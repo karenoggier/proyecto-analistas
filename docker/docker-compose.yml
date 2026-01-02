@@ -3,7 +3,7 @@ services:
     image: postgres:15-alpine
     container_name: usuario-db
     ports:
-      - "5432:5432" 
+      - "5431:5432" 
     environment:
       - POSTGRES_DB=usuarios_db      # La BD se crea sola con este nombre
       - POSTGRES_USER=postgres
