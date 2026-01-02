@@ -3,7 +3,7 @@ package com.seminario.ms_usuarios.model;
 import lombok.Data;
 
 @Data
-public class Direcciones {
+public class Direccion {
     private String id;
     private String calle;
     private String numero;

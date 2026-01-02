@@ -1,5 +1,7 @@
 package com.seminario.ms_usuarios.model;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -9,4 +11,5 @@ public class Usuario {
     private String telefono;
     private String contraseña;
     private EstadoUsuario estado;
+    private List<Direccion> direcciones;
 }
