@@ -1,0 +1,18 @@
+services:
+  usuario-db:
+    image: postgres:15-alpine
+    container_name: usuario-db
+    ports:
+      - "5432:5432" 
+    environment:
+      - POSTGRES_DB=usuarios_db      # La BD se crea sola con este nombre
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./docker/data/usuarios:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
