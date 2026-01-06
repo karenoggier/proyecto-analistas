@@ -13,13 +13,19 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(name = "email")
     private String email;
+
+    @Column(name = "telefono")
     private String telefono;
+
+    @Column(name = "contraseña")
     private String contraseña;
 
+    @Column(name = "estado")
     @Enumerated(EnumType.STRING) // Save "Activo" and not 0 or 1
     private EstadoUsuario estado;
-    
+   
     //Relation 1 a N with Direcciones (One user have many directions)
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Direccion> direcciones;
