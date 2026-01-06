@@ -1,15 +1,26 @@
 package com.seminario.ms_usuarios.model;
 
-import java.util.List;
-
+import java.util.*;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "usuario")
 public class Usuario {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
     private String email;
     private String telefono;
     private String contraseña;
+
+    @Enumerated(EnumType.STRING) // Save "Activo" and not 0 or 1
     private EstadoUsuario estado;
+    
+    //Relation 1 a N with Direcciones (One user have many directions)
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Direccion> direcciones;
 }
