@@ -1,7 +1,16 @@
 package com.seminario.ms_usuarios.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Data;
-import jakarta.persistence.*;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -11,6 +20,13 @@ public class Direccion {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     private String id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idUsuario", nullable = false) // this line specifies the foreign key column  idUsuario in the "direccion" table
+    @ToString.Exclude // important to avoid circular references in toString() method
+    private Usuario usuario;
+
+    private String idUsuario;
     @Column(name = "calle")
     private String calle;
     @Column(name = "numero")

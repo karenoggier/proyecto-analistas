@@ -1,15 +1,21 @@
 package com.seminario.ms_usuarios.model;
 
 import java.time.LocalDate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import jakarta.persistence.*;
 
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "clientes")
+@PrimaryKeyJoinColumn(name = "idUsuario")
 public class Cliente extends Usuario {
+    
     @Column(name = "nombre")
     private String nombre;
 
@@ -18,4 +24,6 @@ public class Cliente extends Usuario {
 
     @Column(name = "fechaDeCumpleaños")
     private LocalDate fechaNacimiento;
+
+    
 }
