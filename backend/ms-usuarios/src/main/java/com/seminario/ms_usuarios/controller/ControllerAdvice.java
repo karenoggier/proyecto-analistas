@@ -6,8 +6,9 @@ import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import com.seminario.ms_usuarios.DTOs.ErrorDTO;
+
 import com.seminario.ms_usuarios.Excepction.RequestException;
+import com.seminario.ms_usuarios.dto.ErrorDTO;
 
     
 @RestControllerAdvice   

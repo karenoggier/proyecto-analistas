@@ -1,4 +1,4 @@
-package com.seminario.ms_usuarios.DTOs;
+package com.seminario.ms_usuarios.dto;
 
 import java.time.LocalDateTime;
 
