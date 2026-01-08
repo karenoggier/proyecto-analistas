@@ -1,4 +1,4 @@
-package com.seminario.ms_usuarios.Excepction;
+package com.seminario.ms_usuarios.excepction;
 
 import org.springframework.http.HttpStatus;
 
