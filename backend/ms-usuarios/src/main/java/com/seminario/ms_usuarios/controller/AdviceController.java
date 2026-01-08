@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.seminario.ms_usuarios.dto.ErrorDTO;
-import com.seminario.ms_usuarios.excepction.RequestException;
+import com.seminario.ms_usuarios.exception.RequestException;
 
     
 @RestControllerAdvice   
