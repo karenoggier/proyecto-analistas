@@ -1,0 +1,293 @@
+/* Co-located CSS Module for registro page - Pure CSS */
+
+.authPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  background: linear-gradient(135deg, rgba(255, 75, 126, 0.08) 0%, rgba(255, 142, 79, 0.08) 100%);
+  font-family: var(--font-sans);
+}
+
+.authCard {
+  width: 100%;
+  max-width: 600px;
+  background: var(--color-card);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-xl);
+}
+
+.authLogo {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.authLogoText {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.authTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.authSubtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xl);
+}
+
+/* Tabs */
+.authTabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-xl);
+}
+
+.authTab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition-base);
+}
+
+.authTab::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background var(--transition-base);
+}
+
+.authTabActive {
+  color: var(--color-primary);
+}
+
+.authTabActive::after {
+  background: var(--color-primary);
+}
+
+.authTab:hover:not(.authTabActive) {
+  color: var(--color-text);
+}
+
+/* Form */
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.formLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.formLabelIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 480px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formInput {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-input-bg);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  transition: all var(--transition-base);
+}
+
+.formInput::placeholder {
+  color: var(--color-gray-400);
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-white);
+}
+
+.formInputWrapper {
+  position: relative;
+}
+
+.formInputToggle {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.formInputToggle:hover {
+  color: var(--color-text);
+}
+
+.formTextarea {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-input-bg);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  min-height: 80px;
+  resize: vertical;
+  transition: all var(--transition-base);
+}
+
+.formTextarea::placeholder {
+  color: var(--color-gray-400);
+}
+
+.formTextarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-white);
+}
+
+/* Address Section - Pink background matching reference */
+.addressSection {
+  background: linear-gradient(135deg, rgba(255, 75, 126, 0.08) 0%, rgba(255, 142, 79, 0.08) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  margin-top: var(--space-sm);
+}
+
+.addressTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: var(--space-lg);
+}
+
+.addressGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.addressRow {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.addressRow2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.addressRow3 {
+  grid-template-columns: 1fr;
+  max-width: 200px;
+}
+
+@media (max-width: 480px) {
+  .addressRow2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Buttons */
+.submitButton {
+  width: 100%;
+  padding: var(--space-md) var(--space-xl);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
+  margin-top: var(--space-md);
+}
+
+.submitButton:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+/* Footer */
+.authFooter {
+  text-align: center;
+  margin-top: var(--space-xl);
+}
+
+.authFooterText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.authLink {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.authLink:hover {
+  text-decoration: underline;
+}
