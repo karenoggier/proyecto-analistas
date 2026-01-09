@@ -7,9 +7,8 @@ import com.seminario.ms_usuarios.dto.ClienteRequestDTO;
 import com.seminario.ms_usuarios.dto.ClienteResponseDTO;
 import com.seminario.ms_usuarios.dto.LoginRequestDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
+import com.seminario.ms_usuarios.mapper.ClienteMapper;
 import com.seminario.ms_usuarios.model.Cliente;
-import com.seminario.ms_usuarios.model.EstadoUsuario;
-import com.seminario.ms_usuarios.model.RolUsuario;
 import com.seminario.ms_usuarios.model.Usuario;
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +20,7 @@ public class AuthService {
     private final ClienteService clienteService; 
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final ClienteMapper clienteMapper;
 
     // --- LOGIN ---
     public String login(LoginRequestDTO loginRequest) {
@@ -40,34 +40,11 @@ public class AuthService {
              throw new RequestException("US", 2, HttpStatus.CONFLICT, "El email ya existe");
         }
 
-        Cliente nuevoCliente = mapToClienteEntity(dto);
+        Cliente nuevoCliente = clienteMapper.toEntity(dto);
 
         Cliente guardado = clienteService.guardarCliente(nuevoCliente);
 
-        return mapToClienteResponseDTO(guardado);
+        return clienteMapper.toResponse(guardado);
     }
 
-    // --- MAPEOS ---
-    private Cliente mapToClienteEntity(ClienteRequestDTO dto) {
-        Cliente cliente = new Cliente();
-        cliente.setEmail(dto.getEmail());
-        cliente.setContraseña(passwordEncoder.encode(dto.getPassword()));
-        cliente.setNombre(dto.getNombre());
-        cliente.setApellido(dto.getApellido());
-        cliente.setTelefono(dto.getTelefono());
-        cliente.setFechaNacimiento(dto.getFechaNacimiento());
-        cliente.setEstado(EstadoUsuario.ACTIVO);
-        cliente.setRol(RolUsuario.CLIENTE);
-        return cliente;
-    }
-
-    private ClienteResponseDTO mapToClienteResponseDTO(Cliente cliente) {
-        ClienteResponseDTO dto = new ClienteResponseDTO();
-        dto.setNombre(cliente.getNombre());
-        dto.setApellido(cliente.getApellido());
-        dto.setEmail(cliente.getEmail());
-        dto.setRol(cliente.getRol().name());
-        dto.setFechaNacimiento(cliente.getFechaNacimiento());
-        return dto;
-    }
 }
