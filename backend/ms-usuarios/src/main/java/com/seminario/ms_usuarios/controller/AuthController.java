@@ -6,6 +6,7 @@ import com.seminario.ms_usuarios.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -14,12 +15,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register/cliente")
-    public ResponseEntity<?> registrarCliente(@RequestBody ClienteRequestDTO dto) {
+    public ResponseEntity<?> registrarCliente(@Valid @RequestBody ClienteRequestDTO dto) {
         return ResponseEntity.ok(authService.registrarCliente(dto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO dto) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO dto) {
         String token = authService.login(dto);
         return ResponseEntity.ok(token); 
     }

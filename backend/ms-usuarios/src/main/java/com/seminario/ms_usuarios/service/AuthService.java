@@ -9,6 +9,7 @@ import com.seminario.ms_usuarios.dto.LoginRequestDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.ClienteMapper;
 import com.seminario.ms_usuarios.model.Cliente;
+import com.seminario.ms_usuarios.model.EstadoUsuario;
 import com.seminario.ms_usuarios.model.Usuario;
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +28,11 @@ public class AuthService {
         Usuario usuario = usuarioService.findByEmail(loginRequest.getEmail());
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), usuario.getContraseña())) {
-            throw new RequestException("US", 2, HttpStatus.UNAUTHORIZED, "Contraseña incorrecta");
+            throw new RequestException("US", 2, HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
+        }
+
+        if (usuario.getEstado() != EstadoUsuario.ACTIVO) {
+            throw new RequestException("US", 2, HttpStatus.FORBIDDEN, "El usuario no está activo. Contacte al administrador.");
         }
 
         return jwtService.generateToken(usuario.getEmail(), usuario.getRol().name());
@@ -37,7 +42,11 @@ public class AuthService {
     public ClienteResponseDTO registrarCliente(ClienteRequestDTO dto) {
         
         if (usuarioService.existeEmail(dto.getEmail())) {
-             throw new RequestException("US", 2, HttpStatus.CONFLICT, "El email ya existe");
+             throw new RequestException("US", 2, HttpStatus.CONFLICT, "Credemciales inválidas");
+        }
+
+        if (!dto.getPassword().equals(dto.getRepetirPassword())) {
+            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "Las contraseñas no coinciden");
         }
 
         Cliente nuevoCliente = clienteMapper.toEntity(dto);
