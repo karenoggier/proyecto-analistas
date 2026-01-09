@@ -3,7 +3,7 @@ package com.seminario.ms_usuarios.dto;
 import lombok.Data;
 
 @Data
-public abstract class LoginRequestDTO {
+public class LoginRequestDTO {
     private String email;
     private String password;
 }

@@ -3,32 +3,35 @@ package com.seminario.ms_usuarios.service;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.*;
 
 @Service
 public class JwtService {
-    // SECRET KEY: En producción esto va en variables de entorno. 
-    // Debe ser larga y compleja (Hexadecimal).
-    private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
+    
+    @Value("${jwt.secret}")
+    private String secretKey;
 
     public String generateToken(String username, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role); // Guardamos el rol dentro del token
+        claims.put("role", role);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(username) // El "dueño" del token (email)
+                .setSubject(username) 
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // Dura 24 horas
+                //1000ms * 60s * 60m * 2h = 2 Hs
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

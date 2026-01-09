@@ -23,24 +23,31 @@ public class Direccion {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idUsuario", nullable = false) // this line specifies the foreign key column  idUsuario in the "direccion" table
+    
     @ToString.Exclude // important to avoid circular references in toString() method
     private Usuario usuario;
 
-    private String idUsuario;
     @Column(name = "calle")
     private String calle;
+
     @Column(name = "numero")
     private String numero;
+
     @Column(name = "localidad")
     private String localidad;
+
     @Column(name = "provincia")
     private String provincia;
+
     @Column(name = "codigoPostal")
     private String codigoPostal;
+
     @Column(name = "observaciones")
     private String observaciones;
+
     @Column(name = "latitud")
     private Double latitud;
+
     @Column(name = "longitud")
     private Double longitud;
 }

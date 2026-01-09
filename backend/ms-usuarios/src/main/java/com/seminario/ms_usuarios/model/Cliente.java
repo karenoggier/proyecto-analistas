@@ -22,7 +22,7 @@ public class Cliente extends Usuario {
     @Column(name = "apellido")
     private String apellido;
 
-    @Column(name = "fechaDeCumpleaños")
+    @Column(name = "fechaNacimiento")
     private LocalDate fechaNacimiento;
 
     

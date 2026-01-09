@@ -9,10 +9,13 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Vendedor extends Usuario {
+
     @Column(name = "nombreNegocio")
     private String nombreNegocio;
+
     @Column(name = "nombreResponsable")
     private String nombreResponsable;
+
     @Column(name = "apellidoResponsable")
     private String apellidoResponsable;
 }
