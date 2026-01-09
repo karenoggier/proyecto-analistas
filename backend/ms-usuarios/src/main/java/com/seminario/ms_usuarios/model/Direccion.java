@@ -27,18 +27,18 @@ public class Direccion {
     @ToString.Exclude // important to avoid circular references in toString() method
     private Usuario usuario;
 
+    @Column(name = "provincia")
+    private String provincia;
+
+    @Column(name = "localidad")
+    private String localidad;
+
     @Column(name = "calle")
     private String calle;
 
     @Column(name = "numero")
     private String numero;
-
-    @Column(name = "localidad")
-    private String localidad;
-
-    @Column(name = "provincia")
-    private String provincia;
-
+ 
     @Column(name = "codigoPostal")
     private String codigoPostal;
 
