@@ -30,6 +30,7 @@ public class ClienteService {
     @Transactional
     public Cliente guardarCliente(Cliente cliente) {
         // check if the email already exists before save
+        // put validations
         return clienteRepository.save(cliente);
     }
 
