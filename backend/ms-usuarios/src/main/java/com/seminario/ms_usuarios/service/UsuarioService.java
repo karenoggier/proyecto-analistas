@@ -1,25 +1,24 @@
 package com.seminario.ms_usuarios.service;
 
-import com.seminario.ms_usuarios.dto.LoginRequestDTO;
-import com.seminario.ms_usuarios.dto.ClienteRequestDTO;
-import com.seminario.ms_usuarios.dto.ClienteResponseDTO;
-import com.seminario.ms_usuarios.model.Cliente;
-import com.seminario.ms_usuarios.model.EstadoUsuario;
-import com.seminario.ms_usuarios.model.Usuario;
-import com.seminario.ms_usuarios.model.RolUsuario;
-import com.seminario.ms_usuarios.repository.ClienteRepository;
-import com.seminario.ms_usuarios.repository.UsuarioRepository;
-
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
+import com.seminario.ms_usuarios.dto.ClienteRequestDTO;
+import com.seminario.ms_usuarios.dto.ClienteResponseDTO;
+import com.seminario.ms_usuarios.dto.LoginRequestDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
+import com.seminario.ms_usuarios.model.Cliente;
+import com.seminario.ms_usuarios.model.EstadoUsuario;
+import com.seminario.ms_usuarios.model.RolUsuario;
+import com.seminario.ms_usuarios.model.Usuario;
+import com.seminario.ms_usuarios.repository.ClienteRepository;
+import com.seminario.ms_usuarios.repository.UsuarioRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +44,7 @@ public class UsuarioService {
     // --- REGISTRO DE CLIENTE ---
     public ClienteResponseDTO registrarCliente(ClienteRequestDTO dto) {
         if(usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new RequestException("US",1, HttpStatus.CONFLICT, "El email ya está registrado");
+            throw new RequestException("US",2, HttpStatus.CONFLICT, "El email ya está registrado");
         }
 
         Cliente nuevoCliente = new Cliente();
@@ -62,9 +61,10 @@ public class UsuarioService {
         nuevoCliente.setRol(RolUsuario.CLIENTE);
 
         Cliente clienteGuardado = clienteRepository.save(nuevoCliente); // aca debería ser clienteService.guardarCliente(nuevoCliente);
-        //esto lo pondría en un metodo mapper en ClienteResponseDTO
+        
 
         ClienteResponseDTO clienteResponse = new ClienteResponseDTO();
+        //esto lo pondría en un metodo mapper en ClienteResponseDTO
         clienteResponse.setNombre(clienteGuardado.getNombre());
         clienteResponse.setApellido(clienteGuardado.getApellido());
         clienteResponse.setEmail(clienteGuardado.getEmail());
