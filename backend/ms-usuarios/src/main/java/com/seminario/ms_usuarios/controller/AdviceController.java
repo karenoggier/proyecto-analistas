@@ -16,7 +16,7 @@ public class AdviceController {
     public ResponseEntity<ErrorDTO> runtimeExceptionHandler(RequestException ex) {
         ErrorDTO errorDTO = ErrorDTO.builder()
                 .ms_code(ex.getMs_code())
-                .error_code(ex.getError_code())
+                .error_code(ex.getLy_code())
                 .message(ex.getMessage())
                 .status(ex.getStatus())
                 .timestamp(LocalDateTime.now())

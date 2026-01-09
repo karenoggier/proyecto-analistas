@@ -9,13 +9,17 @@ import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.model.RolUsuario;
 import com.seminario.ms_usuarios.repository.ClienteRepository;
 import com.seminario.ms_usuarios.repository.UsuarioRepository;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+
+import com.seminario.ms_usuarios.exception.RequestException;
 
 @Service
 @RequiredArgsConstructor
@@ -29,10 +33,10 @@ public class UsuarioService {
     // --- LOGIN ---
     public String login(LoginRequestDTO loginRequest) {
         Usuario usuario = usuarioRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RequestException("US",2, HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), usuario.getContraseña())) {
-            throw new RuntimeException("Contraseña incorrecta");
+            throw new RequestException("US",2, HttpStatus.UNAUTHORIZED, "Contraseña incorrecta");
         }
 
         return jwtService.generateToken(usuario.getEmail(), usuario.getClass().getSimpleName());
@@ -41,10 +45,11 @@ public class UsuarioService {
     // --- REGISTRO DE CLIENTE ---
     public ClienteResponseDTO registrarCliente(ClienteRequestDTO dto) {
         if(usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new RequestException("US",1, HttpStatus.CONFLICT, "El email ya está registrado");
         }
 
         Cliente nuevoCliente = new Cliente();
+        //esto lo pondría en un metodo mapper en ClienteRequestDTO
         nuevoCliente.setEmail(dto.getEmail());
         nuevoCliente.setTelefono(dto.getTelefono());
         
@@ -56,7 +61,8 @@ public class UsuarioService {
         nuevoCliente.setFechaNacimiento(dto.getFechaNacimiento());
         nuevoCliente.setRol(RolUsuario.CLIENTE);
 
-        Cliente clienteGuardado = clienteRepository.save(nuevoCliente);
+        Cliente clienteGuardado = clienteRepository.save(nuevoCliente); // aca debería ser clienteService.guardarCliente(nuevoCliente);
+        //esto lo pondría en un metodo mapper en ClienteResponseDTO
 
         ClienteResponseDTO clienteResponse = new ClienteResponseDTO();
         clienteResponse.setNombre(clienteGuardado.getNombre());

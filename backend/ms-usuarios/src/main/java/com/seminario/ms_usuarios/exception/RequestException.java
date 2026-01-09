@@ -7,12 +7,12 @@ import lombok.Data;
 @Data
 public class RequestException  extends RuntimeException {
     private String ms_code; //microservice code that throws the error  
-    private int error_code;//code that identify the error
+    private int ly_code;//code that identify the layer that throws the error
     private HttpStatus status;
-    public RequestException(String ms_code, int error_code, HttpStatus status, String message) {
+    public RequestException(String ms_code, int ly_code, HttpStatus status, String message) {
         super(message);
         this.ms_code = ms_code;
-        this.error_code = error_code;
+        this.ly_code = ly_code;
         this.status = status;
     }
 
