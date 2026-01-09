@@ -74,11 +74,14 @@
 
 /* ===================== HEADER ===================== */
 .header {
-  position: sticky;
+  position: fixed; 
+  width: 100%;    
   top: 0;
   z-index: 100;
-  background-color: var(--color-card);
-  border-bottom: 1px solid var(--color-border);
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
 }
 
 .headerInner {
@@ -105,9 +108,14 @@
 }
 
 .logoText {
-  font-size: var(--font-size-xl);
+ font-size: var(--font-size-xl);
   font-weight: 700;
-  color: var(--color-text);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent; 
+  display: inline-block;
 }
 
 .nav {
@@ -237,7 +245,7 @@
 }
 
 .heroDescription {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   color: #555555 !important;
   line-height: 1.7;
   max-width: 480px;
@@ -448,8 +456,8 @@
 
 /* Restaurant logo placeholder matching reference */
 .restaurantLogo {
-  width: 160px;
-  height: 160px;
+  width: 200px;
+  height: 200px;
   border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
@@ -565,18 +573,29 @@
 }
 
 /* Category image placeholder for easy swapping */
-.categoryImagePlaceholder {
-  width: 160px;
-  height: 120px;
-  background: linear-gradient(135deg, #2d2b2a 0%, #4a4846 100%);
+.categoryImageWrapper {
+  width: 160px;    
+  height: 120px;      
   border-radius: var(--radius-lg);
+  margin-bottom: var(--space-sm);
+  overflow: hidden;  
+  box-shadow: var(--shadow-md);
+  background-color: #f0f0f0; 
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
-  color: #999;
-  margin-bottom: var(--space-sm);
-  border: 2px dashed var(--color-border);
+}
+
+.categoryImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.categoryCard:hover .categoryImage {
+  transform: scale(1.1);
 }
 
 .categoryName {
@@ -805,13 +824,13 @@
 
 .marqueeTrack {
   display: flex;
-  animation: marquee 30s linear infinite;
+  animation: marquee 15s linear infinite;
   width: max-content;
 }
 
 .marqueeTrackReverse {
   display: flex;
-  animation: marqueeReverse 35s linear infinite;
+  animation: marqueeReverse 15s linear infinite;
   width: max-content;
 }
 

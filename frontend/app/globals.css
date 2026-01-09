@@ -52,7 +52,7 @@
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 2rem;
   --font-size-4xl: 2.5rem;
-  --font-size-5xl: 3.5rem;
+  --font-size-5xl: 3rem;
 
   /* Border Radius */
   --radius-sm: 0.5rem;
@@ -70,7 +70,7 @@
 
   /* Container */
   --container-max: 1400px;
-  --container-padding: 10rem;
+  --container-padding: 8rem;
   --container-padding-mobile: 1.5rem;
 
   /* Transitions */

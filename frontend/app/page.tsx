@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
+import Image from "next/image";
 import styles from "./home.module.css"
 
 /* ===================== SCROLL REVEAL COMPONENT ===================== */
@@ -105,11 +106,11 @@ function Marquee({
 
 /* ===================== DATA ===================== */
 const restaurants = [
-  { name: "McDonald's", logo: "M", colorClass: "mcdonalds" },
-  { name: "Mostaza", logo: "M", colorClass: "mostaza" },
-  { name: "KFC", logo: "KFC", colorClass: "kfc" },
-  { name: "Grido Helados", logo: "grido", colorClass: "grido" },
-  { name: "Burger King", logo: "BK", colorClass: "burgerking" },
+  { name: "McDonald's", logo: "/mcdonalds.jpeg", colorClass: "mcdonalds" },
+  { name: "Mostaza", logo: "/mostaza.jpeg", colorClass: "mostaza" },
+  { name: "KFC", logo: "/kfc.jpeg", colorClass: "kfc" },
+  { name: "Grido Helados", logo: "/grido.jpeg", colorClass: "grido" },
+  { name: "Burger King", logo: "/burger king.jpeg", colorClass: "burgerking" },
 ]
 
 const cities = [
@@ -127,11 +128,11 @@ const cities = [
 ]
 
 const categories = [
-  { name: "Hamburguesas", placeholder: "BURGER" },
-  { name: "Sushi", placeholder: "SUSHI" },
-  { name: "Helado", placeholder: "ICE CREAM" },
-  { name: "Pizza", placeholder: "PIZZA" },
-  { name: "Meriendas", placeholder: "SNACKS" },
+  { name: "Hamburguesas", image: "/hamburguesa.jpg" },
+  { name: "Sushi", image: "/sushi.jpg" },
+  { name: "Helado",image: "/helado.jpg" },
+  { name: "Pizza", image: "/pizza.jpg" },
+  { name: "Meriendas", image: "/merienda.jpg" },
 ]
 
 /* ===================== MAIN PAGE COMPONENT ===================== */
@@ -142,11 +143,7 @@ export default function HomePage() {
       <header className={styles.header}>
         <div className={`${styles.container} ${styles.headerInner}`}>
           <Link href="/" className={styles.logo}>
-            <div className={styles.logoIcon}>
-              <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
-                <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
-              </svg>
-            </div>
+            <Image src="/logo.png" alt="PediloYa Logo" width={50} height={60} className={styles.logo} priority />
             <span className={styles.logoText}>PediloYa</span>
           </Link>
           <nav className={styles.nav}>
@@ -191,13 +188,13 @@ export default function HomePage() {
             {/* Hero image placeholder */}
             <div className={styles.heroImage}>
               <div className={styles.heroImagePlaceholder}>
-                <span>FOOD IMAGE</span>
+                <Image src="/plato-principal.jpeg" alt="Imagen de un plato principal" width={1500} height={1500} priority />
               </div>
             </div>
 
             {/* Yellow dashed curved arrow */}
             <div className={`${styles.heroDecor} ${styles.heroDecorArrow}`}>
-              <svg width="50" height="60" viewBox="0 0 50 60" fill="none">
+              <svg width="50" height="60" viewBox="0 10 50 20" fill="none">
                 <path
                   d="M5 45C5 25 20 10 40 15M40 15L32 8M40 15L32 22"
                   stroke="#e5a832"
@@ -238,7 +235,7 @@ export default function HomePage() {
             <ScrollReveal delay={1}>
               <div className={styles.serviceCard}>
                 <div className={styles.serviceIllustration}>
-                  <div className={styles.serviceIllustrationPlaceholder}>📱</div>
+                  <Image src="/facil-de-pedir.jpeg" alt="Imagen" width={1500} height={1500} priority />
                 </div>
                 <h3 className={styles.serviceTitle}>Fácil de pedir</h3>
                 <p className={styles.serviceDescription}>Para pedir comida solo necesitas unos pocos pasos</p>
@@ -248,7 +245,7 @@ export default function HomePage() {
             <ScrollReveal delay={2}>
               <div className={styles.serviceCard}>
                 <div className={styles.serviceIllustration}>
-                  <div className={styles.serviceIllustrationPlaceholder}>🛵</div>
+                  <Image src="/entregas-rapidas.jpeg" alt="Imagen" width={120} height={120} priority />
                 </div>
                 <h3 className={styles.serviceTitle}>Entregas rápidas</h3>
                 <p className={styles.serviceDescription}>Entrega siempre a tiempo, incluso más rápida.</p>
@@ -258,7 +255,7 @@ export default function HomePage() {
             <ScrollReveal delay={3}>
               <div className={styles.serviceCard}>
                 <div className={styles.serviceIllustration}>
-                  <div className={styles.serviceIllustrationPlaceholder}>👨‍🍳</div>
+                  <Image src="/la-mejor-calidad.jpeg" alt="Imagen" width={120} height={120} priority />
                 </div>
                 <h3 className={styles.serviceTitle}>La mejor calidad</h3>
                 <p className={styles.serviceDescription}>
@@ -281,8 +278,14 @@ export default function HomePage() {
         <Marquee className={styles.marqueeWrapper}>
           {restaurants.map((restaurant, index) => (
             <div key={`${restaurant.name}-${index}`} className={styles.restaurantCard}>
-              <div className={`${styles.restaurantLogo} ${styles[restaurant.colorClass as keyof typeof styles]}`}>
-                {restaurant.logo}
+              <div className={styles.restaurantLogoWrapper}>
+                <Image 
+                  src={restaurant.logo} 
+                  alt={restaurant.name}
+                  width={150} 
+                  height={150}
+                  className={styles.restaurantLogoImage}
+                />
               </div>
               <div className={styles.restaurantName}>{restaurant.name}</div>
             </div>
@@ -328,7 +331,15 @@ export default function HomePage() {
         <Marquee reverse className={styles.categoriesMarquee}>
           {categories.map((category, index) => (
             <div key={`${category.name}-${index}`} className={styles.categoryCard}>
-              <div className={styles.categoryImagePlaceholder}>{category.placeholder}</div>
+              <div className={styles.categoryImageWrapper}>
+                <Image 
+                  src={category.image} 
+                  alt={category.name}
+                  width={160}
+                  height={120}
+                  className={styles.categoryImage}
+                />
+              </div>
               <div className={styles.categoryName}>{category.name}</div>
             </div>
           ))}
