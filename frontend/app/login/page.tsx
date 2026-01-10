@@ -3,21 +3,26 @@
 import { useState } from "react"
 import Link from "next/link"
 import styles from "./login.module.css"
+import Image from "next/image";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
     <div className={styles.authPage}>
-      <div className={styles.authCard}>
-        <div className={styles.authLogo}>
-          <Link href="/" className={styles.authLogoText}>
-            PedidosYa
+      {/* ========== HEADER ========== */}
+      <header className={styles.header}>
+        <div className={`${styles.container} ${styles.headerInner}`}>
+          <Link href="/" className={styles.logo}>
+            <Image src="/logo.png" alt="PediloYa Logo" width={50} height={60} className={styles.logo} priority />
+            <span className={styles.logoText}>PediloYa</span>
           </Link>
         </div>
+      </header>
 
+      <div className={styles.authCard}>
         <h1 className={styles.authTitle}>Bienvenido</h1>
-        <p className={styles.authSubtitle}>Ingresá a tu cuenta de PedidosYa</p>
+        <p className={styles.authSubtitle}>Ingresá a tu cuenta de PediloYa</p>
 
         <form className={styles.authForm}>
           <div className={styles.formGroup}>
@@ -58,22 +63,27 @@ export default function LoginPage() {
           </div>
 
           <button type="submit" className={styles.submitButton}>
-            Ingresá
+            Iniciar Sesión
           </button>
 
-          <p className={styles.orDivider}>¿Nuevo en PedidosYa?</p>
+          <div className={styles.divider}>
+            <span>o</span>
+          </div>
 
-          <Link href="/registro" className={styles.secondaryButton}>
-            Crear una Cuenta
-          </Link>
+          <p className={styles.registerLink}>
+            ¿Nuevo en PediloYa?{" "}
+            <Link href="/registro">
+            <strong>Registrate</strong>
+            </Link>
+          </p>
         </form>
 
-        <div className={styles.forgotPassword}>
-          <Link href="#" className={styles.forgotPasswordLink}>
-            ¿Olvidaste tu contraseña?
-          </Link>
-        </div>
       </div>
+
+      {/* ========== FOOTER ========== */}
+      <footer className={styles.footer}>
+          <p className={styles.footerText}>PediloYa © 2026. Todos los derechos reservados.</p>
+      </footer>
     </div>
   )
 }

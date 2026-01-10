@@ -1,11 +1,68 @@
 /* Co-located CSS Module for login page - Pure CSS */
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+/* ===================== HEADER ===================== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-md);
+  padding-bottom: var(--space-md);
+}
+
+/* PediloYa logo with truck icon */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  text-decoration: none;
+}
+
+.logoIcon {
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+ font-size: var(--font-size-xl);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent; 
+  display: inline-block;
+}
 
 .authPage {
   min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-xl);
+  /*align-items: center;*/
+  flex-direction: column;
+  /*justify-content: center;*/
+  padding-top: 100px;
   background: linear-gradient(135deg, rgba(255, 75, 126, 0.08) 0%, rgba(255, 142, 79, 0.08) 100%);
   font-family: var(--font-sans);
 }
@@ -17,22 +74,9 @@
   border-radius: var(--radius-2xl);
   padding: var(--space-2xl);
   box-shadow: var(--shadow-xl);
-}
-
-.authLogo {
-  text-align: center;
-  margin-bottom: var(--space-xl);
-}
-
-.authLogoText {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-decoration: none;
-  display: inline-block;
+  margin: auto;    
+  z-index: 10;    
+  position: relative;
 }
 
 .authTitle {
@@ -40,12 +84,14 @@
   font-weight: 700;
   color: var(--color-primary);
   margin-bottom: var(--space-sm);
+  text-align: center;
 }
 
 .authSubtitle {
   font-size: var(--font-size-base);
   color: var(--color-text-muted);
   margin-bottom: var(--space-xl);
+  text-align: center;
 }
 
 .authForm {
@@ -141,48 +187,63 @@
   transform: translateY(-1px);
 }
 
-.secondaryButton {
-  width: 100%;
-  padding: var(--space-md) var(--space-xl);
+
+/* ===================== FOOTER ===================== */
+.footer {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  padding: var(--space-xl) 0;
+  position: relative; 
+  width: 100%;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 20px;
+}
+
+.footerText {
   color: var(--color-white);
-  border: none;
-  border-radius: var(--radius-full);
-  font-family: inherit;
-  font-weight: 600;
-  font-size: var(--font-size-base);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-md);
-  text-decoration: none;
-  display: inline-flex;
+  font-size: var(--font-size-sm);
+}
+
+/* Divider */
+.divider {
+  display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.secondaryButton:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
-}
-
-.orDivider {
   text-align: center;
+  margin: 0.5rem 0;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.divider span {
+  padding: 0 1rem;
+  font-weight: 500;
+}
+
+/* Register Link */
+.registerLink {
+  text-align: center;
+  margin-top: 0.5rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  margin: var(--space-md) 0;
 }
 
-.forgotPassword {
-  text-align: center;
-  margin-top: var(--space-md);
-}
-
-.forgotPasswordLink {
-  font-size: var(--font-size-sm);
+.registerLink a {
   color: var(--color-primary);
+  font-weight: 600;
   text-decoration: none;
 }
 
-.forgotPasswordLink:hover {
+.registerLink a:hover {
   text-decoration: underline;
+}
+
+.registerLink strong {
+  font-weight: 600;
 }
