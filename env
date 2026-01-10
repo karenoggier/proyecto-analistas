@@ -1,0 +1,16 @@
+# .env
+
+# ==========================================
+# CONFIGURACIÓN JWT
+# ==========================================
+JWT_SECRET=c2VjcmV0b19zdXBlcl9segdyb19wYXJhX2Rlc2YXJyb2xsb19lbiVsYWN1bA==
+JWT_EXPIRATION=86400000
+JWT_ISSUER=UsuarioMS
+
+# ==========================================
+# BASE DE DATOS
+# ==========================================
+DB_URL=jdbc:postgresql://localhost:5431/usuarios_db
+DB_USERNAME=postgres
+DB_PASSWORD=admin
+
