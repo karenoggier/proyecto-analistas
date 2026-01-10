@@ -18,4 +18,13 @@ public class NominatimResponseDTO{
     
     @JsonProperty("display_name")
     private String displayName;
+
+    public double getLatitud() {
+        return Double.parseDouble(lat);
+    }
+
+    public double getLongitud() {
+        return Double.parseDouble(lon);
+    }
+
 }

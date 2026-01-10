@@ -15,15 +15,14 @@ public class GeocodingService {
 
     private final String NOMINATIM_URL = "https://nominatim.openstreetmap.org/search?q={address}&format=json&limit=1";
 
-    public NominatimResponseDTO obtenerCoordenadas(String calle, String numero, String localidad) {
+    public NominatimResponseDTO obtenerCoordenadas(String calle, String numero, String localidad, String provincia) {
         RestTemplate restTemplate = new RestTemplate();
         
         // create the address query
-        String addressQuery = String.format("%s %s, %s", calle, numero, localidad);
-
+        String addressQuery = String.format("%s %s, %s, %s, %s", calle, numero, localidad, provincia, "Argentina");
         // Configurar Headers (REQUISITO DE NOMINATIM)
         HttpHeaders headers = new HttpHeaders();
-        headers.set("User-Agent", "AppPedidosGastronomicos-UTN-Estudiante"); // Pon un nombre identificativo
+        headers.set("User-Agent", "ProyectoTituloIntermedio-UTN-Estudiante"); 
         
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
         
