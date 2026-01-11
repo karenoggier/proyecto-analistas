@@ -1,8 +1,6 @@
 package com.seminario.ms_usuarios.controller;
 
-import com.seminario.ms_usuarios.dto.LoginRequestDTO;
-import com.seminario.ms_usuarios.dto.ClienteRequestDTO;
-import com.seminario.ms_usuarios.dto.ClienteResponseDTO;
+import com.seminario.ms_usuarios.dto.*;
 import com.seminario.ms_usuarios.dto.LoginResponseDTO;
 import com.seminario.ms_usuarios.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +24,10 @@ public class AuthController {
         String token = authService.login(dto);
         LoginResponseDTO respuesta = new LoginResponseDTO(token);
         return ResponseEntity.ok(respuesta); 
+    }
+
+    @PostMapping("/register/vendedor")
+    public ResponseEntity<VendedorResponseDTO> registrarVendedor(@Valid @RequestBody VendedorRequestDTO dto) {
+        return ResponseEntity.ok(authService.registrarVendedor(dto));
     }
 }

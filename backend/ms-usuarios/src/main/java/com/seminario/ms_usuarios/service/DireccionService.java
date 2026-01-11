@@ -2,7 +2,6 @@ package com.seminario.ms_usuarios.service;
 
 import java.util.ArrayList;
 
-import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,8 @@ import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.NominatimResponseDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.DireccionMapper;
-import com.seminario.ms_usuarios.model.*;
+import com.seminario.ms_usuarios.model.Direccion;
+import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.repository.DireccionRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -29,21 +29,8 @@ public class DireccionService {
      // --- REGISTRAR DIRECCION ---
 
     public DireccionResponseDTO registrarDireccion(DireccionRequestDTO dto, Usuario usuario) {
-        //validations
-        if (dto.getProvincia() == null || dto.getProvincia().isEmpty()) {
-            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "La provincia es obligatoria");
-        }
-        if (dto.getLocalidad() == null || dto.getLocalidad().isEmpty()) {
-            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "La ciudad es obligatoria");
-        }
-        if (dto.getCalle() == null || dto.getCalle().isEmpty()) {
-            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "La calle es obligatoria");
-        }
-        if (dto.getNumero() == null || dto.getNumero().isEmpty()) {
-            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "El número es obligatorio");
-        }
-        if (dto.getCodigoPostal() == null || dto.getCodigoPostal().isEmpty()) {
-            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "El código postal es obligatorio");
+        if (usuario == null) {
+            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "El usuario no puede ser nulo");
         }
 
         NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(dto.getCalle(), dto.getNumero(), dto.getLocalidad(), dto.getProvincia());
