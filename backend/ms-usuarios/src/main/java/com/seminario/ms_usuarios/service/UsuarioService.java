@@ -21,7 +21,7 @@ public class UsuarioService {
 
     public Usuario findByEmail(String email) {
         return usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RequestException("US",2, HttpStatus.NOT_FOUND, "Usuario inexistente"));
+                .orElseThrow(() -> new RequestException("US",2, HttpStatus.NOT_FOUND, "Credenciales inválidas"));
     }
 
     // A useful method for validating logins (searches both clients and sellers simultaneously)

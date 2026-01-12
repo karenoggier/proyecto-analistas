@@ -53,7 +53,7 @@ public class AuthService {
     public ClienteResponseDTO registrarCliente(ClienteRequestDTO dto) {
         
         if (usuarioService.existeEmail(dto.getEmail())) {
-             throw new RequestException("US", 2, HttpStatus.CONFLICT, "Credemciales inválidas");
+             throw new RequestException("US", 2, HttpStatus.CONFLICT, "Credenciales inválidas");
         }
 
         if (!dto.getPassword().equals(dto.getRepetirPassword())) {
@@ -69,7 +69,7 @@ public class AuthService {
 
     public VendedorResponseDTO registrarVendedor(VendedorRequestDTO dto) {
         if (usuarioService.existeEmail(dto.getEmail())) {
-             throw new RequestException("US", 2, HttpStatus.CONFLICT, "Credemciales inválidas");
+             throw new RequestException("US", 2, HttpStatus.CONFLICT, "Credenciales inválidas");
         }
 
         if (!dto.getPassword().equals(dto.getRepetirPassword())) {
