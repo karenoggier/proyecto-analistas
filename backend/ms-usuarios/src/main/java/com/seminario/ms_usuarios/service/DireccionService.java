@@ -14,6 +14,10 @@ import com.seminario.ms_usuarios.mapper.DireccionMapper;
 import com.seminario.ms_usuarios.model.Direccion;
 import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.repository.DireccionRepository;
+import com.seminario.ms_usuarios.repository.LocalidadRepository;
+import com.seminario.ms_usuarios.repository.ProvinciaRepository;
+import com.seminario.ms_usuarios.model.Provincia; 
+import com.seminario.ms_usuarios.model.Localidad;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,15 +29,36 @@ public class DireccionService {
     private final GeocodingService geocodingService;
     private final DireccionRepository direccionRepository;
     private final DireccionMapper direccionMapper;
+    private final ProvinciaRepository provinciaRepository;
+    private final LocalidadRepository localidadRepository;
 
-     // --- REGISTRAR DIRECCION ---
-
+    // --- REGISTRAR DIRECCION ---
     public DireccionResponseDTO registrarDireccion(DireccionRequestDTO dto, Usuario usuario) {
         if (usuario == null) {
             throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "El usuario no puede ser nulo");
         }
 
-        NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(dto.getCalle(), dto.getNumero(), dto.getLocalidad(), dto.getProvincia());
+        Provincia provinciaEntidad = null;
+        String nombreProvinciaParaGeo = dto.getProvincia(); 
+
+        if (dto.getProvincia() != null) {
+            provinciaEntidad = provinciaRepository.findById(dto.getProvincia())
+                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Provincia no encontrada con ID: " + dto.getProvincia()));
+            
+            nombreProvinciaParaGeo = provinciaEntidad.getNombre();
+        }
+
+        Localidad localidadEntidad = null;
+        String nombreLocalidadParaGeo = dto.getLocalidad();
+
+        if (dto.getLocalidad() != null) {
+            localidadEntidad = localidadRepository.findById(dto.getLocalidad())
+                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Localidad no encontrada con ID: " + dto.getLocalidad()));
+            
+            nombreLocalidadParaGeo = localidadEntidad.getNombre();
+        }
+
+        NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(dto.getCalle(), dto.getNumero(), nombreLocalidadParaGeo, nombreProvinciaParaGeo);
 
         if (coordenadas == null) {
             throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "No se pudieron obtener las coordenadas para la dirección proporcionada");
@@ -41,6 +66,9 @@ public class DireccionService {
 
         Direccion direccion = direccionMapper.toEntity(dto,coordenadas.getLatitud(), coordenadas.getLongitud());
         direccion.setUsuario(usuario);
+        direccion.setProvincia(provinciaEntidad); 
+        direccion.setLocalidad(localidadEntidad);
+
         Direccion guardada = direccionRepository.save(direccion);
 
         return direccionMapper.toResponse(guardada);

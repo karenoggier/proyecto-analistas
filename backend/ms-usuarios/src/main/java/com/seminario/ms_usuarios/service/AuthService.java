@@ -17,6 +17,7 @@ import com.seminario.ms_usuarios.model.Cliente;
 import com.seminario.ms_usuarios.model.EstadoUsuario;
 import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.model.Vendedor;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -50,10 +51,11 @@ public class AuthService {
     }
 
     // --- REGISTRAR CLIENTE ---
+    @Transactional
     public ClienteResponseDTO registrarCliente(ClienteRequestDTO dto) {
         
         if (usuarioService.existeEmail(dto.getEmail())) {
-             throw new RequestException("US", 2, HttpStatus.CONFLICT, "Credenciales inválidas");
+             throw new RequestException("US", 2, HttpStatus.CONFLICT, "Usuario ya registrado");
         }
 
         if (!dto.getPassword().equals(dto.getRepetirPassword())) {
@@ -67,9 +69,10 @@ public class AuthService {
         return clienteMapper.toResponse(guardado);
     }
 
+    @Transactional
     public VendedorResponseDTO registrarVendedor(VendedorRequestDTO dto) {
         if (usuarioService.existeEmail(dto.getEmail())) {
-             throw new RequestException("US", 2, HttpStatus.CONFLICT, "Credenciales inválidas");
+             throw new RequestException("US", 2, HttpStatus.CONFLICT, "Usuario ya registrado");
         }
 
         if (!dto.getPassword().equals(dto.getRepetirPassword())) {

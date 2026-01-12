@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import styles from "./registro.module.css"
 import Image from "next/image";
@@ -10,7 +10,7 @@ export default function RegistroPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showRepeatPassword, setShowRepeatPassword] = useState(false)
   const [errors, setErrors] = useState({});
-  const [Error, setError] = useState("");
+  const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // ========= STATES =========
@@ -48,6 +48,57 @@ export default function RegistroPage() {
   const [provincias, setProvincias] = useState([])
   const [localidades, setLocalidades] = useState([])
   const [loadingLocalidades, setLoadingLocalidades] = useState(false)
+
+  // ========= EFFECTS (CARGA DE DATOS) =========
+  // Cargar Provincias
+  useEffect(() => {
+    const fetchProvincias = async () => {
+        try {
+            const res = await fetch('/usuariosMs/ubicacion/provincias');
+            if (res.ok) {
+                const data = await res.json();
+                setProvincias(data);
+            } else {
+                console.error("Error al cargar provincias");
+            }
+        } catch (error) {
+            console.error("Error de conexión:", error);
+        }
+    };
+    fetchProvincias();
+  }, []);
+
+  // 2. Cargar Localidades cuando cambia la provincia seleccionada
+  useEffect(() => {
+    const idProvincia = vendedorData.direccion.provincia;
+    
+    // Si no hay provincia seleccionada, limpiamos las localidades
+    if (!idProvincia) {
+        setLocalidades([]);
+        return;
+    }
+
+    const fetchLocalidades = async () => {
+        setLoadingLocalidades(true);
+        try {
+            const res = await fetch(`/usuariosMs/ubicacion/localidades/${idProvincia}`);
+            if (res.ok) {
+                const data = await res.json();
+                setLocalidades(data);
+            } else {
+                setLocalidades([]);
+            }
+        } catch (error) {
+            console.error("Error cargando localidades:", error);
+            setLocalidades([]);
+        } finally {
+            setLoadingLocalidades(false);
+        }
+    };
+
+    fetchLocalidades();
+  }, [vendedorData.direccion.provincia]);
+
 
   // ========= VALIDATIONS =========
   const validate = () => {
@@ -120,22 +171,27 @@ export default function RegistroPage() {
 
   const handleVendedorChange = (e) => {
     const { name, value } = e.target
-    
     const addressFields = ["provincia", "localidad", "calle", "numero", "codigoPostal", "observaciones"];
 
     if (addressFields.includes(name)) {
       setVendedorData(prev => ({
         ...prev,
-        direccion: { ...prev.direccion, [name]: value }
+        direccion: { 
+            ...prev.direccion, 
+            [name]: value,
+            ...(name === 'provincia' ? { localidad: "" } : {})
+        }
       }))
+      if (errors[name]) setErrors({...errors, [name]: null});
     } else {
       setVendedorData(prev => ({ ...prev, [name]: value }))
+      if (errors[name]) setErrors({...errors, [name]: null});
     }
   }
 
   const handleSumit = async (e) => {
     e.preventDefault()
-    setError("")
+    setServerError("")
 
     if (!validate()) {
         console.log("Formulario inválido", errors);
@@ -184,13 +240,13 @@ export default function RegistroPage() {
         } else {
             if (response.status === 400) {
                 setErrors(data);
-                if (data.message) setError("Por favor revise los datos ingresados.");
+                if (data.message) setServerError("Por favor revise los datos ingresados.");
             } else {
-                throw new Error(data.message || "Error al registrar usuario");
+                setServerError(data.message || "Error al registrar usuario");
             }
         }
       } catch(err){
-        setError("Error en el registro. Verificá tus datos.");
+        setServerError(err.message || "Ocurrió un error inesperado");
         console.error(err);
 
       } finally {
@@ -276,6 +332,7 @@ export default function RegistroPage() {
                   value={clienteData.password}
                   onChange={handleClienteChange}
                   placeholder="••••••••"
+                  autoComplete="off"
                   className={styles.formInput}
                   required
                 />
@@ -308,6 +365,7 @@ export default function RegistroPage() {
                   value={clienteData.repetirPassword}
                   onChange={handleClienteChange}
                   placeholder="••••••••"
+                  autoComplete="off"
                   className={styles.formInput}
                   required
                 />
@@ -389,9 +447,9 @@ export default function RegistroPage() {
               {errors.fechaNacimiento && <p className={styles.errorMsg}>{errors.fechaNacimiento}</p>}
             </div>
 
-            {Error && (
+            {serverError && (
                 <div className={styles.errorMessage}>
-                  <span>{Error}</span>
+                  <span>{serverError}</span>
                 </div>
             )}
 
@@ -437,6 +495,7 @@ export default function RegistroPage() {
                   value={vendedorData.password}
                   onChange={handleVendedorChange}
                   placeholder="••••••••"
+                  autoComplete="off"
                   className={styles.formInput}
                   required
                 />
@@ -469,6 +528,7 @@ export default function RegistroPage() {
                   value={vendedorData.repetirPassword}
                   onChange={handleVendedorChange}
                   placeholder="••••••••"
+                  autoComplete="off"
                   className={styles.formInput}
                   required
                 />
@@ -571,13 +631,15 @@ export default function RegistroPage() {
                     <select
                       name="provincia"
                       value={vendedorData.direccion.provincia}
+                      onChange={handleVendedorChange}
                       placeholder="Buenos Aires" 
                       className={styles.formInput} 
+                      required
                     >
                     <option value="">Seleccione</option>
-                      {/*{provincias.map(p => (
-                            <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}*/}
+                    {provincias.map((prov) => (
+                            <option key={prov.id} value={prov.id}>{prov.nombre}</option>
+                      ))}
                     </select>
                     {errors.provincia && <p className={styles.errorMsg}>{errors.provincia}</p>}
                   </div>
@@ -586,16 +648,16 @@ export default function RegistroPage() {
                     <select 
                       name="localidad"
                       value={vendedorData.direccion.localidad}
-                      
+                      onChange={handleVendedorChange}
                       placeholder="Ciudad Autónoma" 
                       className={styles.formInput} 
+                      disabled={!vendedorData.direccion.provincia}
                       required
                     >
-                      <option value="">Seleccione</option>
-                      {/*<option value="">{loadingLocalidades ? "Cargando..." : "Seleccione"}</option>
-                        {localidades.map(c => (
-                            <option key={c.id} value={c.name}>{c.name}</option>
-                        ))}*/}
+                      <option value="">{loadingLocalidades ? "Cargando..." : "Seleccione"}</option>
+                        {localidades.map((loc) => (
+                            <option key={loc.id} value={loc.id}>{loc.nombre}</option>
+                        ))}
                     </select>
                     {errors.localidad && <p className={styles.errorMsg}>{errors.localidad}</p>}
                   </div>
@@ -659,9 +721,9 @@ export default function RegistroPage() {
               </div>
             </div>
 
-            {Error && (
+            {serverError && (
                 <div className={styles.errorMessage}>
-                  <span>{Error}</span>
+                  <span>{serverError}</span>
                 </div>
             )}
 
