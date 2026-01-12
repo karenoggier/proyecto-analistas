@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "app/cliente/page.jsx", "app/login/page.jsx", "app/vendedor/page.jsx", "app/layout.jsx", "app/page.jsx", "app/registro/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]

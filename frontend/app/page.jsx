@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState} from "react"
 import Link from "next/link"
 import Image from "next/image";
 import styles from "./home.module.css"
@@ -11,24 +11,17 @@ function ScrollReveal({
   direction = "up",
   delay = 0,
   className = "",
-}: {
-  children: ReactNode
-  direction?: "up" | "left" | "right" | "scale"
-  delay?: number
-  className?: string
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(true)
+  const ref = useRef(null)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    // Reset to false initially, then observe
-    setIsVisible(false)
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true)
-          observer.unobserve(entry.target)
+          observer.disconnect()
         }
       },
       { threshold: 0.1, rootMargin: "50px 0px -20px 0px" },
@@ -89,10 +82,6 @@ function Marquee({
   children,
   reverse = false,
   className = "",
-}: {
-  children: ReactNode
-  reverse?: boolean
-  className?: string
 }) {
   return (
     <div className={className} style={{ overflow: "hidden" }}>

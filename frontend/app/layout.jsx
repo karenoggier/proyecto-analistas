@@ -1,5 +1,5 @@
-import type React from "react"
-import type { Metadata } from "next"
+import React from "react"
+import { Metadata } from "next"
 import { Poppins } from "next/font/google"
 import "./globals.css"
 
@@ -9,17 +9,13 @@ const poppins = Poppins({
   variable: "--font-poppins",
 })
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "PediloYa - Tu comida favorita a tu alcance",
   description: "Pedí tu comida favorita y recibila en tu casa. Entregas rápidas en toda Argentina.",
     generator: 'v0.app'
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({children}) {
   return (
     <html lang="es">
       <body className={poppins.className}>{children}</body>

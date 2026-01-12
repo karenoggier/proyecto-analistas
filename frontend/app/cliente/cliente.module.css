@@ -1,0 +1,163 @@
+.container {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: 80px;
+  font-family: -apple-system, sans-serif;
+}
+
+.header {
+  background: white;
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.addressBar {
+  display: flex;
+  align-items: center;
+  color: #ea1d2c; /* Rojo PedidosYa */
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.iconRed { color: #ea1d2c; margin-right: 0.5rem; }
+
+.searchWrapper {
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  color: #9ca3af;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 10px 10px 40px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background-color: #f3f4f6;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.categories {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding: 1.5rem 1rem;
+  background: white;
+  margin-bottom: 1rem;
+}
+
+.categoryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.catCircle {
+  width: 60px;
+  height: 60px;
+  background-color: #fce7e7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.feed {
+  padding: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.cardImage {
+  height: 150px;
+  background-color: #e5e7eb; /* Aquí iría la imagen real */
+  background-image: url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=60');
+  background-size: cover;
+  position: relative;
+}
+
+.promoBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ea1d2c;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.cardInfo {
+  padding: 1rem;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.cardHeader h3 {
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fef3c7;
+  color: #d97706;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.meta {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.deliveryInfo {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: #374151;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 20px;
+  width: fit-content;
+}
