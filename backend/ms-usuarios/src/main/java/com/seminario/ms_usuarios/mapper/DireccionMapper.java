@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import com.seminario.ms_usuarios.dto.DireccionRequestDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.model.Direccion;
+import com.seminario.ms_usuarios.model.Localidad;
+import com.seminario.ms_usuarios.model.Provincia;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,8 +18,21 @@ public class DireccionMapper {
         if (dto == null) return null;
 
         Direccion direccion = new Direccion();
-        direccion.setProvincia(dto.getProvincia());
-        direccion.setLocalidad(dto.getLocalidad());
+        // direccion.setProvincia(dto.getProvincia());
+        // direccion.setLocalidad(dto.getLocalidad());
+        
+        if (dto.getProvincia() != null) {
+            Provincia prov = new Provincia();
+            prov.setId(dto.getProvincia()); // Asumiendo que el DTO trae el ID 
+            direccion.setProvincia(prov);
+        }
+
+        if (dto.getLocalidad() != null) {
+            Localidad loc = new Localidad();
+            loc.setId(dto.getLocalidad()); // Asumiendo que el DTO trae el ID 
+            direccion.setLocalidad(loc);
+        }
+        
         direccion.setCalle(dto.getCalle());
         direccion.setNumero(dto.getNumero());
         direccion.setCodigoPostal(dto.getCodigoPostal());
