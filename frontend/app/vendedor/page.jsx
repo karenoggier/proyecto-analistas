@@ -1,6 +1,6 @@
 'use client';
 import { Bell, Store, CheckCircle, XCircle } from 'lucide-react';
-import styles from './Vendedor.module.css';
+import styles from './vendedor.module.css';
 
 export default function VendedorPage() {
   return (

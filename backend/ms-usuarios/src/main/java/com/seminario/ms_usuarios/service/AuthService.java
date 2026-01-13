@@ -8,6 +8,7 @@ import com.seminario.ms_usuarios.dto.ClienteRequestDTO;
 import com.seminario.ms_usuarios.dto.ClienteResponseDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.LoginRequestDTO;
+import com.seminario.ms_usuarios.dto.LoginResponseDTO;
 import com.seminario.ms_usuarios.dto.VendedorRequestDTO;
 import com.seminario.ms_usuarios.dto.VendedorResponseDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
@@ -36,7 +37,7 @@ public class AuthService {
 
 
     // --- LOGIN ---
-    public String login(LoginRequestDTO loginRequest) {
+    public LoginResponseDTO login(LoginRequestDTO loginRequest) {
         Usuario usuario = usuarioService.findByEmail(loginRequest.getEmail());
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), usuario.getContraseña())) {
@@ -47,7 +48,14 @@ public class AuthService {
             throw new RequestException("US", 2, HttpStatus.FORBIDDEN, "El usuario no está activo. Contacte al administrador.");
         }
 
-        return jwtService.generateToken(usuario.getEmail(), usuario.getRol().name());
+        String token = jwtService.generateToken(usuario.getEmail(), usuario.getRol().name());
+
+        return LoginResponseDTO.builder()
+                .token(token)
+                .rol(usuario.getRol().name()) 
+                .email(usuario.getEmail())
+                .id(usuario.getId())
+                .build();
     }
 
     // --- REGISTRAR CLIENTE ---

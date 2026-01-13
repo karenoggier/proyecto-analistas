@@ -6,7 +6,56 @@ import styles from "./login.module.css"
 import Image from "next/image";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+        const res = await fetch('/usuariosMs/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            // === LOGIN EXITOSO ===
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("rol", data.rol);
+            localStorage.setItem("email", data.email);
+            localStorage.setItem("userId", data.id);
+
+            if (data.rol === "VENDEDOR") {
+                window.location.href = "/vendedor"; 
+            } else if (data.rol === "CLIENTE") {
+                window.location.href = "/cliente";
+            } else {
+                // Si es ADMIN u otro rol
+                window.location.href = "/";
+            }
+
+        } else {
+            setError(data.message || "Error al iniciar sesión. Verifique sus datos.");
+        }
+
+    } catch (err) {
+        console.error("Error de conexión:", err);
+        setError("No se pudo conectar con el servidor. Intente más tarde.");
+    } finally {
+        setIsLoading(false);
+    }
+  }
 
   return (
     <div className={styles.authPage}>
@@ -24,7 +73,7 @@ export default function LoginPage() {
         <h1 className={styles.authTitle}>Bienvenido</h1>
         <p className={styles.authSubtitle}>Ingresá a tu cuenta de PediloYa</p>
 
-        <form className={styles.authForm}>
+        <form className={styles.authForm} onSubmit={handleLogin}>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
               <svg className={styles.formLabelIcon} viewBox="0 0 24 24" fill="currentColor">
@@ -32,7 +81,14 @@ export default function LoginPage() {
               </svg>
               Email
             </label>
-            <input type="email" placeholder="tu@email.com" className={styles.formInput} />
+            <input 
+              type="email" 
+              placeholder="tu@email.com" 
+              className={styles.formInput} 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
           <div className={styles.formGroup}>
@@ -45,8 +101,11 @@ export default function LoginPage() {
             <div className={styles.formInputWrapper}>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Ingresá tu contraseña"
+                placeholder="••••••••"
                 className={styles.formInput}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className={styles.formInputToggle}>
                 {showPassword ? (
@@ -61,6 +120,12 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          {error && (
+            <div className={styles.errorMessage}>
+                {error}
+            </div>
+          )}
 
           <button type="submit" className={styles.submitButton}>
             Iniciar Sesión

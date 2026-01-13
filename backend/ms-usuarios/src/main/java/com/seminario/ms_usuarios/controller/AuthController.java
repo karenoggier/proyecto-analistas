@@ -1,7 +1,6 @@
 package com.seminario.ms_usuarios.controller;
 
 import com.seminario.ms_usuarios.dto.*;
-import com.seminario.ms_usuarios.dto.LoginResponseDTO;
 import com.seminario.ms_usuarios.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +20,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
-        String token = authService.login(dto);
-        LoginResponseDTO respuesta = new LoginResponseDTO(token);
-        return ResponseEntity.ok(respuesta); 
+        LoginResponseDTO response = authService.login(dto);
+        return ResponseEntity.ok(response); 
     }
 
     @PostMapping("/register/vendedor")

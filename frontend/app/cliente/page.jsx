@@ -1,6 +1,6 @@
 'use client';
 import { Search, MapPin, Star, Clock } from 'lucide-react';
-import styles from './Cliente.module.css';
+import styles from './cliente.module.css';
 
 export default function ClientePage() {
   return (
