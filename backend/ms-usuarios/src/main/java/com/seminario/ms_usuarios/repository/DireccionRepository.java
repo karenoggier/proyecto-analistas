@@ -13,4 +13,6 @@ public interface DireccionRepository extends JpaRepository<Direccion, String> {
 
     ArrayList<Direccion> findByUsuario(Usuario usuario);
 
+    ArrayList<Direccion> findByLocalidadAndProvincia(String localidad, String provincia);
+
 }

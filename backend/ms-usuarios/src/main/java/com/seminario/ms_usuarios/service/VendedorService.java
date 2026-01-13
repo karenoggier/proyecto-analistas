@@ -1,18 +1,28 @@
 package com.seminario.ms_usuarios.service;
 
-import com.seminario.ms_usuarios.model.Vendedor;
-import com.seminario.ms_usuarios.repository.VendedorRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorFiltradoParaCatalogoDTO;
+import com.seminario.ms_usuarios.mapper.DireccionMapper;
+import com.seminario.ms_usuarios.model.Direccion;
+import com.seminario.ms_usuarios.model.Vendedor;
+import com.seminario.ms_usuarios.repository.VendedorRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class VendedorService {
     
     private final VendedorRepository vendedorRepository;
+    private final DireccionService direccionService;
+    private final DireccionMapper direccionMapper;
+    
 
     // Get all sellers
     @Transactional(readOnly = true)
@@ -37,5 +47,18 @@ public class VendedorService {
     @Transactional
     public void eliminarVendedor(String id) {
         vendedorRepository.deleteById(id);
+    }
+
+    public ArrayList<VendedorFiltradoParaCatalogoDTO> getVendedoresByUbicacion(String provincia, String localidad) {
+
+        ArrayList<Direccion> direcciones = direccionService.getDireccionesByLocalidadYProvincia(localidad,provincia);
+        ArrayList<VendedorFiltradoParaCatalogoDTO> vendedoresFiltrados = new ArrayList<>();
+        for (Direccion direccion : direcciones) {
+            VendedorFiltradoParaCatalogoDTO vendedorPorDireccion = new VendedorFiltradoParaCatalogoDTO();
+            vendedorPorDireccion.setId(direccion.getUsuario().getId());
+            vendedorPorDireccion.setDireccion(direccionMapper.toResponse(direccion));
+            vendedoresFiltrados.add(vendedorPorDireccion);
+        }
+        return vendedoresFiltrados;
     }
 }

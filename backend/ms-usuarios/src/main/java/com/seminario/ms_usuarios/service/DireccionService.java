@@ -12,12 +12,12 @@ import com.seminario.ms_usuarios.dto.NominatimResponseDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.DireccionMapper;
 import com.seminario.ms_usuarios.model.Direccion;
+import com.seminario.ms_usuarios.model.Localidad;
+import com.seminario.ms_usuarios.model.Provincia;
 import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.repository.DireccionRepository;
 import com.seminario.ms_usuarios.repository.LocalidadRepository;
 import com.seminario.ms_usuarios.repository.ProvinciaRepository;
-import com.seminario.ms_usuarios.model.Provincia; 
-import com.seminario.ms_usuarios.model.Localidad;
 
 import lombok.RequiredArgsConstructor;
 
@@ -86,5 +86,10 @@ public class DireccionService {
 
         return ResponseEntity.ok(direccionesDTO);   
     }
+
+    public ArrayList<Direccion> getDireccionesByLocalidadYProvincia(String localidad, String provincia) {
+        return direccionRepository.findByLocalidadAndProvincia(localidad, provincia);
+    }
+
 
 }
