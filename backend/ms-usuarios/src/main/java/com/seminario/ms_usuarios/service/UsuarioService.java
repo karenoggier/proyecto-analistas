@@ -34,6 +34,10 @@ public class UsuarioService {
        return vendedorService.getVendedoresByUbicacion(provincia, localidad);
     }
 
+    public ArrayList<VendedorFiltradoParaCatalogoDTO> obtenerVendedorPorUbicacion(String provincia, String localidad) {
+        return vendedorService.getVendedoresByUbicacion(provincia, localidad);
+     }
+
 
 
 
