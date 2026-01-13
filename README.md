@@ -22,12 +22,19 @@ Este repositorio contiene la implementación de una arquitectura de **Microservi
 
 El sistema está dividido en servicios independientes. A continuación se detallan los servicios disponibles y sus enlaces a la documentación:
 
-### Microservicio de Usuarios (`ms-usuarios`)
+### 1. Microservicio de Usuarios (`ms-usuarios`)
 Encargado de la autenticación, registro de cuentas (Clientes/Vendedores) y gestión de roles.
 
 * **Puerto:** `8080`
 * **Context Path:** `/usuariosMs`
 * **Documentación (Swagger):** [Ver API Docs](http://localhost:8080/usuariosMs/swagger-ui/index.html)
+
+### 2. Microservicio de Catálogo (`ms-catalogo`)
+Encargado de la gestión de productos, categorías y el perfil público de las tiendas (Vendedores). Utiliza base de datos documental (NoSQL) para alta performance de lectura.
+
+* **Puerto:** `8081`
+* **Context Path:** `/catalogoMs`
+* **Documentación (Swagger):** [Ver API Docs](http://localhost:8081/catalogoMs/swagger-ui/index.html)
 
 > **Nota:** Para ver la documentación, asegurate de tener el microservicio corriendo localmente.
 
