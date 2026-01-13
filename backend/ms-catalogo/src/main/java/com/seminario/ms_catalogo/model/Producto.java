@@ -1,23 +1,24 @@
 package com.seminario.ms_catalogo.model;
 
-import java.math.BigDecimal;
-import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
-import java.math.BigDecimal;
+
+import lombok.Data;
 
 @Data
-@Document(collection = "productos")
 public class Producto {
     @Id
     private String id;
     private String nombre;
     private String descripcion;
-    private BigDecimal precio;
-    private String imagen;
-    private Estado estado;
-    private String vendedorId; 
+    private double precio;
+    private Estado estado; 
+    private double tamanio;
+    private String unidadMedida;
+    private Boolean aptoCeliacos;
+    private Boolean aptoVeganos;
+    private Boolean disponible;
+    private String observaciones;
 
     @DBRef
     private Categoria categoria;

@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Direccion {
-    //private String id;
+    private String id;
     private String provincia;
     private String localidad;
     private String calle;

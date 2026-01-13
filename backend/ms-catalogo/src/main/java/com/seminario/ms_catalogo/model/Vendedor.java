@@ -1,9 +1,12 @@
 package com.seminario.ms_catalogo.model;
 
-import lombok.Data;
+import java.util.ArrayList;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.Data;
 
 @Data
 @Document(collection = "vendedores")
@@ -21,4 +24,6 @@ public class Vendedor {
     private String horarioCierre;
     private String tiempoEstimadoEspera;
     private Estado estado;
+    private Direccion direccion;
+    private ArrayList<Producto> productos;
 }
