@@ -11,17 +11,13 @@ public class ProductoRequestDTO {
     @NotBlank(message = "La imagen no puede estar vacia")
     private double precio;
     @NotBlank(message = "La categoria no puede estar vacia")
-    private String idCategoria;  
-    @NotBlank(message = "El tamaño no puede estar vacio")
-    private double tamanio;
-    @NotBlank(message = "La unidad de medida no puede estar vacia")
-    private String unidadMedida;
+    private String Categoria;  
+    @NotBlank(message = "La subcategoria no puede estar vacia")
+    private String subcategoria;
     @NotBlank(message= "el campo aptoCeliacos no puede estar vacio")
     private Boolean aptoCeliacos;
-    @NotBlank(message= "el campo aptoVeganos no puede estar vacio")
-    private Boolean aptoVeganos;
     @NotBlank(message= "el campo disponible no puede estar vacio")
-    private Boolean disponible; 
+    private String disponible; 
     private String observaciones;
 
 }

@@ -6,13 +6,12 @@ public class ProductoResponseDTO {
     private String descripcion;
     private double precio;
     private String estado; 
-    private double tamanio;
-    private String unidadMedida;
     private Boolean aptoCeliacos;
-    private Boolean aptoVeganos;
-    private Boolean disponible;
+    private String disponible;
     private String observaciones; 
-    private String categoriaNombre;
-    private String categoriaDescripcion;
+    private String categoria;
+    private String subcategoria;
+    private String imagen;
+    
 
 }
