@@ -18,7 +18,8 @@ public class Vendedor {
     private String usuarioId;
     
     private String nombreNegocio;
-    private String logo;
+    private byte[] logo;
+    private byte [] banner;
     private Boolean realizaEnvios;
     private String horarioApertura;
     private String horarioCierre;
