@@ -14,10 +14,9 @@ public class ProductoRequestDTO {
     private String Categoria;  
     @NotBlank(message = "La subcategoria no puede estar vacia")
     private String subcategoria;
-    @NotBlank(message= "el campo aptoCeliacos no puede estar vacio")
-    private Boolean aptoCeliacos;
     @NotBlank(message= "el campo disponible no puede estar vacio")
     private String disponible; 
     private String observaciones;
-
+    private String logo;
+    private String banner;
 }

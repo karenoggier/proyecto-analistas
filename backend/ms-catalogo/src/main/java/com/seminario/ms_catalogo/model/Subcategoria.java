@@ -11,6 +11,7 @@ public enum Subcategoria {
     PARRILLA(Categoria.COMIDA),
     ENSALADA(Categoria.COMIDA),
     VEGANO(Categoria.COMIDA),
+    CELIACO(Categoria.COMIDA),
     SUSHI(Categoria.COMIDA),
     POSTRE(Categoria.COMIDA),
     
