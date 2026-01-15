@@ -17,7 +17,6 @@ public class Producto {
     private String observaciones;
     private Categoria categoria;
     private Subcategoria subcategoria; 
-    private String logo;
-    private String banner;
+    private String imagen;
 }
 

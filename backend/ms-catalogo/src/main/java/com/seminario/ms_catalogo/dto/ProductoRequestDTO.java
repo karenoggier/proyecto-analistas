@@ -17,6 +17,5 @@ public class ProductoRequestDTO {
     @NotBlank(message= "el campo disponible no puede estar vacio")
     private String disponible; 
     private String observaciones;
-    private String logo;
-    private String banner;
+    private String imagen;
 }

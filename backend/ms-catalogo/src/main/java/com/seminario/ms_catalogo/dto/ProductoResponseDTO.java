@@ -10,8 +10,7 @@ public class ProductoResponseDTO {
     private String observaciones; 
     private String categoria;
     private String subcategoria;
-    private String logo;
-    private String banner;
+    private String imagen;
     
 
 }
