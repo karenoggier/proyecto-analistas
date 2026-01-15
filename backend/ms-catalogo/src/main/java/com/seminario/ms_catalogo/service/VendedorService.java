@@ -34,6 +34,6 @@ public class VendedorService {
 
     @RabbitListener(queues = RabbitConfig.QUEUE)
     public void recibirActualizacionVendedor(VendedorActualizarDTO actualizacion) {
-        // logica actualizacion vendedor
+        System.out.println("Actualización de vendedor recibida: " + actualizacion.getEmail());
     }
 }
