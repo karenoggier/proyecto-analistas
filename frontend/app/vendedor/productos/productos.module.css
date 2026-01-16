@@ -1,0 +1,696 @@
+.pageWrapper {
+  min-height: 100vh;
+  background: #f8f9fa;
+  font-family: var(--font-sans);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===================== NAVBAR ===================== */
+.navbar {
+  background: white;
+  padding: 0.875rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbarInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logoText {
+  font-size: 1.125rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Mi dirección styling to match screenshot exactly */
+.location {
+  display: flex;
+  align-items: center;
+  gap: 0rem;
+  cursor: pointer;
+}
+
+.locationText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.locationLabel {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.locationValue {
+  font-size: 0.8rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.navbarRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbarIconWrapper {
+  position: relative;
+}
+
+.navbarIcon {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* User button to match screenshot */
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.userButtonText {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* Notification Popover - exact match */
+.notificationPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  min-width: 280px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.notificationHeader {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.notificationContent {
+  padding: 2rem 1.25rem;
+  text-align: center;
+}
+
+.notificationContent p {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* User Popover - exact match to screenshot */
+.userPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.userPopoverHeader {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.9rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.userPopoverMenu {
+  padding: 0.5rem 0;
+}
+
+.userPopoverItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: #374151;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.userPopoverItem:hover {
+  background: #f9fafb;
+}
+
+.userPopoverItem span {
+  color: #374151;
+}
+
+/* ===================== MAIN CONTENT ===================== */
+.mainContent {
+  flex: 1;
+  display: flex;
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  width: 100%;
+}
+
+/* Add vertical scrollbar to product list */
+.leftPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: calc(100vh - 120px);
+}
+
+.rightPanel {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pageTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ff4b7e;
+  letter-spacing: 0.05em;
+}
+
+/* Search Bar */
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.searchInputWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 25px;
+  overflow: hidden;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.searchIconBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.filterBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fee2e2;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Products Grid */
+/* Make products grid scrollable */
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 0.5rem;
+}
+
+/* Custom scrollbar styling */
+.productsGrid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.productsGrid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.productsGrid::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.productsGrid::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+.productCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  border: 2px solid transparent;
+}
+
+.productCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.productCardSelected {
+  border-color: #ff4b7e;
+}
+
+.productCardContent {
+  display: flex;
+  gap: 1rem;
+}
+
+.productInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.productName {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.375rem;
+  line-height: 1.3;
+}
+
+.productDescription {
+  font-size: 0.6875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.productPrice {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ff4b7e;
+}
+
+.productImage {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.productImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Right Panel - Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.actionBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.actionBtn:hover {
+  transform: translateY(-1px);
+}
+
+/* Form Panel */
+.formPanel {
+  background: linear-gradient(180deg, #ff4b7e 0%, #ff8e4f 100%);
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+
+.formImageUpload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.imageUploadArea {
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageLabel {
+  font-size: 0.75rem;
+  color: white;
+  font-weight: 500;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.formLabel {
+  font-size: 0.6875rem;
+  color: white;
+  font-weight: 500;
+}
+
+.formInput,
+.formSelect,
+.formTextarea {
+  padding: 0.625rem 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: #1f2937;
+  background: white;
+}
+
+.formInput:disabled,
+.formSelect:disabled,
+.formTextarea:disabled {
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+.formTextarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.formSelect {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%236b7280'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 0.75rem;
+  background: white;
+  color: #ff4b7e;
+  border: none;
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.submitBtn:hover {
+  transform: translateY(-1px);
+}
+
+/* ===================== FILTERS MODAL ===================== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.filtersModal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.filtersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.filtersTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filtersBody {
+  padding: 1rem 1.5rem;
+}
+
+.filterSection {
+  margin-bottom: 1.25rem;
+}
+
+.filterSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+.filterSectionTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.filterOptions {
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.filterOptionsGrid {
+  padding-top: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem 1rem;
+}
+
+.filterOption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.filterOption input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #ff4b7e;
+}
+
+.filtersFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.applyBtn {
+  flex: 1;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clearBtn {
+  flex: 1;
+  padding: 0.75rem;
+  background: white;
+  color: #ff4b7e;
+  border: 2px solid #ff4b7e;
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===================== FOOTER ===================== */
+.footer {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  padding: var(--space-xl) 0;
+}
+
+.footerInner {
+  text-align: center;
+}
+
+.footerText {
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 1024px) {
+  .mainContent {
+    flex-direction: column;
+  }
+
+  .rightPanel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .productsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .filterOptionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

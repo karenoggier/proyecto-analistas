@@ -1,67 +1,416 @@
-'use client';
-import { Bell, Store, CheckCircle, XCircle } from 'lucide-react';
-import styles from './vendedor.module.css';
+"use client"
+
+import { useState, useEffect } from "react"
+import Image from "next/image"
+import styles from "./vendedor.module.css"
+import Link from "next/link"
 
 export default function VendedorPage() {
+  const [isProfileComplete, setIsProfileComplete] = useState(false)
+  const [vendorName, setVendorName] = useState("Local")
+  const [userEmail, setUserEmail] = useState("")
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    const rol = localStorage.getItem("rol")
+    const email = localStorage.getItem("email") || ""
+
+    if (!token || rol !== "VENDEDOR") {
+      window.location.href = "/login"
+      return
+    }
+
+    setUserEmail(email)
+
+    if (email === "vendedor@test.com") {
+      setIsProfileComplete(false)
+      setVendorName("Local")
+    } else {
+      setIsProfileComplete(true)
+      setVendorName("McDonald's")
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.clear()
+    window.location.href = "/login"
+  }
+
+  const handleNavigate = (path) => {
+    window.location.href = path
+  }
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(`.${styles.navbarIconWrapper}`)) {
+        setShowNotifications(false)
+        setShowUserMenu(false)
+      }
+    }
+    document.addEventListener("click", handleClickOutside)
+    return () => document.removeEventListener("click", handleClickOutside)
+  }, [])
+
   return (
-    <div className={styles.container}>
-      {/* Header Dashboard */}
-      <header className={styles.header}>
-        <div className={styles.brand}>
-          <Store className={styles.iconBrand} />
-          <span>Mi Negocio</span>
-        </div>
-        <div className={styles.statusToggle}>
-          <span className={styles.dot}></span> Abierto
-        </div>
-      </header>
-
-      {/* Métricas Rápidas */}
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <h3>Pedidos hoy</h3>
-          <p>12</p>
-        </div>
-        <div className={styles.statCard}>
-          <h3>Ingresos</h3>
-          <p>$45k</p>
-        </div>
-      </div>
-
-      {/* Lista de Pedidos Entrantes */}
-      <main className={styles.ordersSection}>
-        <h2 className={styles.sectionTitle}>
-          Pedidos Activos <span className={styles.badge}>3</span>
-        </h2>
-
-        {/* Card Pedido */}
-        {[101, 102].map((id) => (
-          <div key={id} className={styles.orderCard}>
-            <div className={styles.orderHeader}>
-              <span className={styles.orderId}>#{id}</span>
-              <span className={styles.timeAgo}>hace 5 min</span>
+    <div className={styles.pageWrapper}>
+      {/* ========== NAVBAR ========== */}
+      <nav className={styles.navbar}>
+        <div className={styles.navbarInner}>
+          <div className={styles.navbarLeft}>
+            <Link href="/vendedor" className={styles.logo}>
+              <Image src="/logo.png" alt="PediloYa Logo" width={50} height={60} className={styles.logo} priority />
+              <span className={styles.logoText}>PediloYa</span>
+            </Link>
+            <div className={styles.location}>
+              <Image src="/pin-de-ubicacion.png" alt="Pin de ubicación" width={30} height={40} />
+              <div className={styles.locationText}>
+                <span className={styles.locationLabel}>Ubicación</span>
+                <span className={styles.locationValue}>Mi dirección</span>
+              </div>
             </div>
-            
-            <div className={styles.itemsList}>
-              <p>2x Hamburguesa Doble</p>
-              <p>1x Coca Cola 1.5L</p>
-            </div>
-            
-            <div className={styles.customerInfo}>
-              Cliente: <strong>Karen Archeron</strong>
-            </div>
-            
-            <div className={styles.actions}>
-              <button className={styles.btnReject}>
-                <XCircle size={18} /> Rechazar
+          </div>
+
+          <div className={styles.navbarRight}>
+            <div className={styles.navbarIconWrapper}>
+              <button
+                className={styles.navbarIcon}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowNotifications(!showNotifications)
+                  setShowUserMenu(false)
+                }}
+              >
+                <Image src="/campana-de-notificacion.png" alt="Notificaciones" width={28} height={38} />
               </button>
-              <button className={styles.btnAccept}>
-                <CheckCircle size={18} /> Aceptar
+              {showNotifications && (
+                <div className={styles.notificationPopover}>
+                  <div className={styles.notificationHeader}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#9ca3af">
+                      <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+                    </svg>
+                    <span>Notificaciones</span>
+                  </div>
+                  <div className={styles.notificationContent}>
+                    <p>No tenés notificaciones</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.navbarIconWrapper}>
+              <button
+                className={styles.userButton}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowUserMenu(!showUserMenu)
+                  setShowNotifications(false)
+                }}
+              >
+                <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
+                <span className={styles.userButtonText}>Local</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
+                  <path d="M7 10l5 5 5-5z" />
+                </svg>
+              </button>
+              {showUserMenu && (
+                <div className={styles.userPopover}>
+                  <div className={styles.userPopoverHeader}>
+                    <span>Local</span>
+                  </div>
+                  <div className={styles.userPopoverMenu}>
+                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor")}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#9ca3af">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                      </svg>
+                      <span>Inicio</span>
+                    </button>
+                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/perfil")}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#9ca3af">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                      </svg>
+                      <span>Mi perfil</span>
+                    </button>
+                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/productos")}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#9ca3af">
+                        <path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z" />
+                      </svg>
+                      <span>Mis productos</span>
+                    </button>
+                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/pedidos")}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#9ca3af">
+                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                      </svg>
+                      <span>Pedidos</span>
+                    </button>
+                    <button className={styles.userPopoverItem}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#9ca3af">
+                        <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
+                      </svg>
+                      <span>Cupones</span>
+                    </button>
+                    <button className={styles.userPopoverItem} onClick={handleLogout}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#9ca3af">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+                      </svg>
+                      <span>Salir</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* ========== HERO SECTION ========== */}
+      <section className={`${styles.hero} ${!isProfileComplete ? styles.heroIncomplete : ""}`}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>{isProfileComplete ? "McDonald's" : "Local"}</h1>
+          {!isProfileComplete && (
+            <>
+              <h2 className={styles.heroSubtitle}>¡Estás a un paso de empezar a vender!</h2>
+              <p className={styles.heroDescription}>
+                Para que tu local sea visible en la app y puedas recibir pedidos, necesitamos que termines de configurar
+                tu cuenta. Completa tu perfil ahora para activar tu tienda.
+              </p>
+              <button className={styles.heroButton} onClick={() => handleNavigate("/vendedor/perfil")}>
+                <span className={styles.heroButtonText}>
+                  Completar el perfil
+                </span>
+              </button>
+            </>
+          )}
+        </div>
+        {isProfileComplete && (
+          <div className={styles.heroImage}>
+            <Image
+              src="/mcdonalds-burger-fries-meal-red-background.jpg"
+              alt="McDonald's Hero"
+              width={450}
+              height={280}
+              style={{ objectFit: "contain" }}
+            />
+          </div>
+        )}
+      </section>
+
+      <main className={styles.mainContent}>
+        {/* ========== MIS PRODUCTOS ========== */}
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>MIS PRODUCTOS</h2>
+            <div className={styles.carouselNav}>
+              <button className={styles.carouselButton} disabled={!isProfileComplete}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+              </button>
+              <button
+                className={`${styles.carouselButton} ${isProfileComplete ? styles.carouselButtonActive : ""}`}
+                disabled={!isProfileComplete}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
               </button>
             </div>
           </div>
-        ))}
+
+          <div className={styles.productsGrid}>
+            {isProfileComplete ? (
+              <>
+                <div className={styles.productCard}>
+                  <div className={styles.productInfo}>
+                    <h3 className={styles.productTitle}>Doble carne Doble queso + Papas medianas</h3>
+                    <p className={styles.productDescription}>
+                      Hamburguesa doble carne junior 100% vacuno, dos fetas de queso cheddar, lechuga, mostaza y
+                      ketchup. Acompañada de papas medianas.
+                    </p>
+                  </div>
+                  <div className={styles.productRight}>
+                    <div className={styles.productImageWrapper}>
+                      <Image src="/double-cheeseburger-with-fries.jpg" alt="Burger" width={90} height={90} />
+                    </div>
+                    <p className={styles.productPrice}>$ 10000</p>
+                  </div>
+                </div>
+
+                <div className={styles.productCard}>
+                  <div className={styles.productInfo}>
+                    <h3 className={styles.productTitle}>McPollo + Papas Pequeñas</h3>
+                    <p className={styles.productDescription}>
+                      Medallón de pollo frito, mayonesa y lechuga con papas pequeñas.
+                    </p>
+                  </div>
+                  <div className={styles.productRight}>
+                    <div className={styles.productImageWrapper}>
+                      <Image src="/chicken-burger-with-small-fries.jpg" alt="McPollo" width={90} height={90} />
+                    </div>
+                    <p className={styles.productPrice}>$ 7000</p>
+                  </div>
+                </div>
+
+                <div className={styles.productCard}>
+                  <div className={styles.productInfo}>
+                    <h3 className={styles.productTitle}>McFlurry Oreo</h3>
+                    <p className={styles.productDescription}>
+                      Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.
+                    </p>
+                  </div>
+                  <div className={styles.productRight}>
+                    <div className={styles.productImageWrapper}>
+                      <Image src="/mcflurry-oreo-ice-cream.jpg" alt="McFlurry" width={90} height={90} />
+                    </div>
+                    <p className={styles.productPrice}>$ 4000</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              
+              <div className={styles.productCardPlaceholder}>
+                  <div className={styles.productInfo}>
+                    <h3 className={styles.placeholderTitle}>Añadi un producto a tu catálogo</h3>
+                    <p className={styles.placeholderSubtitle}>
+                      descripción del producto
+                    </p>
+                  </div>
+                  <div className={styles.productRight}>
+                    <div className={styles.placeholderIcon}>
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="#d1d5db">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                      </svg>
+                    </div>
+                    <p className={styles.placeholderPrice}>$ precio</p>
+                  </div>
+                </div>
+              
+            )}
+          </div>
+
+          <button
+            className={`${styles.addButton} ${!isProfileComplete ? styles.addButtonDisabled : ""}`}
+            onClick={() => isProfileComplete && handleNavigate("/vendedor/productos")}
+            disabled={!isProfileComplete}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+            Añadir producto
+          </button>
+        </section>
+
+        {/* ========== PEDIDOS ========== */}
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>PEDIDOS</h2>
+            <p className={styles.sectionSubtitle}>Fecha actual</p>
+          </div>
+
+          <div className={styles.ordersGrid}>
+            <div
+              className={`${styles.orderCard} ${styles.orderCardPending} ${!isProfileComplete ? styles.orderCardDisabled : ""}`}
+            >
+              <span className={styles.orderLabel}>PENDIENTES</span>
+              <span className={styles.orderCount}>0</span>
+            </div>
+            <div
+              className={`${styles.orderCard} ${styles.orderCardPrep} ${!isProfileComplete ? styles.orderCardDisabled : ""}`}
+            >
+              <span className={styles.orderLabel}>EN PREPARACIÓN</span>
+              <span className={styles.orderCount}>0</span>
+            </div>
+            <div
+              className={`${styles.orderCard} ${styles.orderCardDelivered} ${!isProfileComplete ? styles.orderCardDisabled : ""}`}
+            >
+              <span className={styles.orderLabel}>ENTREGADOS</span>
+              <span className={styles.orderCount}>0</span>
+            </div>
+          </div>
+
+          <button
+            className={`${styles.addButton} ${!isProfileComplete ? styles.addButtonDisabled : ""}`}
+            onClick={() => isProfileComplete && handleNavigate("/vendedor/pedidos")}
+            disabled={!isProfileComplete}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+            </svg>
+            Ver pedidos
+          </button>
+        </section>
+
+        {/* ========== CUPONES ========== */}
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>CUPONES DE DESCUENTO</h2>
+            <div className={styles.carouselNav}>
+              <button className={styles.carouselButton} disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+              </button>
+              <button className={styles.carouselButton} disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.couponsContainer}>
+            {isProfileComplete ? (
+              <div className={styles.couponCard}>
+                <div className={styles.couponIcon}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="#ff8e4f">
+                    <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
+                  </svg>
+                </div>
+                <div className={styles.couponInfo}>
+                  <h3 className={styles.couponTitle}>10% OFF en McFlurry</h3>
+                  <p className={styles.couponExpiry}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#9ca3af">
+                      <circle cx="12" cy="12" r="10" stroke="#9ca3af" strokeWidth="2" fill="none" />
+                    </svg>
+                    Vence el 31 de enero
+                  </p>
+                </div>
+                <button className={styles.couponBadge}>Desactivar</button>
+              </div>
+            ) : (
+              <div className={styles.couponCardPlaceholder}>
+                <div className={styles.couponIcon}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="#d1d5db">
+                    <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
+                  </svg>
+                </div>
+                <div className={styles.couponInfo}>
+                  <h3 className={styles.couponTitle}>Añadi un cupón de descuento</h3>
+                  <p className={styles.couponExpiry}>
+                    Fecha de vencimiento
+                  </p>
+                </div>
+                <button className={styles.couponBadgeDisabled}>Activar</button>
+              </div>
+            )}
+          </div>
+
+          <button className={`${styles.addButton} ${styles.addButtonDisabled}`} disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+            Añadir cupón
+          </button>
+        </section>
       </main>
+
+      {/* ========== FOOTER ========== */}
+      <footer className={styles.footer}>
+        <div className={`${styles.container} ${styles.footerInner}`}>
+          <p className={styles.footerText}>PediloYa © 2026. Todos los derechos reservados.</p>
+        </div>
+      </footer>
     </div>
-  );
+  )
 }

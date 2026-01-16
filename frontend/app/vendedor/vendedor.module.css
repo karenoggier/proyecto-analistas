@@ -1,171 +1,697 @@
-.container {
-  background-color: #f0f2f5;
+/* Vendedor Dashboard - Pixel Perfect Match */
+@import url('https://fonts.googleapis.com/css2?family=Protest+Riot&display=swap');
+
+.pageWrapper {
   min-height: 100vh;
-  font-family: -apple-system, sans-serif;
-}
-
-.header {
-  background: #1f2937; /* Color oscuro profesional */
-  color: white;
-  padding: 1rem 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-
-.statusToggle {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  background-color: #34d399;
-  border-radius: 50%;
-  box-shadow: 0 0 8px #34d399;
-}
-
-.statsGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  padding: 1.5rem;
-}
-
-.statCard {
   background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.statCard h3 {
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin: 0 0 0.5rem 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statCard p {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #111827;
-  margin: 0;
-}
-
-.ordersSection {
-  padding: 0 1.5rem 2rem 1.5rem;
-}
-
-.sectionTitle {
-  font-size: 1.1rem;
-  color: #374151;
-  margin-bottom: 1rem;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
-.badge {
-  background: #ea1d2c;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-}
-
-.orderCard {
+/* ===================== NAVBAR ===================== */
+.navbar {
   background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  border-left: 5px solid #3b82f6; /* Indicador visual azul */
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 0.875rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.orderHeader {
+.navbarInner {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #f3f4f6;
-  padding-bottom: 0.5rem;
 }
 
-.orderId {
+.navbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logoText {
+  font-size: 1.125rem;
   font-weight: 700;
-  color: #1f2937;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.timeAgo {
-  color: #6b7280;
-  font-size: 0.85rem;
+/* Mi dirección styling to match screenshot exactly */
+.location {
+  display: flex;
+  align-items: center;
+  gap: 0rem;
+  cursor: pointer;
 }
 
-.itemsList {
-  margin-bottom: 1rem;
+.locationText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
 }
 
-.itemsList p {
-  margin: 4px 0;
+.locationLabel {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.locationValue {
+  font-size: 0.8rem;
   color: #374151;
+  font-weight: 500;
 }
 
-.customerInfo {
-  background: #f9fafb;
-  padding: 0.5rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  color: #4b5563;
-  margin-bottom: 1.5rem;
+.navbarRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+.navbarIconWrapper {
+  position: relative;
 }
 
-.btnAccept, .btnReject {
+.navbarIcon {
+  background: none;
   border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: 600;
+  padding: 0.5rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: opacity 0.2s;
 }
 
-.btnAccept {
-  background-color: #10b981;
+/* User button to match screenshot */
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.userButtonText {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* Notification Popover - exact match */
+.notificationPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  min-width: 280px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.notificationHeader {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.notificationContent {
+  padding: 2rem 1.25rem;
+  text-align: center;
+}
+
+.notificationContent p {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* User Popover - exact match to screenshot */
+.userPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.userPopoverHeader {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.9rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.userPopoverMenu {
+  padding: 0.5rem 0;
+}
+
+.userPopoverItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: #374151;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.userPopoverItem:hover {
+  background: #f9fafb;
+}
+
+.userPopoverItem span {
+  color: #374151;
+}
+
+/* ===================== HERO SECTION ===================== */
+/* Make hero full-bleed with 100vw width */
+.hero {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding: 1.5rem 10rem;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%); /* ACA VA LA FOTO DEL BANNER SI PUSIERON*/
+}
+
+.heroIncomplete {
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  max-width: 650px;
+}
+
+.heroTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  color: white;
+  font-family: "Protest Riot", serif;
+  font-style: italic;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.1;
+}
+
+.heroIncomplete .heroTitle {
+  font-size: 5rem;
+  color: #ffffff;
+  font-family: "Protest Riot", serif;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.heroSubtitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.75rem 0;
+}
+
+.heroDescription {
+  font-size: 0.9rem;
+  color: #ffffff;
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+}
+
+.heroButton {
+  background: white;
+  border-radius: 20px;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.heroButtonText {
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.heroButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(252, 190, 225, 0.69);
+}
+
+.heroImage {
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 400px;
+  height: auto;
+}
+
+/* Main content - sections flow directly on background */
+.mainContent {
+  flex: 1;
+  padding: 2rem 10rem;
+}
+
+/* ===================== SECTIONS ===================== */
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ff4b7e;
+  letter-spacing: 0.08em;
+  margin-top: 3rem;
+}
+
+.sectionSubtitle {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin-top: 3rem;
+}
+
+.carouselNav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.carouselButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #a5a6a8;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 3rem;
+}
+
+.carouselButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #1f2937;
+}
+
+.carouselButtonActive {
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
   color: white;
 }
 
-.btnReject {
-  background-color: #fee2e2;
-  color: #ef4444;
+/* ===================== PRODUCTS ===================== */
+.productsGrid {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.productCard {
+  flex: 0 0 280px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+}
+
+.productInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.productTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.productDescription {
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.productRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.productImageWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.productImageWrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.productPrice {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+/* Placeholder product card */
+.productCardPlaceholder {
+  flex: 0 0 350px;
+  min-height:150px;
+  background: white;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+}
+
+.placeholderIcon {
+  color: #d1d5db;
+}
+
+.placeholderText {
+  flex: 1;
+}
+
+.placeholderTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.25rem 0;
+}
+
+.placeholderSubtitle {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.placeholderPrice {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #9ca3af;
+  margin-right: 6px;
+  margin-top: 20px;
+}
+
+
+/* Add button */
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.addButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 75, 126, 0.3);
+}
+
+.addButtonDisabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
+
+.addButtonDisabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ===================== ORDERS ===================== */
+.ordersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.orderCard {
+  border-radius: 16px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.orderCardPending {
+  background: linear-gradient(180deg, #ff6b8b 0%, #ff8e7a 100%);
+}
+
+.orderCardPrep {
+  background: linear-gradient(180deg, #ff8a6b 0%, #ffb07a 100%);
+}
+
+.orderCardDelivered {
+  background: linear-gradient(180deg, #ffa86b 0%, #ffc87a 100%);
+}
+
+.orderCardDisabled {
+  background: #514C4C !important;
+}
+
+.orderLabel {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: white;
+  letter-spacing: 0.05em;
+}
+
+.orderCount {
+  font-size: 3rem;
+  font-weight: 500;
+  color: white;
+  line-height: 1;
+}
+
+/* ===================== COUPONS ===================== */
+.couponsContainer {
+  margin-bottom: 1rem;
+}
+
+.couponCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 400px;
+}
+
+.couponCardPlaceholder {
+  background: white;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 400px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.10);
+}
+
+.couponIcon {
+  flex-shrink: 0;
+}
+
+.couponInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.couponTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+}
+
+.couponExpiry {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.couponBadge {
+  background: #10b981;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.couponBadgeDisabled {
+  background: #6b7280;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  cursor: not-allowed;
+  font-family: inherit;
+}
+
+/* ===================== FOOTER ===================== */
+.footer {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  padding: var(--space-xl) 0;
+}
+
+.footerInner {
+  text-align: center;
+}
+
+.footerText {
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+}
+
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 1024px) {
+  .heroImage {
+    width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .location {
+    display: none;
+  }
+
+  .hero {
+    margin: 1rem;
+    padding: 2rem;
+  }
+
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .heroImage {
+    display: none;
+  }
+
+  .mainContent {
+    padding: 0 1rem;
+  }
+
+  .ordersGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .productsGrid {
+    flex-direction: column;
+  }
+
+  .productCard,
+  .productCardPlaceholder {
+    flex: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroIncomplete .heroTitle {
+    font-size: 1.5rem;
+  }
+
+  .userButtonText {
+    display: none;
+  }
 }

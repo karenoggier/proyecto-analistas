@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorActualizarDTO;
+//import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorActualizarDTO;
 import com.seminario.ms_usuarios.service.VendedorActualizador;
 
 import lombok.RequiredArgsConstructor;
@@ -17,9 +17,9 @@ public class VendedorController {
     
     private final VendedorActualizador vendedorActualizador;
     
-    @PostMapping("/actualizar")
+    /*@PostMapping("/actualizar")
     public void actualizarVendedor(@RequestBody VendedorActualizarDTO vendedorDTO) {
         vendedorActualizador.enviarActualizacion(vendedorDTO);
-    }
+    }*/
 
 }
