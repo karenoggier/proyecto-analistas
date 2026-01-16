@@ -1,16 +1,16 @@
-package com.seminario.ms_catalogo.model;
+package com.seminario.ms_usuarios.dto.ms_catalogo;
 
 import lombok.Data;
 
 @Data
-public class Direccion {
-    private String id;
+public class DireccionCatDTO {
     private String provincia;
     private String localidad;
     private String calle;
     private String numero;
-    private String observaciones;
     private String codigoPostal;
+    private String observaciones;
     private Double latitud;
     private Double longitud;
+
 }

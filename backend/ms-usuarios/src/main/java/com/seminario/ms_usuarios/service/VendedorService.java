@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorFiltradoParaCatalogoDTO;
 import com.seminario.ms_usuarios.mapper.DireccionMapper;
 import com.seminario.ms_usuarios.model.Direccion;
 import com.seminario.ms_usuarios.model.Vendedor;
@@ -49,16 +48,4 @@ public class VendedorService {
         vendedorRepository.deleteById(id);
     }
 
-    public ArrayList<VendedorFiltradoParaCatalogoDTO> getVendedoresByUbicacion(String provincia, String localidad) {
-
-        ArrayList<Direccion> direcciones = direccionService.getDireccionesByLocalidadYProvincia(localidad,provincia);
-        ArrayList<VendedorFiltradoParaCatalogoDTO> vendedoresFiltrados = new ArrayList<>();
-        for (Direccion direccion : direcciones) {
-            VendedorFiltradoParaCatalogoDTO vendedorPorDireccion = new VendedorFiltradoParaCatalogoDTO();
-            vendedorPorDireccion.setId(direccion.getUsuario().getId());
-            vendedorPorDireccion.setDireccion(direccionMapper.toResponse(direccion));
-            vendedoresFiltrados.add(vendedorPorDireccion);
-        }
-        return vendedoresFiltrados;
-    }
 }

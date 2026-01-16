@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorFiltradoParaCatalogoDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.repository.UsuarioRepository;
@@ -30,14 +29,7 @@ public class UsuarioService {
                 .orElseThrow(() -> new RequestException("US",2, HttpStatus.NOT_FOUND, "Credenciales inválidas"));
     }
 
-    public ArrayList<VendedorFiltradoParaCatalogoDTO> getAllVendedorFiltered(String provincia, String localidad) {
-       return vendedorService.getVendedoresByUbicacion(provincia, localidad);
-    }
-
-    public ArrayList<VendedorFiltradoParaCatalogoDTO> obtenerVendedorPorUbicacion(String provincia, String localidad) {
-        return vendedorService.getVendedoresByUbicacion(provincia, localidad);
-     }
-
+   
 
 
 

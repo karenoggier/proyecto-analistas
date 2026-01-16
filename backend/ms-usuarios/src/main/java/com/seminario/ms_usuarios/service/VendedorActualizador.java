@@ -4,7 +4,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import com.seminario.ms_usuarios.config.RabbitConfig;
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorActualizarDTO;
+import com.seminario.ms_usuarios.dto.ms_catalogo.*;;
 
 @Service
 public class VendedorActualizador {
@@ -15,7 +15,7 @@ public class VendedorActualizador {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void enviarActualizacion(VendedorActualizarDTO actualizacion) {
+    public void enviarActualizacion(VendedorResponseCatDTO actualizacion) {
         rabbitTemplate.convertAndSend(
                 RabbitConfig.EXCHANGE,
                 RabbitConfig.ROUTING_KEY,

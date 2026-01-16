@@ -17,8 +17,6 @@ public class Producto {
     private String observaciones;
     private Categoria categoria;
     private Subcategoria subcategoria; 
-
-    private byte[] imagen; //to save image as byte array in mongodb
-
+    private String imagen;
 }
 
