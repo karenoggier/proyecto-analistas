@@ -181,18 +181,16 @@
   cursor: pointer;
   font-family: inherit;
   font-size: 0.875rem;
-  color: #374151;
+   color: #797b7d;
   text-align: left;
   transition: background 0.15s;
 }
 
 .userPopoverItem:hover {
-  background: #f9fafb;
+  background: #ff4b7e;
+  color:white;
 }
 
-.userPopoverItem span {
-  color: #374151;
-}
 
 /* ===================== HERO SECTION ===================== */
 /* Make hero full-bleed with 100vw width */
@@ -202,7 +200,7 @@
   padding: 1.5rem 10rem;
   position: relative;
   overflow: hidden;
-  min-height: 200px;
+  min-height: 300px;
   display: flex;
   align-items: center;
   background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%); /* ACA VA LA FOTO DEL BANNER SI PUSIERON*/
@@ -324,50 +322,57 @@
   gap: 0.5rem;
 }
 
-.carouselButton {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: #a5a6a8;
-  color: #1f2937;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 3rem;
-}
-
-.carouselButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  color: #1f2937;
-}
-
 .carouselButtonActive {
   background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
   color: white;
 }
 
+.carouselButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  color: white;
+  display: flex;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.carouselButton:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* ===================== PRODUCTS ===================== */
 .productsGrid {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 1.5rem;
   overflow-x: auto;
+  scroll-behavior: smooth;
   padding-bottom: 0.5rem;
+  scrollbar-width: none; 
 }
 
+.productsGrid::-webkit-scrollbar {
+  display: none; 
+}
 .productCard {
-  flex: 0 0 280px;
+  flex: 0 0 350px;
+  min-height:150px;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 1rem;
   display: flex;
   gap: 1rem;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.006),
+    0 5px 25px rgba(0, 0, 0, 0.08);
 }
 
 .productInfo {
@@ -419,7 +424,8 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: #1f2937;
-  margin: 0;
+  margin-right: 10px;
+  margin-top: 20px;
 }
 
 /* Placeholder product card */
@@ -516,15 +522,15 @@
 }
 
 .orderCardPending {
-  background: linear-gradient(180deg, #ff6b8b 0%, #ff8e7a 100%);
+  background: linear-gradient(180deg, #ff4b7e 0%, #ff8e4f 100%);
 }
 
 .orderCardPrep {
-  background: linear-gradient(180deg, #ff8a6b 0%, #ffb07a 100%);
+  background: linear-gradient(180deg, #ff4b7e 0%, #ff8e4f 100%);
 }
 
 .orderCardDelivered {
-  background: linear-gradient(180deg, #ffa86b 0%, #ffc87a 100%);
+  background: linear-gradient(180deg, #ff4b7e 0%, #ff8e4f 100%);
 }
 
 .orderCardDisabled {
@@ -620,6 +626,19 @@
   border: none;
   cursor: not-allowed;
   font-family: inherit;
+}
+
+.comingSoon {
+  margin-left: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  color: white;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* ===================== FOOTER ===================== */
