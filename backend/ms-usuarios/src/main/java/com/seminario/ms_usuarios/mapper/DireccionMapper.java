@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.seminario.ms_usuarios.dto.DireccionRequestDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
+import com.seminario.ms_usuarios.dto.ms_catalogo.DireccionCatDTO;
 import com.seminario.ms_usuarios.model.Direccion;
 import com.seminario.ms_usuarios.model.Localidad;
 import com.seminario.ms_usuarios.model.Provincia;
@@ -58,6 +59,28 @@ public class DireccionMapper {
 
         return dto;
     }
+
+    public DireccionCatDTO toDireccionCatDTO(Direccion direccion) {
+        if (direccion == null) return null;
+
+        DireccionCatDTO direccionCatDTO = new DireccionCatDTO();
+        if (direccion.getProvincia() != null) {
+            direccionCatDTO.setProvincia(direccion.getProvincia().getNombre());
+        }
+        if (direccion.getLocalidad() != null) {
+            direccionCatDTO.setLocalidad(direccion.getLocalidad().getNombre());
+        }
+        direccionCatDTO.setCalle(direccion.getCalle());
+        direccionCatDTO.setNumero(direccion.getNumero());
+        direccionCatDTO.setCodigoPostal(direccion.getCodigoPostal());
+        direccionCatDTO.setObservaciones(direccion.getObservaciones());
+        direccionCatDTO.setLatitud(direccion.getLatitud());
+        direccionCatDTO.setLongitud(direccion.getLongitud());
+
+        return direccionCatDTO;
+    }
+
+
 
 
 }

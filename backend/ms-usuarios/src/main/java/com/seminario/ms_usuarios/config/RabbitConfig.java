@@ -19,6 +19,7 @@ public class RabbitConfig {
     public static final String EXCHANGE = "vendedor.exchange";
     public static final String QUEUE = "vendedor.queue";
     public static final String ROUTING_KEY = "vendedor.actualizado";
+    public static final String ROUTING_KEY_CONSULTA = "vendedor.consulta";
 
     @Bean
     public TopicExchange exchange() {

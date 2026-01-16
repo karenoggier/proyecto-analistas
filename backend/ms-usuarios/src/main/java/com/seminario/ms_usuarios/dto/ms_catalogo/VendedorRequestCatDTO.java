@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class VendedornRequestCastDTO {
+public class VendedorRequestCatDTO {
     @NotBlank(message = "El usuario es obligatorio")
     private String usuarioId;
     @NotBlank(message = "El nombre del negocio es obligatorio")

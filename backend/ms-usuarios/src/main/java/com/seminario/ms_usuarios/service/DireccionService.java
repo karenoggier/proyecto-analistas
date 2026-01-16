@@ -91,5 +91,54 @@ public class DireccionService {
         return direccionRepository.findByLocalidadAndProvincia(localidad, provincia);
     }
 
+    public Direccion actualizarDireccion(DireccionRequestDTO dto, String idUsuario) {
+        Direccion direccion = direccionRepository.findByUsuarioId(idUsuario);
+        if (direccion==null) new RequestException("US", 2, HttpStatus.NOT_FOUND, "Dirección no encontrada");
+
+        Provincia provinciaEntidad = null;
+        String nombreProvinciaParaGeo = dto.getProvincia(); 
+
+        if (dto.getProvincia() != null) {
+            provinciaEntidad = provinciaRepository.findById(dto.getProvincia())
+                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Provincia no encontrada con ID: " + dto.getProvincia()));
+            
+            nombreProvinciaParaGeo = provinciaEntidad.getNombre();
+        }
+
+        Localidad localidadEntidad = null;
+        String nombreLocalidadParaGeo = dto.getLocalidad();
+
+        if (dto.getLocalidad() != null) {
+            localidadEntidad = localidadRepository.findById(dto.getLocalidad())
+                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Localidad no encontrada con ID: " + dto.getLocalidad()));
+            
+            nombreLocalidadParaGeo = localidadEntidad.getNombre();
+        }
+
+        NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(dto.getCalle(), dto.getNumero(), nombreLocalidadParaGeo, nombreProvinciaParaGeo);
+
+        if (coordenadas == null) {
+            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "No se pudieron obtener las coordenadas para la dirección proporcionada");
+        }
+
+        direccion.setCalle(dto.getCalle());
+        direccion.setNumero(dto.getNumero());
+        direccion.setCodigoPostal(dto.getCodigoPostal());
+        direccion.setProvincia(provinciaEntidad); 
+        direccion.setLocalidad(localidadEntidad);
+        direccion.setLatitud(coordenadas.getLatitud());
+        direccion.setLongitud(coordenadas.getLongitud());
+
+        return direccionRepository.save(direccion);
+    }
+
+    public DireccionResponseDTO obtenerDireccionPorUsuarioId(String id) {
+        Direccion direccion = direccionRepository.findByUsuarioId(id);
+        if (direccion == null) {
+            throw new RequestException("US", 2, HttpStatus.NOT_FOUND, "Dirección no encontrada para el usuario con ID: " + id);
+        }
+        return direccionMapper.toResponse(direccion);
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package com.seminario.ms_catalogo.service;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class VendedorService {
     private VendedorRepository vendedorRepository;
     private ProductoMapper productoMapper;
+    private final RabbitTemplate rabbitTemplate;
     
 
     public ResponseEntity<ProductoResponseDTO> agregarProducto(ProductoRequestDTO productoRequestDTO, String vendedorId) {
@@ -34,6 +36,11 @@ public class VendedorService {
 
     @RabbitListener(queues = RabbitConfig.QUEUE)
     public void recibirActualizacionVendedor(VendedorRequestDTO actualizacion) {
+        
         // logica actualizacion vendedor
     }
+    
+
+    
+    
 }
