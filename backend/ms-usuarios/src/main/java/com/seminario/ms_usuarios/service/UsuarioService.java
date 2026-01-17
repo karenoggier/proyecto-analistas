@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.VendedorResponseDTO;
 import com.seminario.ms_usuarios.dto.VendedorUpdateRequestDTO;
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorRequestCatDTO;
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorResponseCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRequestCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorResponseCatDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.VendedorMapper;
 import com.seminario.ms_usuarios.model.Direccion;
@@ -38,7 +38,7 @@ public class UsuarioService {
                 .orElseThrow(() -> new RequestException("US",2, HttpStatus.NOT_FOUND, "Credenciales inválidas"));
     }
 
-    public VendedorResponseDTO actualizarVendedor(VendedorUpdateRequestDTO vendedorDTO) {
+   /*  public VendedorResponseDTO actualizarVendedor(VendedorUpdateRequestDTO vendedorDTO) {
         Vendedor vendedor = vendedorService.buscarPorId(vendedorDTO.getUsuarioId())
                 .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Vendedor no encontrado"));
         // Update fields
@@ -56,14 +56,14 @@ public class UsuarioService {
         VendedorResponseCatDTO vendedorResponseCatDTO = vendedorActualizador.enviarActualizacionRequest(vendedorCatDTO);
         return vendedorMapper.toResponse(vendedor,direccionDTO,vendedorResponseCatDTO);
        
-    }
+    }*/
 
     public VendedorResponseDTO obtenerVendedorPorId(String id) {
         Vendedor vendedor = vendedorService.buscarPorId(id)
                 .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Vendedor no encontrado"));
         DireccionResponseDTO direccionDTO = direccionService.obtenerDireccionPorUsuarioId(vendedor.getId());
         VendedorResponseCatDTO vendedorResponseCatDTO = vendedorActualizador.enviarConsultaVendedorRequest(id);
-        return vendedorMapper.toResponse(vendedor, direccionDTO, vendedorResponseCatDTO);
+        return vendedorMapper.toResponse(vendedor, direccionDTO);
         
     }   
 

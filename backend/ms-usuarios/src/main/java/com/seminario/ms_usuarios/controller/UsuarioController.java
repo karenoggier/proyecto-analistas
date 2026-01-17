@@ -20,10 +20,11 @@ import lombok.RequiredArgsConstructor;
 public class UsuarioController {
     private final UsuarioService usuarioService;
     
-    @PostMapping("/actualizarVendedor")
+   /*  @PostMapping("/actualizarVendedor")
     public ResponseEntity<VendedorResponseDTO> actualizarVendedor(@RequestBody VendedorUpdateRequestDTO vendedorDTO) {
         return ResponseEntity.ok(usuarioService.actualizarVendedor(vendedorDTO));
-    }
+    }*/
+
     @GetMapping("/vendedorPorId")
     public VendedorResponseDTO getVendedorPorId(@RequestParam String id) {
         return usuarioService.obtenerVendedorPorId(id);  

@@ -7,9 +7,8 @@ import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.VendedorRequestDTO;
 import com.seminario.ms_usuarios.dto.VendedorResponseDTO;
 import com.seminario.ms_usuarios.dto.VendedorUpdateRequestDTO;
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorRequestCatDTO;
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorResponseCatDTO;
-import com.seminario.ms_usuarios.model.Direccion;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.DireccionCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRegistradoEvent;
 import com.seminario.ms_usuarios.model.EstadoUsuario;
 import com.seminario.ms_usuarios.model.RolUsuario;
 import com.seminario.ms_usuarios.model.Vendedor;
@@ -20,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VendedorMapper {
     private final PasswordEncoder passwordEncoder;  
+   
     // --- DE DTO A ENTIDAD ---
     public Vendedor toEntity(VendedorRequestDTO dto) {
         if (dto == null) return null;
@@ -38,7 +38,7 @@ public class VendedorMapper {
         return vendedor;
     }
     // --- DE ENTIDAD A RESPONSE ---
-    public VendedorResponseDTO toResponse(Vendedor entity, DireccionResponseDTO direccion, VendedorResponseCatDTO vendedorResponseCatDTO) {
+    public VendedorResponseDTO toResponse(Vendedor entity, DireccionResponseDTO direccion) {
         if (entity == null) return null;
 
         VendedorResponseDTO dto = new VendedorResponseDTO();
@@ -48,11 +48,34 @@ public class VendedorMapper {
         dto.setEmail(entity.getEmail());
         dto.setTelefono(entity.getTelefono());
         dto.setDireccion(direccion);
-        dto.setVendedorResponseCatDTO(vendedorResponseCatDTO);
-
         
         return dto;
     }
+
+    public VendedorRegistradoEvent toVendedorRegistrado(Vendedor vendedor, DireccionResponseDTO direccion){
+        DireccionCatDTO direccionCat = new DireccionCatDTO();
+        direccionCat.setCalle(direccion.getCalle());
+        direccionCat.setNumero(direccion.getNumero());
+        direccionCat.setCodigoPostal(direccion.getCodigoPostal());
+        direccionCat.setLocalidad(direccion.getLocalidad().getNombre());
+        direccionCat.setProvincia(direccion.getProvincia().getNombre());
+        direccionCat.setObservaciones(direccion.getObservaciones());
+        direccionCat.setLatitud(direccion.getLatitud());
+        direccionCat.setLongitud(direccion.getLongitud());
+        
+        
+        VendedorRegistradoEvent evento = new VendedorRegistradoEvent();
+        evento.setUsuarioId(vendedor.getId().toString());
+        evento.setEmail(vendedor.getEmail());
+        evento.setNombreNegocio(vendedor.getNombreNegocio());
+        evento.setNombreResponsable(vendedor.getNombreResponsable());
+        evento.setApellidoResponsable(vendedor.getApellidoResponsable());
+        evento.setTelefono(vendedor.getTelefono());
+        evento.setDireccion(direccionCat);
+        
+        return evento;
+    }
+/* 
     public  VendedorRequestCatDTO toVendedorResponseCatDTO(VendedorUpdateRequestDTO dtoRequest, Direccion direccion) {
         if (dtoRequest == null) return null;
         VendedorRequestCatDTO vendedorCatDTO = new VendedorRequestCatDTO();
@@ -80,6 +103,7 @@ public class VendedorMapper {
         vendedorCatDTO.setDireccion(direccionMapper.toDireccionCatDTO(direccion));
         return vendedorCatDTO;
     }
+
     public VendedorRequestCatDTO toVendedorRequestCatDTO(VendedorRequestDTO dto,
             DireccionResponseDTO direccionResponseDTO, String usuarioId) {
         if (dto == null) return null;
@@ -95,6 +119,6 @@ public class VendedorMapper {
         vendedorCatDTO.getDireccion().setLatitud(direccionResponseDTO.getLatitud());
         vendedorCatDTO.getDireccion().setLongitud(direccionResponseDTO.getLongitud());
         return vendedorCatDTO;
-    }
+    }*/
 
 }

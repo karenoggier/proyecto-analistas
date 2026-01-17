@@ -1,4 +1,4 @@
-package com.seminario.ms_usuarios.dto.ms_catalogo;
+package com.seminario.ms_usuarios.dto.eventos_ms_catalogo;
 
 import jakarta.validation.constraints.NotBlank;
 

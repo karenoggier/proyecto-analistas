@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.seminario.ms_usuarios.dto.DireccionRequestDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
-import com.seminario.ms_usuarios.dto.ms_catalogo.DireccionCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.DireccionCatDTO;
 import com.seminario.ms_usuarios.model.Direccion;
 import com.seminario.ms_usuarios.model.Localidad;
 import com.seminario.ms_usuarios.model.Provincia;

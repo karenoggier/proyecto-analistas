@@ -4,8 +4,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import com.seminario.ms_usuarios.config.RabbitConfig;
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorRequestCatDTO;
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorResponseCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRequestCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorResponseCatDTO;
 
 
 
@@ -40,7 +40,7 @@ public class VendedorActualizador {
         // convertSendAndReceive: Envía el mensaje y SE BLOQUEA esperando la vuelta
         Object respuesta = rabbitTemplate.convertSendAndReceive(
                 RabbitConfig.EXCHANGE,
-                RabbitConfig.ROUTING_KEY_CONSULTA,
+                RabbitConfig.ROUTING_KEY,
                 id
         );
         // Verificamos y casteamos la respuesta

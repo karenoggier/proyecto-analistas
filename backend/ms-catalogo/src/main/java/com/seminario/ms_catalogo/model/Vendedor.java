@@ -13,13 +13,14 @@ import lombok.Data;
 public class Vendedor {
     @Id
     private String id;
-
     @Indexed(unique = true)
     private String usuarioId;
-    
     private String nombreNegocio;
-    private byte[] logo;
-    private byte [] banner;
+    private String nombreResponsable;
+    private String apellidoResponsable;
+    private String telefono;
+    private String logo;
+    private String banner;
     private Boolean realizaEnvios;
     private String horarioApertura;
     private String horarioCierre;
@@ -27,4 +28,5 @@ public class Vendedor {
     private Estado estado;
     private Direccion direccion;
     private ArrayList<Producto> productos;
+    //private Boolean perfilCompleto;
 }

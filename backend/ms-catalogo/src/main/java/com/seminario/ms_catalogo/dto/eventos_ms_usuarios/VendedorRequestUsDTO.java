@@ -1,16 +1,17 @@
-package com.seminario.ms_catalogo.dto.ms_usuarios;
+package com.seminario.ms_catalogo.dto.eventos_ms_usuarios;
 import com.seminario.ms_catalogo.dto.DireccionDTO;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class VendedorRequestUsDTO {
-    @NotBlank(message = "El usuarioId no puede estar vacio")
     private String usuarioId;
-    @NotBlank(message = "El nombre del negocio no puede estar vacio")
     private String nombreNegocio;
-   
     private Boolean realizaEnvios;
     private String horarioApertura;
     private String horarioCierre;

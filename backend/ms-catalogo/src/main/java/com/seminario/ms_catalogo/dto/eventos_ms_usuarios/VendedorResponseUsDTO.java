@@ -1,4 +1,4 @@
-package com.seminario.ms_catalogo.dto.ms_usuarios;
+package com.seminario.ms_catalogo.dto.eventos_ms_usuarios;
 
 import lombok.Data;
 

@@ -12,6 +12,4 @@ import lombok.Builder;
 public class LoginResponseDTO {
     private String token;
     private String rol;    
-    private String email;  
-    private String id;
 }

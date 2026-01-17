@@ -1,10 +1,12 @@
 package com.seminario.ms_usuarios.service;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.seminario.ms_usuarios.config.RabbitConfig;
 import com.seminario.ms_usuarios.dto.ClienteRequestDTO;
 import com.seminario.ms_usuarios.dto.ClienteResponseDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
@@ -12,8 +14,9 @@ import com.seminario.ms_usuarios.dto.LoginRequestDTO;
 import com.seminario.ms_usuarios.dto.LoginResponseDTO;
 import com.seminario.ms_usuarios.dto.VendedorRequestDTO;
 import com.seminario.ms_usuarios.dto.VendedorResponseDTO;
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorRequestCatDTO;
-import com.seminario.ms_usuarios.dto.ms_catalogo.VendedorResponseCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRegistradoEvent;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRequestCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorResponseCatDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.ClienteMapper;
 import com.seminario.ms_usuarios.mapper.VendedorMapper;
@@ -37,6 +40,7 @@ public class AuthService {
     private final VendedorMapper vendedorMapper;
     private final DireccionService direccionService;
     private final VendedorActualizador vendedorActualizador;
+    private final RabbitTemplate rabbitTemplate;
 
 
 
@@ -57,8 +61,6 @@ public class AuthService {
         return LoginResponseDTO.builder()
                 .token(token)
                 .rol(usuario.getRol().name()) 
-                .email(usuario.getEmail())
-                .id(usuario.getId())
                 .build();
     }
 
@@ -92,16 +94,23 @@ public class AuthService {
         }
         Vendedor nuevoVendedor = vendedorMapper.toEntity(dto);
        
-        Vendedor guardado = vendedorService.guardarVendedor(nuevoVendedor);
+        Vendedor vendedorGuardado = vendedorService.guardarVendedor(nuevoVendedor);
+        System.out.println("VENDEDOR GUARDADO EN SQL: " + vendedorGuardado.getEmail());
 
-        DireccionResponseDTO direccionResponseDTO = direccionService.registrarDireccion(dto.getDireccion(), guardado);
+        DireccionResponseDTO direccionGuardada = direccionService.registrarDireccion(dto.getDireccion(), vendedorGuardado);
 
-        //actualiza en el microservicio de catalogo
-        VendedorRequestCatDTO vendedorCatDTO = vendedorMapper.toVendedorRequestCatDTO(dto, direccionResponseDTO, guardado.getId());
-        VendedorResponseCatDTO vendedorResponseCatDTO = vendedorActualizador.enviarActualizacionRequest(vendedorCatDTO);
-        
+        // update vendedor in ms-catalogo
+        VendedorRegistradoEvent evento = vendedorMapper.toVendedorRegistrado(vendedorGuardado, direccionGuardada);
+        System.out.println("🐰 ENVIANDO A: " + RabbitConfig.EXCHANGE + " / " + RabbitConfig.ROUTING_KEY);
 
-        return vendedorMapper.toResponse(guardado, direccionResponseDTO, null); 
+        rabbitTemplate.convertAndSend(
+            RabbitConfig.EXCHANGE,   // "exchange.final.v1"
+            RabbitConfig.ROUTING_KEY, // "evento.registro.v1"
+            evento
+        );
+        System.out.println("🚀 MENSAJE ENVIADO A RABBIT (Supuestamente)");
+
+        return vendedorMapper.toResponse(vendedorGuardado, direccionGuardada); 
     }
 
 }

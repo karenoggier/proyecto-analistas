@@ -37,8 +37,6 @@ public class VendedorRequestDTO {
     @NotBlank(message = "El teléfono es obligatorio")
     @Pattern(regexp = "^\\+54\\s9\\s\\d{4}-\\d{6}$", message = "El teléfono debe respetar el formato +54 9 XXXX-XXXXXX")
     private String telefono;
-
+    
     private DireccionRequestDTO direccion;
-    
-    
 }
