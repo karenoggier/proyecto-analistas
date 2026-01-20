@@ -63,12 +63,12 @@ public class DireccionService {
         if (coordenadas == null) {
             throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "No se pudieron obtener las coordenadas para la dirección proporcionada");
         }
-
+ 
         Direccion direccion = direccionMapper.toEntity(dto,coordenadas.getLatitud(), coordenadas.getLongitud());
         direccion.setUsuario(usuario);
         direccion.setProvincia(provinciaEntidad); 
         direccion.setLocalidad(localidadEntidad);
-
+         
         Direccion guardada = direccionRepository.save(direccion);
 
         return direccionMapper.toResponse(guardada);

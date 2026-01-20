@@ -3,10 +3,6 @@ package com.seminario.ms_usuarios.service;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
-import com.seminario.ms_usuarios.config.RabbitConfig;
-import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRequestCatDTO;
-import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorResponseCatDTO;
-
 
 
 @Service
@@ -18,11 +14,11 @@ public class VendedorActualizador {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public VendedorResponseCatDTO enviarActualizacionRequest(VendedorRequestCatDTO actualizacion) {
+    /*public VendedorResponseCatDTO enviarActualizacionRequest(VendedorRequestCatDTO actualizacion) {
         // convertSendAndReceive: Envía el mensaje y SE BLOQUEA esperando la vuelta
         Object respuesta = rabbitTemplate.convertSendAndReceive(
-                RabbitConfig.EXCHANGE,
-                RabbitConfig.ROUTING_KEY,
+                RabbitConfig.EXCHANGE_TO_CATALOGO,
+                RabbitConfig.ROUTING_KEY_TO_CATALOGO,
                 actualizacion
         );
 
@@ -34,13 +30,13 @@ public class VendedorActualizador {
             throw new RuntimeException("El servicio de Catálogo no respondió correctamente.");
         }
 
-    }
+    }*/
 
-    public VendedorResponseCatDTO enviarConsultaVendedorRequest(String id) {
+    /*public VendedorResponseCatDTO enviarConsultaVendedorRequest(String id) {
         // convertSendAndReceive: Envía el mensaje y SE BLOQUEA esperando la vuelta
         Object respuesta = rabbitTemplate.convertSendAndReceive(
-                RabbitConfig.EXCHANGE,
-                RabbitConfig.ROUTING_KEY,
+                RabbitConfig.EXCHANGE_TO_CATALOGO,
+                RabbitConfig.ROUTING_KEY_TO_CATALOGO,
                 id
         );
         // Verificamos y casteamos la respuesta
@@ -50,7 +46,7 @@ public class VendedorActualizador {
             // Manejo de error si la respuesta es nula o de otro tipo
             throw new RuntimeException("El servicio de Catálogo no respondió correctamente.");
         }
-    }
+    }*/
     
 
     

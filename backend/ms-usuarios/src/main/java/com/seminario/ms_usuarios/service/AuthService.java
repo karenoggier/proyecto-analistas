@@ -15,8 +15,6 @@ import com.seminario.ms_usuarios.dto.LoginResponseDTO;
 import com.seminario.ms_usuarios.dto.VendedorRequestDTO;
 import com.seminario.ms_usuarios.dto.VendedorResponseDTO;
 import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRegistradoEvent;
-import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRequestCatDTO;
-import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorResponseCatDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.ClienteMapper;
 import com.seminario.ms_usuarios.mapper.VendedorMapper;
@@ -101,11 +99,11 @@ public class AuthService {
 
         // update vendedor in ms-catalogo
         VendedorRegistradoEvent evento = vendedorMapper.toVendedorRegistrado(vendedorGuardado, direccionGuardada);
-        System.out.println("🐰 ENVIANDO A: " + RabbitConfig.EXCHANGE + " / " + RabbitConfig.ROUTING_KEY);
+        System.out.println("🐰 ENVIANDO A: " + RabbitConfig.EXCHANGE_FROM_USUARIOS + " / " + RabbitConfig.ROUTING_KEY_REGISTRAR_USUARIOS);
 
         rabbitTemplate.convertAndSend(
-            RabbitConfig.EXCHANGE,   // "exchange.final.v1"
-            RabbitConfig.ROUTING_KEY, // "evento.registro.v1"
+            RabbitConfig.EXCHANGE_FROM_USUARIOS,   
+            RabbitConfig.ROUTING_KEY_REGISTRAR_USUARIOS,
             evento
         );
         System.out.println("🚀 MENSAJE ENVIADO A RABBIT (Supuestamente)");

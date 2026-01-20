@@ -1,19 +1,12 @@
-package com.seminario.ms_catalogo.dto.eventos_ms_usuarios;
+/*package com.seminario.ms_catalogo.dto.eventos_ms_usuarios;
 
 
-import java.util.ArrayList;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.stereotype.Component;
 
 import com.seminario.ms_catalogo.config.RabbitConfig;
 import com.seminario.ms_catalogo.mapper.DireccionMapper;
-import com.seminario.ms_catalogo.model.Direccion;
-import com.seminario.ms_catalogo.model.Estado;
-import com.seminario.ms_catalogo.model.Producto;
-import com.seminario.ms_catalogo.model.Vendedor;
 import com.seminario.ms_catalogo.repository.VendedorRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,7 +19,7 @@ public class VendedorConsumerEvent {
     private final VendedorRepository repository;
     private final DireccionMapper direccionMapper;
 
-    @RabbitListener(queues = RabbitConfig.QUEUE)
+    @RabbitListener(queues = RabbitConfig.QUEUE_FROM_USUARIOS)
     public void recibirCrudo(Message message) {
         String jsonBody = new String(message.getBody());
         System.out.println("🔥🔥🔥 ¡LLEGÓ UN MENSAJE A LA COLA! 🔥🔥🔥");
@@ -62,5 +55,5 @@ public class VendedorConsumerEvent {
         log.info(" Vendedor guardado en MongoDB con ID Usuario: {}", evento.getUsuarioId());
 
         
-    }*/
-}
+    }
+}*/

@@ -2,16 +2,9 @@ package com.seminario.ms_usuarios.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
-import com.seminario.ms_usuarios.dto.VendedorResponseDTO;
-import com.seminario.ms_usuarios.dto.VendedorUpdateRequestDTO;
-import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRequestCatDTO;
-import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorResponseCatDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.VendedorMapper;
-import com.seminario.ms_usuarios.model.Direccion;
 import com.seminario.ms_usuarios.model.Usuario;
-import com.seminario.ms_usuarios.model.Vendedor;
 import com.seminario.ms_usuarios.repository.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -58,14 +51,14 @@ public class UsuarioService {
        
     }*/
 
-    public VendedorResponseDTO obtenerVendedorPorId(String id) {
+    /*public VendedorResponseDTO obtenerVendedorPorId(String id) {
         Vendedor vendedor = vendedorService.buscarPorId(id)
                 .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Vendedor no encontrado"));
         DireccionResponseDTO direccionDTO = direccionService.obtenerDireccionPorUsuarioId(vendedor.getId());
         VendedorResponseCatDTO vendedorResponseCatDTO = vendedorActualizador.enviarConsultaVendedorRequest(id);
         return vendedorMapper.toResponse(vendedor, direccionDTO);
         
-    }   
+    }   */
 
    
 
