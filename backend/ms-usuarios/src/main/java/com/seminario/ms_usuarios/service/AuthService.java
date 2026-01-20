@@ -37,7 +37,7 @@ public class AuthService {
     private final ClienteMapper clienteMapper;
     private final VendedorMapper vendedorMapper;
     private final DireccionService direccionService;
-    private final VendedorActualizador vendedorActualizador;
+    private final RabbitCommunicationService rabbitService;
     private final RabbitTemplate rabbitTemplate;
 
 
@@ -101,11 +101,7 @@ public class AuthService {
         VendedorRegistradoEvent evento = vendedorMapper.toVendedorRegistrado(vendedorGuardado, direccionGuardada);
         System.out.println("🐰 ENVIANDO A: " + RabbitConfig.EXCHANGE_FROM_USUARIOS + " / " + RabbitConfig.ROUTING_KEY_REGISTRAR_USUARIOS);
 
-        rabbitTemplate.convertAndSend(
-            RabbitConfig.EXCHANGE_FROM_USUARIOS,   
-            RabbitConfig.ROUTING_KEY_REGISTRAR_USUARIOS,
-            evento
-        );
+        rabbitService.enviarRegistroVendedorEvent(evento);
         System.out.println("🚀 MENSAJE ENVIADO A RABBIT (Supuestamente)");
 
         return vendedorMapper.toResponse(vendedorGuardado, direccionGuardada); 
