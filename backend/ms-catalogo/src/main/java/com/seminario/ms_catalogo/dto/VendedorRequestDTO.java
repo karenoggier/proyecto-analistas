@@ -7,7 +7,9 @@ public class VendedorRequestDTO {
     private String usuarioId;
     @NotBlank(message = "El nombre del negocio no puede estar vacio")
     private String nombreNegocio;
-   
+    private String nombreResponsable;
+    private String apellidoResponsable;
+    private String telefono;
     private Boolean realizaEnvios;
     private String horarioApertura;
     private String horarioCierre;
