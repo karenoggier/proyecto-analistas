@@ -1,5 +1,5 @@
 package com.seminario.ms_catalogo.mapper;
-import java.util.Base64;
+import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
 
@@ -45,6 +45,13 @@ public class ProductoMapper {
 
         
         return productoResponseDTO;
+    }
+    public ArrayList<ProductoResponseDTO> toDTOList(ArrayList<Producto> productos) {
+        ArrayList<ProductoResponseDTO> dtoList = new ArrayList<>();
+        for (Producto producto : productos) {
+            dtoList.add(toDTO(producto));
+        }
+        return dtoList;
     }
 
 }

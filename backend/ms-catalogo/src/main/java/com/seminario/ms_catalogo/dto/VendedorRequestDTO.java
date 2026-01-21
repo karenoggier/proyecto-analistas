@@ -1,7 +1,9 @@
 package com.seminario.ms_catalogo.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
+@Data
 public class VendedorRequestDTO {
     @NotBlank(message = "El usuarioId no puede estar vacio")
     private String usuarioId;
