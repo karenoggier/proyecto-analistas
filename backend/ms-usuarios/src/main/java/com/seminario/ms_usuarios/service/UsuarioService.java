@@ -17,7 +17,6 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final VendedorService vendedorService;
     private final ClienteService clienteService;
-    private final RabbitCommunicationService vendedorActualizador;
     private final DireccionService direccionService;
     private final VendedorMapper vendedorMapper;
  

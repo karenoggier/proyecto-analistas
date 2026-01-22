@@ -14,6 +14,7 @@ public enum Subcategoria {
     CELIACO(Categoria.COMIDA),
     SUSHI(Categoria.COMIDA),
     POSTRE(Categoria.COMIDA),
+    PAPAS(Categoria.COMIDA),
     
     // --- BEBIDAS ---
     GASEOSA(Categoria.BEBIDA),

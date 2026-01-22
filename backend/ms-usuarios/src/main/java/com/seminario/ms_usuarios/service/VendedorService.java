@@ -3,11 +3,9 @@ package com.seminario.ms_usuarios.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.seminario.ms_usuarios.config.RabbitConfig;
 import com.seminario.ms_usuarios.mapper.DireccionMapper;
 import com.seminario.ms_usuarios.model.Vendedor;
 import com.seminario.ms_usuarios.repository.VendedorRepository;
@@ -20,7 +18,6 @@ public class VendedorService {
     
     private final VendedorRepository vendedorRepository;
     private final DireccionService direccionService;
-    private final DireccionMapper direccionMapper;
     
 
     // Get all sellers
@@ -46,11 +43,5 @@ public class VendedorService {
     @Transactional
     public void eliminarVendedor(String id) {
         vendedorRepository.deleteById(id);
-    }
-
-    @RabbitListener(queues = RabbitConfig.QUEUE_TO_USUARIOS)
-    public void recibirActualizacionVendedor() {
-        
-        
     }
 }

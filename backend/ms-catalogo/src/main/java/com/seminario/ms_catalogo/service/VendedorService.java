@@ -1,11 +1,8 @@
 package com.seminario.ms_catalogo.service;
 
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.seminario.ms_catalogo.config.RabbitConfig;
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
@@ -25,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 public class VendedorService {
     private final VendedorRepository vendedorRepository;
     private final ProductoMapper productoMapper;
-    private final RabbitTemplate rabbitTemplate;
     private final DireccionMapper direccionMapper;
     
 
@@ -40,12 +36,9 @@ public class VendedorService {
         return ResponseEntity.ok(productoMapper.toDTO(producto));
     }
 
-    @RabbitListener(queues = RabbitConfig.QUEUE_FROM_USUARIOS)
+    //Recibe el registro de vendedor desde ms-usuarios por HTTP sincrónico
     public void recibirRegistroVendedor(VendedorRegistradoEvent evento) {
-                
-        try {
-            log.info("Recibido evento de registro para: {}", evento.getNombreNegocio());
-
+        
             Vendedor vendedor = new Vendedor();
             vendedor.setUsuarioId(evento.getUsuarioId());
             vendedor.setNombreNegocio(evento.getNombreNegocio());
@@ -66,15 +59,9 @@ public class VendedorService {
             
             vendedor.setProductos(null);
             
-            // Guardar vendedor
+            // Guardar vendedor en mongodb
             Vendedor vendedorGuardado = vendedorRepository.save(vendedor);
             
-            log.info("✅ VENDEDOR REGISTRADO EN CATALOGO: " + vendedorGuardado.getId());
-            log.info(" Vendedor guardado en MongoDB con ID Usuario: {}", evento.getUsuarioId());
-            
-        } catch (Exception e) {
-            log.error("❌ ERROR AL REGISTRAR VENDEDOR EN CATALOGO: " + e.getMessage(), e);
-        }
     }
     
 }

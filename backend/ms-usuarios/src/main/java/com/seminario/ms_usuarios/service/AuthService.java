@@ -1,12 +1,11 @@
 package com.seminario.ms_usuarios.service;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.seminario.ms_usuarios.config.RabbitConfig;
+import com.seminario.ms_usuarios.client.CatalogoClient;
 import com.seminario.ms_usuarios.dto.ClienteRequestDTO;
 import com.seminario.ms_usuarios.dto.ClienteResponseDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
@@ -24,9 +23,11 @@ import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.model.Vendedor;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UsuarioService usuarioService; 
@@ -37,8 +38,7 @@ public class AuthService {
     private final ClienteMapper clienteMapper;
     private final VendedorMapper vendedorMapper;
     private final DireccionService direccionService;
-    private final RabbitCommunicationService rabbitService;
-    private final RabbitTemplate rabbitTemplate;
+    private final CatalogoClient catalogoClient;
 
 
 
@@ -92,17 +92,16 @@ public class AuthService {
         }
         Vendedor nuevoVendedor = vendedorMapper.toEntity(dto);
        
+        //guardar vendedor en postgres
         Vendedor vendedorGuardado = vendedorService.guardarVendedor(nuevoVendedor);
-        System.out.println("VENDEDOR GUARDADO EN SQL: " + vendedorGuardado.getEmail());
 
         DireccionResponseDTO direccionGuardada = direccionService.registrarDireccion(dto.getDireccion(), vendedorGuardado);
 
-        // update vendedor in ms-catalogo
+        // Registrar vendedor en ms-catalogo usando HTTP sincrónico
         VendedorRegistradoEvent evento = vendedorMapper.toVendedorRegistrado(vendedorGuardado, direccionGuardada);
-        System.out.println("🐰 ENVIANDO A: " + RabbitConfig.EXCHANGE_FROM_USUARIOS + " / " + RabbitConfig.ROUTING_KEY_REGISTRAR_USUARIOS);
 
-        rabbitService.enviarRegistroVendedorEvent(evento);
-        System.out.println("🚀 MENSAJE ENVIADO A RABBIT (Supuestamente)");
+        //mensaje a catalogo
+        catalogoClient.registrarVendedor(evento);
 
         return vendedorMapper.toResponse(vendedorGuardado, direccionGuardada); 
     }
