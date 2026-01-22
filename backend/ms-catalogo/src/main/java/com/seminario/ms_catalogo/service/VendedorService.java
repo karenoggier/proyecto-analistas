@@ -42,21 +42,12 @@ public class VendedorService {
 
     //Recibe el registro de vendedor desde ms-usuarios por HTTP sincrónico
     public void recibirRegistroVendedor(VendedorRegistradoEvent evento) {
-                
-        try {
-            log.info("Recibido evento de registro para: {}", evento.getNombreNegocio());
-
+           
             Vendedor vendedor = vendedorMapper.toNewEntity(evento);
             
             // Guardar vendedor en mongodb
             Vendedor vendedorGuardado = vendedorRepository.save(vendedor);
             
-            log.info("VENDEDOR REGISTRADO EN CATALOGO: " + vendedorGuardado.getId());
-            log.info(" Vendedor guardado en MongoDB con ID Usuario: {}", evento.getUsuarioId());
-            
-        } catch (Exception e) {
-            log.error("ERROR AL REGISTRAR VENDEDOR EN CATALOGO: " + e.getMessage(), e);
-        }
     }
 
     public ResponseEntity<VendedorResponseDTO> obtnerVendedorPorUsuarioId(String usuarioId) {
@@ -68,6 +59,7 @@ public class VendedorService {
         VendedorResponseDTO vendedorResponseDTO = vendedorMapper.toDTO(vendedor);
         return ResponseEntity.ok(vendedorResponseDTO);
     }
+
     public ResponseEntity<VendedorResponseDTO> updateVendedor(VendedorRequestDTO vendedorRequestDTO) {
         Vendedor vendedor = vendedorRepository.findById(vendedorRequestDTO.getUsuarioId()).orElse(null);
         if (vendedor == null) {
