@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
+import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.service.VendedorService;
 
@@ -30,7 +31,8 @@ public class VendedorController {
     public ResponseEntity<VendedorResponseDTO> obtnerVendedorPorUsuarioId(@RequestParam String usuarioId) {
         return vendedorService.obtnerVendedorPorUsuarioId(usuarioId);
     }
-
-
-
+    @PostMapping("/updateVendedor")
+    public ResponseEntity<VendedorResponseDTO> updateVendedor(@RequestBody VendedorRequestDTO vendedorRequestDTO) {
+        return vendedorService.updateVendedor(vendedorRequestDTO);
+    }
 }
