@@ -3,6 +3,7 @@ package com.seminario.ms_catalogo.service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.seminario.ms_catalogo.client.UsuarioClient;
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
@@ -27,6 +28,7 @@ public class VendedorService {
     private final ProductoMapper productoMapper;
     private final DireccionMapper direccionMapper;
     private final VendedorMapper vendedorMapper;
+    private final UsuarioClient usuarioClient;
     
 
     public ResponseEntity<ProductoResponseDTO> agregarProducto(ProductoRequestDTO productoRequestDTO, String vendedorId) {
@@ -66,7 +68,7 @@ public class VendedorService {
             return ResponseEntity.notFound().build();
         }
         //aca hay que actualizar el ms-usuarios
-        VendedorRegistradoEvent evento = updateVendorEnUsuarios(vendedorRequestDTO);
+        VendedorRegistradoEvent evento = usuarioClient.actualizarVendedor(vendedorRequestDTO).getBody();
       
         vendedor.setNombreNegocio(vendedorRequestDTO.getNombreNegocio());
         vendedor.setTelefono(vendedorRequestDTO.getTelefono());
@@ -86,10 +88,10 @@ public class VendedorService {
         return ResponseEntity.ok(vendedorMapper.toDTO(vendedor));
     }
  
-    private VendedorRegistradoEvent updateVendorEnUsuarios(Object event) {
+    /*private VendedorRegistradoEvent updateVendorEnUsuarios(Object event) {
         //aca tiene que mandar el evento a ms-usuarios y recibir el dto actualizado
        return new VendedorRegistradoEvent();
-    }
+    }*/
 
 }
 

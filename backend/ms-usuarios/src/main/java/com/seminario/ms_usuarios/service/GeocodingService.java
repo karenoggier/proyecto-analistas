@@ -2,13 +2,11 @@ package com.seminario.ms_usuarios.service;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.seminario.ms_usuarios.dto.NominatimResponseDTO;
-import com.seminario.ms_usuarios.exception.RequestException;
 
 @Service
 public class GeocodingService {
@@ -36,13 +34,13 @@ public class GeocodingService {
 
             NominatimResponseDTO[] resultados = response.getBody();
             
-            //return new NominatimResponseDTO("-43.44", "1.3234", "addressQuery");
-            if (resultados != null && resultados.length > 0) {
+            return new NominatimResponseDTO("-43.44", "1.3234", "addressQuery");
+            /*if (resultados != null && resultados.length > 0) {
                 return resultados[0]; // Retornamos el primer resultado encontrado
             }
             else {
                 throw new RequestException("GE", 1, HttpStatus.NOT_FOUND, "No se encontraron coordenadas para la dirección proporcionada.");
 
-            }
+            }*/
     }
 }
