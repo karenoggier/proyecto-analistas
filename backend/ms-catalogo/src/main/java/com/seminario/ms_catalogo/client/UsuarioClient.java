@@ -32,7 +32,7 @@ public class UsuarioClient {
     @Retry(name = "usuarioClient")
     public ResponseEntity<VendedorRegistradoEvent> actualizarVendedor(VendedorRequestDTO vendedorRequestDTO) {
         try {
-            String url = usuariosBaseUrl + "/usuariosMs/api/vendedores/actualizar";
+            String url = usuariosBaseUrl + "/usuariosMs/vendedores/actualizar";
             
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

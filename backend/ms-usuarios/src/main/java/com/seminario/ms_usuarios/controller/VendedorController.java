@@ -1,19 +1,37 @@
 package com.seminario.ms_usuarios.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.seminario.ms_usuarios.dto.VendedorRequestDTO;
+import com.seminario.ms_usuarios.mapper.VendedorMapper;
+import com.seminario.ms_usuarios.model.Vendedor;
+import com.seminario.ms_usuarios.service.VendedorService;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 
 @RestController
 @RequestMapping("/vendedores")
 @RequiredArgsConstructor
+@Slf4j
 public class VendedorController {
-    
-    
-    /*@PostMapping("/actualizar")
-    public void actualizarVendedor(@RequestBody VendedorActualizarDTO vendedorDTO) {
-        rabbitService.enviarActualizacion(vendedorDTO);
-    }*/
+    private final VendedorService vendedorService;
+    private final VendedorMapper vendedorMapper;
+
+    @PostMapping("/actualizar")
+    public ResponseEntity<Void> actualizarVendedor(@RequestBody VendedorRequestDTO vendedorDTO) {
+        Vendedor nuevoVendedor = vendedorMapper.toEntity(vendedorDTO);
+
+        vendedorService.guardarVendedor(nuevoVendedor);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+
+    }
 
 }

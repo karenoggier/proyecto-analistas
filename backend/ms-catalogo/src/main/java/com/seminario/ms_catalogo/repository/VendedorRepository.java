@@ -8,6 +8,6 @@ import com.seminario.ms_catalogo.model.Vendedor;
 @Repository 
 public interface VendedorRepository extends MongoRepository<Vendedor, String> {
 
-    Vendedor findByUsuarioId(String usuarioId);
+    java.util.Optional<Vendedor> findByUsuarioId(String usuarioId);
 
 }

@@ -32,7 +32,7 @@ public class VendedorService {
     
 
     public ResponseEntity<ProductoResponseDTO> agregarProducto(ProductoRequestDTO productoRequestDTO, String vendedorId) {
-        Vendedor vendedor = vendedorRepository.findById(vendedorId).orElse(null);
+        Vendedor vendedor = vendedorRepository.findByUsuarioId(vendedorId).orElse(null);
         if (vendedor == null) {
             return ResponseEntity.notFound().build();
         }
@@ -53,7 +53,7 @@ public class VendedorService {
     }
 
     public ResponseEntity<VendedorResponseDTO> obtnerVendedorPorUsuarioId(String usuarioId) {
-        Vendedor vendedor = vendedorRepository.findByUsuarioId(usuarioId);
+        Vendedor vendedor = vendedorRepository.findByUsuarioId(usuarioId).get();
         if (vendedor == null) {
             return ResponseEntity.notFound().build();
         }
@@ -63,7 +63,7 @@ public class VendedorService {
     }
 
     public ResponseEntity<VendedorResponseDTO> updateVendedor(VendedorRequestDTO vendedorRequestDTO) {
-        Vendedor vendedor = vendedorRepository.findById(vendedorRequestDTO.getUsuarioId()).orElse(null);
+        Vendedor vendedor = vendedorRepository.findByUsuarioId(vendedorRequestDTO.getUsuarioId()).orElse(null);
         if (vendedor == null) {
             return ResponseEntity.notFound().build();
         }
