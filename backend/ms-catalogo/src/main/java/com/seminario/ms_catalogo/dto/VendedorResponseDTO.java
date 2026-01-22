@@ -17,6 +17,7 @@ public class VendedorResponseDTO {
     private String tiempoEstimadoEspera;
     private String logo;
     private String banner;
+    private String estado;
     private DireccionDTO direccion;
     private ArrayList<ProductoResponseDTO> productos;
 }

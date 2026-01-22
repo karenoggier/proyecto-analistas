@@ -5,16 +5,19 @@ import org.springframework.stereotype.Service;
 
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
+import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
+import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.mapper.DireccionMapper;
 import com.seminario.ms_catalogo.mapper.ProductoMapper;
-import com.seminario.ms_catalogo.model.Estado;
+import com.seminario.ms_catalogo.mapper.VendedorMapper;
 import com.seminario.ms_catalogo.model.Producto;
 import com.seminario.ms_catalogo.model.Vendedor;
 import com.seminario.ms_catalogo.repository.VendedorRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class VendedorService {
     private final VendedorRepository vendedorRepository;
     private final ProductoMapper productoMapper;
     private final DireccionMapper direccionMapper;
+    private final VendedorMapper vendedorMapper;
     
 
     public ResponseEntity<ProductoResponseDTO> agregarProducto(ProductoRequestDTO productoRequestDTO, String vendedorId) {
@@ -38,32 +42,62 @@ public class VendedorService {
 
     //Recibe el registro de vendedor desde ms-usuarios por HTTP sincrónico
     public void recibirRegistroVendedor(VendedorRegistradoEvent evento) {
-        
-            Vendedor vendedor = new Vendedor();
-            vendedor.setUsuarioId(evento.getUsuarioId());
-            vendedor.setNombreNegocio(evento.getNombreNegocio());
-            vendedor.setNombreResponsable(evento.getNombreResponsable());
-            vendedor.setApellidoResponsable (evento.getApellidoResponsable());
-            vendedor.setTelefono(evento.getTelefono());
-            vendedor.setLogo(null);
-            vendedor.setBanner(null);
-            vendedor.setRealizaEnvios(null);
-            vendedor.setHorarioApertura(null);
-            vendedor.setHorarioCierre(null);
-            vendedor.setTiempoEstimadoEspera(null);
-            vendedor.setEstado(Estado.INCOMPLETO);
+                
+        try {
+            log.info("Recibido evento de registro para: {}", evento.getNombreNegocio());
 
-            if (evento.getDireccion() != null) {
-                vendedor.setDireccion(direccionMapper.toEntity(evento.getDireccion()));
-            }
-            
-            vendedor.setProductos(null);
+            Vendedor vendedor = vendedorMapper.toNewEntity(evento);
             
             // Guardar vendedor en mongodb
             Vendedor vendedorGuardado = vendedorRepository.save(vendedor);
             
+            log.info("VENDEDOR REGISTRADO EN CATALOGO: " + vendedorGuardado.getId());
+            log.info(" Vendedor guardado en MongoDB con ID Usuario: {}", evento.getUsuarioId());
+            
+        } catch (Exception e) {
+            log.error("ERROR AL REGISTRAR VENDEDOR EN CATALOGO: " + e.getMessage(), e);
+        }
     }
-    
-}
 
+    public ResponseEntity<VendedorResponseDTO> obtnerVendedorPorUsuarioId(String usuarioId) {
+        Vendedor vendedor = vendedorRepository.findByUsuarioId(usuarioId);
+        if (vendedor == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        VendedorResponseDTO vendedorResponseDTO = vendedorMapper.toDTO(vendedor);
+        return ResponseEntity.ok(vendedorResponseDTO);
+    }
+    public ResponseEntity<VendedorResponseDTO> updateVendedor(VendedorRequestDTO vendedorRequestDTO) {
+        Vendedor vendedor = vendedorRepository.findById(vendedorRequestDTO.getUsuarioId()).orElse(null);
+        if (vendedor == null) {
+            return ResponseEntity.notFound().build();
+        }
+        //aca hay que actualizar el ms-usuarios
+        VendedorRegistradoEvent evento = updateVendorEnUsuarios(vendedorRequestDTO);
+      
+        vendedor.setNombreNegocio(vendedorRequestDTO.getNombreNegocio());
+        vendedor.setTelefono(vendedorRequestDTO.getTelefono());
+        vendedor.setNombreResponsable(vendedorRequestDTO.getNombreResponsable());
+        vendedor.setApellidoResponsable(vendedorRequestDTO.getApellidoResponsable());
+        vendedor.setBanner(vendedorRequestDTO.getBanner());
+        vendedor.setLogo(vendedorRequestDTO.getLogo());
+        vendedor.setHorarioApertura(vendedorRequestDTO.getHorarioApertura());
+        vendedor.setHorarioCierre(vendedorRequestDTO.getHorarioCierre());
+        vendedor.setRealizaEnvios(vendedorRequestDTO.getRealizaEnvios());
+        vendedor.setTiempoEstimadoEspera(vendedorRequestDTO.getTiempoEstimadoEspera());
+
+        if(evento.getDireccion() != null){
+            vendedor.setDireccion(direccionMapper.toEntity(evento.getDireccion()));
+        }
+        vendedorRepository.save(vendedor);
+        return ResponseEntity.ok(vendedorMapper.toDTO(vendedor));
+    }
+ 
+    private VendedorRegistradoEvent updateVendorEnUsuarios(Object event) {
+        //aca tiene que mandar el evento a ms-usuarios y recibir el dto actualizado
+       return new VendedorRegistradoEvent();
+    }
+
+}
 
