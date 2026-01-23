@@ -1,5 +1,6 @@
 package com.seminario.ms_catalogo.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
+import com.seminario.ms_catalogo.exception.RequestException;
 import com.seminario.ms_catalogo.mapper.DireccionMapper;
 import com.seminario.ms_catalogo.mapper.ProductoMapper;
 import com.seminario.ms_catalogo.mapper.VendedorMapper;
@@ -50,6 +52,14 @@ public class VendedorService {
             // Guardar vendedor en mongodb
             Vendedor vendedorGuardado = vendedorRepository.save(vendedor);
             
+    }
+
+    public void usuarioExistente(String usuarioId) {
+        Vendedor vendedor = vendedorRepository.findByUsuarioId(usuarioId).orElse(null);
+        if (vendedor == null) {
+            //codigoo puesto al azar
+            throw new RequestException("CA", 1, HttpStatus.BAD_REQUEST, "Vendedor no encontrado");
+        }
     }
 
     public ResponseEntity<VendedorResponseDTO> obtnerVendedorPorUsuarioId(String usuarioId) {
