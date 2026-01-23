@@ -16,5 +16,10 @@ public class Provincia {
     @Id
     private String id; 
     
-    private String nombre; 
+    private String nombre;
+
+    public Provincia orElseThrow(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");
+    } 
 }

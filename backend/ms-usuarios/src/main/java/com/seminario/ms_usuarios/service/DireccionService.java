@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.seminario.ms_usuarios.dto.DireccionRequestDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.NominatimResponseDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.DireccionCatDTO;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.DireccionMapper;
 import com.seminario.ms_usuarios.model.Direccion;
@@ -91,31 +92,19 @@ public class DireccionService {
         return direccionRepository.findByLocalidadAndProvincia(localidad, provincia);
     }
 
-    public Direccion actualizarDireccion(DireccionRequestDTO dto, String idUsuario) {
+    public DireccionCatDTO actualizarDireccion(DireccionCatDTO dto, String idUsuario) {
         Direccion direccion = direccionRepository.findByUsuarioId(idUsuario);
         if (direccion==null) new RequestException("US", 2, HttpStatus.NOT_FOUND, "Dirección no encontrada");
 
-        Provincia provinciaEntidad = null;
-        String nombreProvinciaParaGeo = dto.getProvincia(); 
+        Provincia provinciaEntidad = provinciaRepository.findByNombre(dto.getProvincia());
+        if(provinciaEntidad==null) new RequestException("US", 2, HttpStatus.NOT_FOUND, "Provincia no encontrada con ID: " + dto.getProvincia());
 
-        if (dto.getProvincia() != null) {
-            provinciaEntidad = provinciaRepository.findById(dto.getProvincia())
-                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Provincia no encontrada con ID: " + dto.getProvincia()));
-            
-            nombreProvinciaParaGeo = provinciaEntidad.getNombre();
-        }
 
-        Localidad localidadEntidad = null;
-        String nombreLocalidadParaGeo = dto.getLocalidad();
+        Localidad localidadEntidad = localidadRepository.findByNombre(dto.getLocalidad());
+        if(localidadEntidad==null) new RequestException("US", 2, HttpStatus.NOT_FOUND, "Localidad no encontrada con ID: " + dto.getLocalidad());
 
-        if (dto.getLocalidad() != null) {
-            localidadEntidad = localidadRepository.findById(dto.getLocalidad())
-                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Localidad no encontrada con ID: " + dto.getLocalidad()));
-            
-            nombreLocalidadParaGeo = localidadEntidad.getNombre();
-        }
 
-        NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(dto.getCalle(), dto.getNumero(), nombreLocalidadParaGeo, nombreProvinciaParaGeo);
+        NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(dto.getCalle(), dto.getNumero(), dto.getLocalidad(), dto.getProvincia());
 
         if (coordenadas == null) {
             throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "No se pudieron obtener las coordenadas para la dirección proporcionada");
@@ -129,7 +118,7 @@ public class DireccionService {
         direccion.setLatitud(coordenadas.getLatitud());
         direccion.setLongitud(coordenadas.getLongitud());
 
-        return direccionRepository.save(direccion);
+        return direccionMapper.toDireccionCatDTO(direccionRepository.save(direccion));
     }
 
     public DireccionResponseDTO obtenerDireccionPorUsuarioId(String id) {

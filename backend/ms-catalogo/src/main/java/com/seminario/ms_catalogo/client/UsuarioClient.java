@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.exception.RequestException;
 
@@ -30,14 +29,14 @@ public class UsuarioClient {
 
     @CircuitBreaker(name = "usuarioClient", fallbackMethod = "actualizarVendedorFallback")
     @Retry(name = "usuarioClient")
-    public ResponseEntity<VendedorRegistradoEvent> actualizarVendedor(VendedorRequestDTO vendedorRequestDTO) {
+    public ResponseEntity<VendedorRegistradoEvent> actualizarVendedor(VendedorRegistradoEvent vendedorRegistradoEvent) {
         try {
             String url = usuariosBaseUrl + "/usuariosMs/vendedores/actualizar";
             
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             
-            HttpEntity<VendedorRequestDTO> request = new HttpEntity<>(vendedorRequestDTO, headers);
+            HttpEntity<VendedorRegistradoEvent> request = new HttpEntity<>(vendedorRegistradoEvent, headers);
                         
             //envío de mensaje HTTP
             ResponseEntity<VendedorRegistradoEvent> response = restTemplate.postForEntity(url, request, VendedorRegistradoEvent.class);
@@ -51,7 +50,7 @@ public class UsuarioClient {
     }
 
     //Fallback method cuando el circuit breaker está abierto
-    public ResponseEntity<VendedorRegistradoEvent> actualizarVendedorFallback(VendedorRequestDTO vendedorRequestDTO, Exception exception) {
+    public ResponseEntity<VendedorRegistradoEvent> actualizarVendedorFallback(VendedorRegistradoEvent vendedorRegistradoEvent, Exception exception) {
         throw new RequestException("CAT", 503, HttpStatus.SERVICE_UNAVAILABLE, 
             "El servicio de usuarios no está disponible. Por favor intente más tarde.");
     }

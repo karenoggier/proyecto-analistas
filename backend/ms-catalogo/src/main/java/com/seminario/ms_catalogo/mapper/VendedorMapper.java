@@ -92,6 +92,19 @@ public class VendedorMapper {
         }
         return evento;
     }
+
+    public VendedorRegistradoEvent toVendedorRegistradoEvent(VendedorRequestDTO vendedorRequestDTO) {
+        VendedorRegistradoEvent evento = new VendedorRegistradoEvent();
+        evento.setUsuarioId(vendedorRequestDTO.getUsuarioId());
+        evento.setNombreNegocio(vendedorRequestDTO.getNombreNegocio());
+        evento.setNombreResponsable(vendedorRequestDTO.getNombreResponsable());
+        evento.setApellidoResponsable(vendedorRequestDTO.getApellidoResponsable());
+        evento.setTelefono(vendedorRequestDTO.getTelefono());
+        if (vendedorRequestDTO.getDireccion() != null) {
+            evento.setDireccion(vendedorRequestDTO.getDireccion());
+        }
+        return evento;
+    }
     
 
 }

@@ -68,7 +68,8 @@ public class VendedorService {
             return ResponseEntity.notFound().build();
         }
         //aca hay que actualizar el ms-usuarios
-        VendedorRegistradoEvent evento = usuarioClient.actualizarVendedor(vendedorRequestDTO).getBody();
+        
+        VendedorRegistradoEvent evento = usuarioClient.actualizarVendedor(vendedorMapper.toVendedorRegistradoEvent(vendedorRequestDTO)).getBody();
       
         vendedor.setNombreNegocio(vendedorRequestDTO.getNombreNegocio());
         vendedor.setTelefono(vendedorRequestDTO.getTelefono());

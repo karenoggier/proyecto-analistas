@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.VendedorRequestDTO;
 import com.seminario.ms_usuarios.dto.VendedorResponseDTO;
-import com.seminario.ms_usuarios.dto.VendedorUpdateRequestDTO;
 import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.DireccionCatDTO;
 import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRegistradoEvent;
 import com.seminario.ms_usuarios.model.EstadoUsuario;

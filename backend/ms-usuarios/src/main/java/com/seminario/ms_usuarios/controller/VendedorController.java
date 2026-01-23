@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_usuarios.dto.VendedorRequestDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRegistradoEvent;
 import com.seminario.ms_usuarios.mapper.VendedorMapper;
 import com.seminario.ms_usuarios.model.Vendedor;
 import com.seminario.ms_usuarios.service.VendedorService;
@@ -25,12 +26,9 @@ public class VendedorController {
     private final VendedorMapper vendedorMapper;
 
     @PostMapping("/actualizar")
-    public ResponseEntity<Void> actualizarVendedor(@RequestBody VendedorRequestDTO vendedorDTO) {
-        Vendedor nuevoVendedor = vendedorMapper.toEntity(vendedorDTO);
+    public ResponseEntity<VendedorRegistradoEvent> actualizarVendedor(@RequestBody VendedorRegistradoEvent vendedorDTO) {
 
-        vendedorService.guardarVendedor(nuevoVendedor);
-
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok(vendedorService.guardarVendedor(vendedorDTO));
 
     }
 

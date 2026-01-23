@@ -6,7 +6,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.seminario.ms_usuarios.mapper.DireccionMapper;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.DireccionCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.VendedorRegistradoEvent;
 import com.seminario.ms_usuarios.model.Vendedor;
 import com.seminario.ms_usuarios.repository.VendedorRepository;
 
@@ -43,5 +44,28 @@ public class VendedorService {
     @Transactional
     public void eliminarVendedor(String id) {
         vendedorRepository.deleteById(id);
+    }
+
+    public VendedorRegistradoEvent guardarVendedor(VendedorRegistradoEvent vendedorDTO) {
+        Vendedor vendedor = vendedorRepository.findById(vendedorDTO.getUsuarioId()).orElse(null);
+        if (vendedor == null) {
+            throw new RuntimeException("Vendedor no encontrado con ID: " + vendedorDTO.getUsuarioId());
+        }
+        DireccionCatDTO direccionDTO = direccionService.actualizarDireccion(vendedorDTO.getDireccion(), vendedor.getId());
+        if (direccionDTO == null) {
+            throw new RuntimeException("Error al actualizar la dirección para el vendedor con ID: " + vendedorDTO.getUsuarioId());
+        }
+        
+        //actualizar otros campos del vendedor si es necesario
+        vendedor.setNombreNegocio(vendedorDTO.getNombreNegocio());
+        vendedor.setNombreResponsable(vendedorDTO.getNombreResponsable());
+        vendedor.setApellidoResponsable(vendedorDTO.getApellidoResponsable());
+        vendedor.setTelefono(vendedorDTO.getTelefono());
+        
+        vendedorRepository.save(vendedor);
+
+        vendedorDTO.setDireccion(direccionDTO);
+        return vendedorDTO;
+    
     }
 }
