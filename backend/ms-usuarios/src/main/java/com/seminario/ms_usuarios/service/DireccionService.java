@@ -96,11 +96,11 @@ public class DireccionService {
         Direccion direccion = direccionRepository.findByUsuarioId(idUsuario);
         if (direccion==null) new RequestException("US", 2, HttpStatus.NOT_FOUND, "Dirección no encontrada");
 
-        Provincia provinciaEntidad = provinciaRepository.findByNombre(dto.getProvincia());
+        Provincia provinciaEntidad = provinciaRepository.findById(dto.getProvincia()).get();
         if(provinciaEntidad==null) new RequestException("US", 2, HttpStatus.NOT_FOUND, "Provincia no encontrada con ID: " + dto.getProvincia());
 
 
-        Localidad localidadEntidad = localidadRepository.findByNombre(dto.getLocalidad());
+        Localidad localidadEntidad = localidadRepository.findById(dto.getLocalidad()).get();
         if(localidadEntidad==null) new RequestException("US", 2, HttpStatus.NOT_FOUND, "Localidad no encontrada con ID: " + dto.getLocalidad());
 
 

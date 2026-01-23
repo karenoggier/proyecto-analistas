@@ -68,8 +68,8 @@ public class VendedorService {
             return ResponseEntity.notFound().build();
         }
         //aca hay que actualizar el ms-usuarios
-        
-        VendedorRegistradoEvent evento = usuarioClient.actualizarVendedor(vendedorMapper.toVendedorRegistradoEvent(vendedorRequestDTO)).getBody();
+        VendedorRegistradoEvent guardado = vendedorMapper.toVendedorRegistradoEvent(vendedorRequestDTO);
+        VendedorRegistradoEvent evento = usuarioClient.actualizarVendedor(guardado).getBody();
       
         vendedor.setNombreNegocio(vendedorRequestDTO.getNombreNegocio());
         vendedor.setTelefono(vendedorRequestDTO.getTelefono());
@@ -88,11 +88,6 @@ public class VendedorService {
         vendedorRepository.save(vendedor);
         return ResponseEntity.ok(vendedorMapper.toDTO(vendedor));
     }
- 
-    /*private VendedorRegistradoEvent updateVendorEnUsuarios(Object event) {
-        //aca tiene que mandar el evento a ms-usuarios y recibir el dto actualizado
-       return new VendedorRegistradoEvent();
-    }*/
 
 }
 

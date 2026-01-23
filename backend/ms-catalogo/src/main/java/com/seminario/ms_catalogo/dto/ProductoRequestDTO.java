@@ -11,7 +11,7 @@ public class ProductoRequestDTO {
     @NotBlank(message = "La imagen no puede estar vacia")
     private double precio;
     @NotBlank(message = "La categoria no puede estar vacia")
-    private String Categoria;  
+    private String categoria;  
     @NotBlank(message = "La subcategoria no puede estar vacia")
     private String subcategoria;
     @NotBlank(message= "el campo disponible no puede estar vacio")

@@ -30,7 +30,7 @@ public class VendedorMapper {
         vendedor.setHorarioCierre(null);
         vendedor.setTiempoEstimadoEspera(null);
         vendedor.setEstado(Estado.INCOMPLETO);
-        vendedor.setProductos(null);
+        vendedor.setProductos(new java.util.ArrayList<>());
         if (evento.getDireccion() != null) {
             vendedor.setDireccion(direccionMapper.toEntity(evento.getDireccion()));
         }
