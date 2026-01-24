@@ -27,5 +27,8 @@ public class DireccionController {
         return ResponseEntity.ok(direccionService.buscarDireccionesPorUsuario(usuario));
     }
     
+    public ResponseEntity<ArrayList<DireccionResponseDTO>> obtenerDirecciones(Usuario usuario) {
+        return direccionService.buscarDireccionesPorUsuario(usuario);
+    }
 
 }

@@ -1,12 +1,15 @@
 package com.seminario.ms_usuarios.service;
 
-import com.seminario.ms_usuarios.model.Cliente;
-import com.seminario.ms_usuarios.repository.ClienteRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import com.seminario.ms_usuarios.model.Cliente;
+import com.seminario.ms_usuarios.repository.ClienteRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -39,5 +42,6 @@ public class ClienteService {
     public void eliminarCliente(String id) {
         clienteRepository.deleteById(id);
     }
+
     
 }
