@@ -1,5 +1,7 @@
 package com.seminario.ms_catalogo.service;
 
+import java.util.ArrayList;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,10 +35,14 @@ public class VendedorService {
     private final UsuarioClient usuarioClient;
     
 
+    public VendedorResponseDTO updateVendedorConDatosLocales(Vendedor vendedor) {
+        Vendedor vendedorGuardado = vendedorRepository.save(vendedor);
+        return vendedorMapper.toDTO(vendedorGuardado);
+    }
     public ResponseEntity<ProductoResponseDTO> agregarProducto(ProductoRequestDTO productoRequestDTO, String vendedorId) {
         Vendedor vendedor = vendedorRepository.findByUsuarioId(vendedorId).orElse(null);
         if (vendedor == null) {
-            return ResponseEntity.notFound().build();
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado");
         }
         Producto producto = productoMapper.toEntity(productoRequestDTO);
         vendedor.getProductos().add(producto);
@@ -54,12 +60,13 @@ public class VendedorService {
             
     }
 
-    public void usuarioExistente(String usuarioId) {
+    public Vendedor usuarioExistente(String usuarioId) {
         Vendedor vendedor = vendedorRepository.findByUsuarioId(usuarioId).orElse(null);
         if (vendedor == null) {
             //codigoo puesto al azar
-            throw new RequestException("CA", 1, HttpStatus.BAD_REQUEST, "Vendedor no encontrado");
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado");
         }
+        return vendedor;
     }
 
     public ResponseEntity<VendedorResponseDTO> obtnerVendedorPorUsuarioId(String usuarioId) {
@@ -97,6 +104,20 @@ public class VendedorService {
         }
         vendedorRepository.save(vendedor);
         return ResponseEntity.ok(vendedorMapper.toDTO(vendedor));
+    }
+
+    public ArrayList<Vendedor> obtenerVendedoresPorUbicacion(String provincia, String ciudad) {
+        ArrayList<Vendedor> vendedores = new ArrayList<Vendedor>();
+        if(provincia != null && ciudad != null){
+            vendedores = vendedorRepository.findByDireccion_ProvinciaAndDireccion_Ciudad(provincia, ciudad);
+        } else if(provincia == null && ciudad != null){
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La provincia no puede ser nula");
+        } else if(ciudad == null && provincia != null){
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La ciudad no puede ser nula");
+        } else {
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La provincia y la ciudad no pueden ser nulas");    
+        }
+        return vendedores;
     }
 
 }

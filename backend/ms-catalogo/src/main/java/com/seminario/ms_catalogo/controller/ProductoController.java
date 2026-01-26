@@ -8,9 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.seminario.ms_catalogo.dto.AllProductosResumidoDTO;
+import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.service.ProductoService;
-import com.seminario.ms_catalogo.service.VendedorService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,11 +19,24 @@ import lombok.RequiredArgsConstructor;
 public class ProductoController {
 
     private final ProductoService productoService;
-    private final VendedorService vendedorService;
+    private final VendedorController vendedorController;
 
-    @GetMapping("/getAllProductos")
-    public ResponseEntity<ArrayList<AllProductosResumidoDTO>> getAllProductos(@RequestParam String usuarioId) {
-        vendedorService.usuarioExistente(usuarioId);
-        return ResponseEntity.ok(productoService.getAllProductos(usuarioId));
+    @GetMapping("/getAllProductosFromVendedor")
+    public ResponseEntity<ArrayList<ProductoResponseDTO>> getAllProductosFromVendedor(@RequestParam String usuarioId) {
+        return ResponseEntity.ok(vendedorController.obtnerVendedorPorUsuarioId(usuarioId).getBody().getProductos());
     }
+    @GetMapping("/getAllProductosFromAllVendedores")
+    public ResponseEntity<ArrayList<ProductoResponseDTO>> getAllProductosFromAllVendedores
+    (@RequestParam String provincia, @RequestParam String ciudad) {
+        return ResponseEntity.ok(productoService.getAllProductosFromAllVendedores(provincia, ciudad));
+
+    }
+    @GetMapping("/updateProducto")
+    public ProductoResponseDTO updateProducto(@RequestParam String vendedorId, @RequestParam String productoId,
+            @RequestParam ProductoResponseDTO productoRequestDTO) {
+        return productoService.updateProducto(vendedorId, productoId, productoRequestDTO);
+
+    }
+        
+
 }

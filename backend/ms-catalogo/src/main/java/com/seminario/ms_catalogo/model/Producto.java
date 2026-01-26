@@ -12,7 +12,6 @@ public class Producto {
     private String descripcion;
     private double precio;
     private Estado estado; 
-    private Boolean aptoCeliacos;
     private Estado disponible;
     private String observaciones;
     private Categoria categoria;

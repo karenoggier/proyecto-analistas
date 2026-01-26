@@ -34,6 +34,7 @@ public class ProductoMapper {
             return null;
         }
         ProductoResponseDTO productoResponseDTO = new ProductoResponseDTO();
+        productoResponseDTO.setId(producto.getId());
         productoResponseDTO.setNombre(producto.getNombre());
         productoResponseDTO.setDescripcion(producto.getDescripcion());
         productoResponseDTO.setPrecio(producto.getPrecio());
