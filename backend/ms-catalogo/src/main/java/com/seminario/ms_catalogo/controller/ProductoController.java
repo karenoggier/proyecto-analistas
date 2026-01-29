@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.service.ProductoService;
+import com.seminario.ms_catalogo.mapper.ProductoMapper;
+import com.seminario.ms_catalogo.dto.consultas_ms_pedido.ProductoResumidoDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,6 +38,12 @@ public class ProductoController {
             @RequestParam ProductoResponseDTO productoRequestDTO) {
         return productoService.updateProducto(vendedorId, productoId, productoRequestDTO);
 
+    }
+
+    @GetMapping("/getProductoByIdAndVendedorId")
+    public ResponseEntity<ProductoResumidoDTO> getProductoByIdAndVendedorId(@RequestParam String productoId,
+            @RequestParam String vendedorId) {
+        return ResponseEntity.ok(ProductoMapper.toResumenDTO(productoService.getProductoByIdAndVendedorId(productoId, vendedorId), vendedorId));
     }
         
 

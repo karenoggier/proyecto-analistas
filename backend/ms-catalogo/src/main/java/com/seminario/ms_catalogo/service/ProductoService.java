@@ -10,6 +10,7 @@ import com.seminario.ms_catalogo.model.Categoria;
 import com.seminario.ms_catalogo.model.Estado;
 import com.seminario.ms_catalogo.model.Subcategoria;
 import com.seminario.ms_catalogo.model.Vendedor;
+import com.seminario.ms_catalogo.model.Producto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +38,17 @@ public class ProductoService {
                 producto.setImagen(productoRequestDTO.getImagen());
                 vendedorService.updateVendedorConDatosLocales(vendedor);
                 return productoRequestDTO;
+            }
+        }
+        throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado");  
+    }
+
+    public Producto getProductoByIdAndVendedorId(String productoId, String vendedorId) {
+        Vendedor vendedor = vendedorService.usuarioExistente(vendedorId);
+        
+        for (Producto producto : vendedor.getProductos()) {
+            if (producto.getId().equals(productoId)) {
+                return producto;
             }
         }
         throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado");  

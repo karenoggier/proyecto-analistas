@@ -4,7 +4,7 @@ services:
     image: postgres:15-alpine
     container_name: usuario-db
     ports:
-      - "5431:5432" 
+      - "5431:5431" 
     environment:
       - POSTGRES_DB=usuarios_db      # La BD se crea sola con este nombre
       - POSTGRES_USER=postgres
@@ -25,23 +25,42 @@ services:
     networks:
       - app-network
 
-# --- MESSAGE BROKER (RabbitMQ) ---
-  rabbitmq:
-    image: rabbitmq:3.12-management-alpine
-    container_name: rabbitmq
+# --- BASE DE DATOS PEDIDOS (SQL) ---
+  pedido-db:
+    image: postgres:15-alpine
+    container_name: pedido-db
     ports:
-      - "5672:5672"      # AMQP port
-      - "15672:15672"    # Management UI
+      - "5432:5432"
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - POSTGRES_DB=pedidos_db      # La BD se crea sola con este nombre
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./docker/data/pedidos:/var/lib/postgresql/data
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+
+# --- BASE DE DATOS CARRITO (NoSQL) ---
+  carrito-db:
+    image: mongo:latest
+    container_name: carrito-db
+    ports:
+      - "27018:27018" 
+    volumes:
+      - ./docker/data/carrito:/data/db 
+    networks:
+      - app-network
+
+# --- BASE DE DATOS NOTIFICACIONES (NoSQL) ---
+  notificaciones-db:
+    image: mongo:latest
+    container_name: notificaciones-db
+    ports:
+      - "27019:27019" 
+    volumes:
+      - ./docker/data/notificaciones:/data/db 
+    networks:
+      - app-network
 
 networks:
   app-network:
