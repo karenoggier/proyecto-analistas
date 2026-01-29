@@ -8,9 +8,9 @@ import com.seminario.ms_catalogo.exception.RequestException;
 import com.seminario.ms_catalogo.mapper.ProductoMapper;
 import com.seminario.ms_catalogo.model.Categoria;
 import com.seminario.ms_catalogo.model.Estado;
+import com.seminario.ms_catalogo.model.Producto;
 import com.seminario.ms_catalogo.model.Subcategoria;
 import com.seminario.ms_catalogo.model.Vendedor;
-import com.seminario.ms_catalogo.model.Producto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,5 +53,8 @@ public class ProductoService {
         }
         throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado");  
     }
+
+
+    
 
 }
