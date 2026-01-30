@@ -109,13 +109,13 @@ public class VendedorService {
     public ArrayList<Vendedor> obtenerVendedoresPorUbicacion(String provincia, String ciudad) {
         ArrayList<Vendedor> vendedores = new ArrayList<Vendedor>();
         if(provincia != null && ciudad != null){
-            vendedores = vendedorRepository.findByDireccion_ProvinciaAndDireccion_Ciudad(provincia, ciudad);
+            vendedores = vendedorRepository.findByDireccion_ProvinciaAndDireccion_Localidad(provincia, ciudad);
         } else if(provincia == null && ciudad != null){
             throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La provincia no puede ser nula");
         } else if(ciudad == null && provincia != null){
-            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La ciudad no puede ser nula");
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La localidad no puede ser nula");
         } else {
-            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La provincia y la ciudad no pueden ser nulas");    
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La provincia y la localidad no pueden ser nulas");    
         }
         return vendedores;
     }

@@ -1,13 +1,12 @@
 package com.seminario.ms_catalogo.model;
 
-import org.springframework.data.annotation.Id;
+import java.util.UUID;
 
 import lombok.Data;
 
 @Data
 public class Producto {
-    @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
     private String nombre;
     private String descripcion;
     private double precio;
