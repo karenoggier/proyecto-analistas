@@ -4,7 +4,7 @@ services:
     image: postgres:15-alpine
     container_name: usuario-db
     ports:
-      - "5431:5431" 
+      - "5431:5432" 
     environment:
       - POSTGRES_DB=usuarios_db      # La BD se crea sola con este nombre
       - POSTGRES_USER=postgres
@@ -45,7 +45,7 @@ services:
     image: mongo:latest
     container_name: carrito-db
     ports:
-      - "27018:27018" 
+      - "27018:27017" 
     volumes:
       - ./docker/data/carrito:/data/db 
     networks:
@@ -56,7 +56,7 @@ services:
     image: mongo:latest
     container_name: notificaciones-db
     ports:
-      - "27019:27019" 
+      - "27019:27017" 
     volumes:
       - ./docker/data/notificaciones:/data/db 
     networks:

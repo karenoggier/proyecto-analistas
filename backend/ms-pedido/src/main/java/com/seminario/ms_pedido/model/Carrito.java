@@ -1,11 +1,11 @@
 package com.seminario.ms_pedido.model;
 
+import java.util.ArrayList;
+
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
-import java.util.ArrayList;
 
 @Data
 @Document(collection = "carritos")
@@ -13,7 +13,6 @@ public class Carrito {
     @Id
     private String id;
     private String vendedorId;
-    @Indexed(unique = true)
     private String clienteId;
     private Double montoTotal;
     private Double montoTotalProductos;

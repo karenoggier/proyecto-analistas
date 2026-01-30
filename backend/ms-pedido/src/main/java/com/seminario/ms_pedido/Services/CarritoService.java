@@ -3,11 +3,11 @@ package com.seminario.ms_pedido.Services;
 import com.seminario.ms_pedido.model.Carrito;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
-import com.seminario.ms_pedido.Repositories.CarritoRepository;
 import com.seminario.ms_pedido.client.WebClient;
 import com.seminario.ms_pedido.DTOs.ProductoResumidoDTO;
 import java.util.ArrayList;
 import com.seminario.ms_pedido.model.DetalleCarrito;
+import com.seminario.ms_pedido.Repositories.CarritoRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ public class CarritoService {
     }
 
     public Carrito getCarritoByClienteAndVendedorId(String clienteId, String vendedorId) {
-        return carritoRepository.findByClienteandVendedorId(clienteId, vendedorId).orElse(null);
+        return carritoRepository.findByClienteIdAndVendedorId(clienteId, vendedorId).orElse(null);
     }
 
     public Carrito modificarItem(String clienteId, String vendedorId, String productoId, Double cantidad) {
