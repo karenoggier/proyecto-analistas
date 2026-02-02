@@ -1,13 +1,18 @@
 package com.seminario.ms_pedido.Services;
 
-import com.seminario.ms_pedido.model.Carrito;
-import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
-import com.seminario.ms_pedido.client.WebClient;
-import com.seminario.ms_pedido.DTOs.ProductoResumidoDTO;
 import java.util.ArrayList;
-import com.seminario.ms_pedido.model.DetalleCarrito;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import com.seminario.ms_pedido.DTOs.ProductoResumidoDTO;
 import com.seminario.ms_pedido.Repositories.CarritoRepository;
+import com.seminario.ms_pedido.client.WebClient;
+import com.seminario.ms_pedido.exception.RequestException;
+import com.seminario.ms_pedido.model.Carrito;
+import com.seminario.ms_pedido.model.DetalleCarrito;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -16,7 +21,7 @@ public class CarritoService {
 
     private final WebClient webClient;
 
-    public Carrito getCarritoByClienteId(String clienteId) {
+    public ArrayList<Carrito> getCarritoByClienteId(String clienteId) {
         return carritoRepository.findByClienteId(clienteId).orElse(null);
     }
 
@@ -30,25 +35,46 @@ public class CarritoService {
         
         // Lógica para agregar un producto al carrito
         Carrito carrito = getCarritoByClienteAndVendedorId(clienteId, vendedorId);
-        if (carrito == null) {         //si no hay productos de ese vendedor en ningun carrito, crear uno nuevo
+        if (carrito == null) {         //si no hay productos de ese vendedor en ningun carrito de ese cliente, crear uno nuevo
             carrito = new Carrito();
             carrito.setClienteId(clienteId);
             carrito.setVendedorId(vendedorId);
             carrito.setMontoTotal(0.0);
             carrito.setMontoTotalProductos(0.0);
-            carrito.setDetallesCarrito(new ArrayList<DetalleCarrito>());
+            carrito.setDetallesCarrito(new ArrayList<>());
             carrito.addDetalle(new DetalleCarrito(productoId, cantidad, productoDTO.getMontoUnitario(), productoDTO.getObservaciones()));
+            carrito.calcularMontosTotales();
 
         }
         else {
+            boolean productoExiste = false;
             for (DetalleCarrito detalle : carrito.getDetallesCarrito()) {     //ver si el producto ya existe en el carrito
                 if (detalle.getProductoId().equals(productoId)) {
                     //modificar cantidad
                     detalle.setCantidad(cantidad);
+                    carrito.calcularMontosTotales();
+                    productoExiste = true;
+                    break;
                 }
+            }
+            if (!productoExiste) {
+                carrito.addDetalle(new DetalleCarrito(productoId, cantidad, productoDTO.getMontoUnitario(), productoDTO.getObservaciones()));
+                carrito.calcularMontosTotales();
             }
         }      
 
         return carritoRepository.save(carrito);
+    }
+
+    public void deleteItem(String clienteId, String vendedorId, String productoId) {
+        Carrito carrito = getCarritoByClienteAndVendedorId(clienteId, vendedorId);
+        if (carrito == null || !carrito.getDetallesCarrito().stream().anyMatch(detalle -> detalle.getProductoId().equals(productoId))) {
+            throw new RequestException(vendedorId, 400, HttpStatus.BAD_REQUEST, "El producto no está en el carrito");
+        }
+        else{
+            carrito.getDetallesCarrito().removeIf(detalle -> detalle.getProductoId().equals(productoId));
+            carrito.calcularMontosTotales();
+            carritoRepository.save(carrito);
+        }
     }
 }

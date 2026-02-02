@@ -24,4 +24,15 @@ public class Carrito {
         }
         this.detallesCarrito.add(detalle);
     }
+
+    public void calcularMontosTotales() {
+        this.montoTotalProductos = 0.0;
+        if (this.detallesCarrito != null) {
+            for (DetalleCarrito detalle : this.detallesCarrito) {
+                this.montoTotalProductos += detalle.getCantidad()*detalle.getMontoUnitario();
+            }
+        }
+        // lógica para calcular descuentos, impuestos, etc.
+        this.montoTotal = this.montoTotalProductos; // Por simplicidad, sin descuentos ni impuestos
+    }
 }

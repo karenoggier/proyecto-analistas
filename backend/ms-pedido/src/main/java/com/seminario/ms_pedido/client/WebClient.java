@@ -57,7 +57,7 @@ public class WebClient {
     }
 
     //Fallback method cuando el circuit breaker está abierto
-    public ResponseEntity<ProductoResumidoDTO> buscarProductoFallback(String productoId, String vendedorId, Exception exception) {
+    public ResponseEntity<ProductoResumidoDTO> buscarproductoFallback(String productoId, String vendedorId, Throwable t) {
         throw new RequestException("CAT", 503, HttpStatus.SERVICE_UNAVAILABLE, 
             "El servicio de catalogo no está disponible. Por favor intente más tarde.");
     }
