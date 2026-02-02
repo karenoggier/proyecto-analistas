@@ -33,8 +33,8 @@ export default function LoginPage() {
             // === LOGIN EXITOSO ===
             localStorage.setItem("token", data.token);
             localStorage.setItem("rol", data.rol);
-            localStorage.setItem("email", data.email);
-            localStorage.setItem("userId", data.id);
+            //localStorage.setItem("email", data.email);
+            //localStorage.setItem("userId", data.id);
 
             if (data.rol === "VENDEDOR") {
                 window.location.href = "/vendedor"; 
