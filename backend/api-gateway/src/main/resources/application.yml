@@ -1,0 +1,22 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        - id: ms-usuarios
+          uri: http://localhost:8080
+          predicates:
+            - Path=/usuariosMs/**
+        - id: ms-catalogo
+          uri: http://localhost:8081
+          predicates:
+            - Path=/catalogoMs/**

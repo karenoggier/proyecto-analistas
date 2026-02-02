@@ -10,10 +10,14 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        // El frontend escuchará peticiones que empiecen con /usuariosMs
+        // 1. Todo lo que sea de USUARIOS -> Al Gateway (8090)
         source: '/usuariosMs/:path*',
-        // Y las redirigirá internamente a tu backend en Java (sin problemas de CORS)
-        destination: 'http://localhost:8080/usuariosMs/:path*', 
+        destination: 'http://127.0.0.1:8090/usuariosMs/:path*', 
+      },
+      {
+        // 2. Todo lo que sea de CATÁLOGO -> Al Gateway (8090)
+        source: '/catalogoMs/:path*',
+        destination: 'http://localhost:8090/catalogoMs/:path*', 
       },
     ]
   },
