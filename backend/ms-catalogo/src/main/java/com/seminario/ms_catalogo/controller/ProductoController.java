@@ -25,7 +25,7 @@ public class ProductoController {
 
     @GetMapping("/getAllProductosFromVendedor")
     public ResponseEntity<ArrayList<ProductoResponseDTO>> getAllProductosFromVendedor(@RequestParam String usuarioId) {
-        return ResponseEntity.ok(vendedorController.obtnerVendedorPorUsuarioId(usuarioId).getBody().getProductos());
+        return ResponseEntity.ok(vendedorController.obtenerVendedorPorUsuarioId(usuarioId).getBody().getProductos());
     }
 
     /*@GetMapping("/getAllProductosFromAllVendedores")

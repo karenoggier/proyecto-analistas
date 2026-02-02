@@ -18,22 +18,42 @@ export default function VendedorPage() {
   useEffect(() => {
     const token = localStorage.getItem("token")
     const rol = localStorage.getItem("rol")
-    const email = localStorage.getItem("email") || ""
 
     if (!token || rol !== "VENDEDOR") {
       window.location.href = "/login"
       return
     }
 
-    setUserEmail(email)
+   const fetchPerfil = async () => {
+      try {
+        const response = await fetch('/catalogoMs/vendedores/perfil', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-    if (email === "vendedor@test.com") {
-      setIsProfileComplete(false)
-      setVendorName("Local")
-    } else {
-      setIsProfileComplete(true)
-      setVendorName("McDonald's")
+        if (response.ok) {
+            const data = await response.json();
+          
+            setIsProfileComplete(data.perfilCompleto); 
+            setVendorName(data.nombreNegocio);
+
+        } else {
+            console.error("Error al obtener perfil del vendedor");
+            setIsProfileComplete(false);
+        }
+
+      } catch (error) {
+        console.error("Error de red:", error);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    fetchPerfil();
+
   }, [])
 
   const handleLogout = () => {

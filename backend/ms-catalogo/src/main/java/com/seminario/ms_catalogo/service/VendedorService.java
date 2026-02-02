@@ -69,7 +69,7 @@ public class VendedorService {
         return vendedor;
     }
 
-    public ResponseEntity<VendedorResponseDTO> obtnerVendedorPorUsuarioId(String usuarioId) {
+    public ResponseEntity<VendedorResponseDTO> obtenerVendedorPorUsuarioId(String usuarioId) {
         Vendedor vendedor = vendedorRepository.findByUsuarioId(usuarioId).get();
         if (vendedor == null) {
             return ResponseEntity.notFound().build();
@@ -78,6 +78,14 @@ public class VendedorService {
         VendedorResponseDTO vendedorResponseDTO = vendedorMapper.toDTO(vendedor);
         return ResponseEntity.ok(vendedorResponseDTO);
     }
+
+    public VendedorResponseDTO buscarVendedorPorEmail(String email) {
+        Vendedor vendedor = vendedorRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No se encontró vendedor con email: " + email));
+        
+        return vendedorMapper.toDTO(vendedor);
+    }
+    
 
     public ResponseEntity<VendedorResponseDTO> updateVendedor(VendedorRequestDTO vendedorRequestDTO) {
         Vendedor vendedor = vendedorRepository.findByUsuarioId(vendedorRequestDTO.getUsuarioId()).orElse(null);

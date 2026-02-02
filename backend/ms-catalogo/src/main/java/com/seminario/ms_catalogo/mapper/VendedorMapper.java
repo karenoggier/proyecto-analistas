@@ -19,6 +19,7 @@ public class VendedorMapper {
     public Vendedor toNewEntity (VendedorRegistradoEvent evento) {
         Vendedor vendedor = new Vendedor();
         vendedor.setUsuarioId(evento.getUsuarioId());
+        vendedor.setEmail(evento.getEmail());
         vendedor.setNombreNegocio(evento.getNombreNegocio());
         vendedor.setNombreResponsable(evento.getNombreResponsable());
         vendedor.setApellidoResponsable (evento.getApellidoResponsable());

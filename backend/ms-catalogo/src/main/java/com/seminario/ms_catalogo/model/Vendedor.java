@@ -15,6 +15,8 @@ public class Vendedor {
     private String id;
     @Indexed(unique = true)
     private String usuarioId;
+    @Indexed(unique = true) 
+    private String email;
     private String nombreNegocio;
     private String nombreResponsable;
     private String apellidoResponsable;
