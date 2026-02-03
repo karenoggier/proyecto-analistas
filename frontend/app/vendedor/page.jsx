@@ -7,8 +7,8 @@ import Link from "next/link"
 
 export default function VendedorPage() {
   const [isProfileComplete, setIsProfileComplete] = useState(false)
-  const [vendorName, setVendorName] = useState("Local")
-  const [userEmail, setUserEmail] = useState("")
+  const [vendedorProfile, setVendedorProfile] = useState(null);
+
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const productsRef = useRef(null);
@@ -26,7 +26,7 @@ export default function VendedorPage() {
 
    const fetchPerfil = async () => {
       try {
-        const response = await fetch('/catalogoMs/vendedores/perfil', {
+        const response = await fetch('/catalogoMs/api/vendedores/perfil', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -37,8 +37,8 @@ export default function VendedorPage() {
         if (response.ok) {
             const data = await response.json();
           
-            setIsProfileComplete(data.perfilCompleto); 
-            setVendorName(data.nombreNegocio);
+            setVendedorProfile(data);
+            setIsProfileComplete(data.estado === "ACTIVO");
 
         } else {
             console.error("Error al obtener perfil del vendedor");
@@ -47,9 +47,7 @@ export default function VendedorPage() {
 
       } catch (error) {
         console.error("Error de red:", error);
-      } finally {
-        setLoading(false);
-      }
+      } 
     }
 
     fetchPerfil();
@@ -134,7 +132,11 @@ export default function VendedorPage() {
               <Image src="/pin-de-ubicacion.png" alt="Pin de ubicación" width={30} height={40} />
               <div className={styles.locationText}>
                 <span className={styles.locationLabel}>Ubicación</span>
-                <span className={styles.locationValue}>Mi dirección</span>
+                <span className={styles.locationValue}>
+                  {vendedorProfile?.direccion 
+                  ? `${vendedorProfile.direccion.calle} ${vendedorProfile.direccion.numero}, ${vendedorProfile.direccion.localidad}`
+                  : "Mi dirección"}
+                </span>
               </div>
             </div>
           </div>
@@ -176,7 +178,7 @@ export default function VendedorPage() {
                 }}
               >
                 <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
-                <span className={styles.userButtonText}>Local</span>
+                <span className={styles.userButtonText}>{vendedorProfile?.nombreNegocio || "Mi Cuenta"}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
                   <path d="M7 10l5 5 5-5z" />
                 </svg>
@@ -184,7 +186,7 @@ export default function VendedorPage() {
               {showUserMenu && (
                 <div className={styles.userPopover}>
                   <div className={styles.userPopoverHeader}>
-                    <span>Local</span>
+                    <span>{vendedorProfile?.nombreNegocio || "Usuario"}</span>
                   </div>
                   <div className={styles.userPopoverMenu}>
                     <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor")}>
@@ -234,7 +236,7 @@ export default function VendedorPage() {
       {/* ========== HERO SECTION ========== */}
       <section className={`${styles.hero} ${!isProfileComplete ? styles.heroIncomplete : ""}`}>
         <div className={styles.heroContent}>
-          <h1 className={styles.heroTitle}>{isProfileComplete ? "McDonald's" : "Local"}</h1>
+          <h1 className={styles.heroTitle}>{vendedorProfile?.nombreNegocio || "Mi Negocio"}</h1>
           {!isProfileComplete && (
             <>
               <h2 className={styles.heroSubtitle}>¡Estás a un paso de empezar a vender!</h2>

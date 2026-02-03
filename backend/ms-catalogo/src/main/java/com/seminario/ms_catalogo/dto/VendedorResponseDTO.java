@@ -6,7 +6,8 @@ import lombok.Data;
 
 @Data
 public class VendedorResponseDTO {
-    private String usuarioId;
+    //private String usuarioId;
+    private String email;
     private String nombreNegocio;
     private String nombreResponsable;
     private String apellidoResponsable;

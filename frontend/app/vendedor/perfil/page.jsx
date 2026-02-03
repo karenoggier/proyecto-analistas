@@ -10,6 +10,7 @@ export default function VendedorPerfilPage() {
   const router = useRouter()
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+   const [vendedorProfile, setVendedorProfile] = useState(null);
 
   // Estado para previsualizar imágenes cargadas
   const [previews, setPreviews] = useState({
@@ -24,24 +25,64 @@ export default function VendedorPerfilPage() {
 
   const [formData, setFormData] = useState({
     nombreNegocio: "",
+    email: "",
     telefono: "",
     nombreResponsable: "",
     apellidoResponsable: "",
     horarioApertura: "",
     horarioCierre: "",
-    tiempoEspera: "",
+    tiempoEstimadoEspera: "",
     realizaEnvios: "",
-    provincia: "",
-    localidad: "",
-    calle: "",
-    numero: "",
-    codigoPostal: "",
-    notasAdicionales: "",
+    direccion: {
+      provincia: "",
+      localidad: "",
+      calle: "",
+      numero: "",
+      codigoPostal: "",
+      observaciones: ""
+    },
     logo:null,
     banner:null
   })
 
   // ========= EFFECTS (CARGA DE DATOS) =========
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    const rol = localStorage.getItem("rol")
+
+    if (!token || rol !== "VENDEDOR") {
+      window.location.href = "/login"
+      return
+    }
+
+   const fetchPerfil = async () => {
+      try {
+        const response = await fetch('/catalogoMs/api/vendedores/perfil', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+          
+            setVendedorProfile(data);
+
+        } else {
+            console.error("Error al obtener perfil del vendedor");
+        }
+
+      } catch (error) {
+        console.error("Error de red:", error);
+      } 
+    }
+
+    fetchPerfil();
+
+  }, [])
+
   // Cargar Provincias
   useEffect(() => {
     const fetchProvincias = async () => {
@@ -60,9 +101,9 @@ export default function VendedorPerfilPage() {
     fetchProvincias();
   }, []);
 
-  // 2. Cargar Localidades cuando cambia la provincia seleccionada
-  /*useEffect(() => {
-    //const idProvincia = vendedorData.direccion.provincia;
+  
+  useEffect(() => {
+    const idProvincia = vendedorProfile.direccion.provincia;
     
     // Si no hay provincia seleccionada, limpiamos las localidades
     if (!idProvincia) {
@@ -89,7 +130,7 @@ export default function VendedorPerfilPage() {
     };
 
     fetchLocalidades();
-  }, []);*/
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token")
@@ -99,6 +140,26 @@ export default function VendedorPerfilPage() {
       router.push("/login")
     }
   }, [router])
+
+  const handleVendedorChange = (e) => {
+    const { name, value } = e.target
+    const addressFields = ["provincia", "localidad", "calle", "numero", "codigoPostal", "observaciones"];
+
+    if (addressFields.includes(name)) {
+      setVendedorData(prev => ({
+        ...prev,
+        direccion: { 
+            ...prev.direccion, 
+            [name]: value,
+            ...(name === 'provincia' ? { localidad: "" } : {})
+        }
+      }))
+      if (errors[name]) setErrors({...errors, [name]: null});
+    } else {
+      setVendedorData(prev => ({ ...prev, [name]: value }))
+      if (errors[name]) setErrors({...errors, [name]: null});
+    }
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -147,7 +208,11 @@ export default function VendedorPerfilPage() {
               <Image src="/pin-de-ubicacion.png" alt="Pin de ubicación" width={30} height={40} />
               <div className={styles.locationText}>
                 <span className={styles.locationLabel}>Ubicación</span>
-                <span className={styles.locationValue}>Mi dirección</span>
+                <span className={styles.locationValue}>
+                  {vendedorProfile?.direccion 
+                  ? `${vendedorProfile.direccion.calle} ${vendedorProfile.direccion.numero}, ${vendedorProfile.direccion.localidad}`
+                  : "Mi dirección"}
+                </span>
               </div>
             </div>
           </div>
@@ -189,7 +254,7 @@ export default function VendedorPerfilPage() {
                 }}
               >
                 <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
-                <span className={styles.userButtonText}>Local</span>
+                <span className={styles.userButtonText}>{vendedorProfile?.nombreNegocio}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
                   <path d="M7 10l5 5 5-5z" />
                 </svg>
@@ -197,7 +262,7 @@ export default function VendedorPerfilPage() {
               {showUserMenu && (
                 <div className={styles.userPopover}>
                   <div className={styles.userPopoverHeader}>
-                    <span>Local</span>
+                    <span>{vendedorProfile?.nombreNegocio}</span>
                   </div>
                   <div className={styles.userPopoverMenu}>
                     <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor")}>
@@ -271,7 +336,7 @@ export default function VendedorPerfilPage() {
                       onChange={(e) => handleImageChange(e, 'logo')}
                     />
                     {previews.logo ? (
-                      <img src={previews.logo} alt="Logo preview" className={styles.imagePreview} />
+                      <img src={vendedorProfile.logo} alt="Logo preview" className={styles.imagePreview} />
                     ) : (
                       <>
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="#d1d5db">
@@ -294,7 +359,7 @@ export default function VendedorPerfilPage() {
                       onChange={(e) => handleImageChange(e, 'logo')}
                     />
                     {previews.logo ? (
-                      <img src={previews.logo} alt="Logo preview" className={styles.imagePreview} />
+                      <img src={vendedorProfile.logo} alt="Logo preview" className={styles.imagePreview} />
                     ) : (
                       <>
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="#d1d5db">
@@ -313,7 +378,7 @@ export default function VendedorPerfilPage() {
               <input
                 type="text"
                 name="nombreNegocio"
-                value={formData.nombreNegocio}
+                value={vendedorProfile?.nombreNegocio || ""}
                 onChange={handleInputChange}
                 className={styles.formInput}
               />
@@ -325,7 +390,7 @@ export default function VendedorPerfilPage() {
               <input
                 type="tel"
                 name="telefono"
-                value={formData.telefono}
+                value={vendedorProfile?.telefono || ""}
                 onChange={handleInputChange}
                 className={styles.formInput}
               />
@@ -338,7 +403,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="text"
                   name="nombreResponsable"
-                  value={formData.nombreResponsable}
+                  value={vendedorProfile?.nombreResponsable || ""}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
@@ -349,7 +414,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="text"
                   name="apellidoResponsable"
-                  value={formData.apellidoResponsable}
+                  value={vendedorProfile?.apellidoResponsable || ""}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
@@ -363,7 +428,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="time"
                   name="horarioApertura"
-                  value={formData.horarioApertura}
+                  value={vendedorProfile?.horarioApertura || ""}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
@@ -374,7 +439,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="time"
                   name="horarioCierre"
-                  value={formData.horarioCierre}
+                  value={vendedorProfile?.horarioCierre || ""}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
@@ -388,7 +453,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="text"
                   name="tiempoEspera"
-                  value={formData.tiempoEspera}
+                  value={vendedorProfile?.tiempoEspera || ""}
                   onChange={handleInputChange}
                   className={styles.formInput}
                   placeholder="ej: 30-45 min"
@@ -399,7 +464,7 @@ export default function VendedorPerfilPage() {
                 <label className={styles.formLabel}>Realiza envíos</label>
                 <select
                   name="realizaEnvios"
-                  value={formData.realizaEnvios}
+                  value={vendedorProfile?.realizaEnvios || ""}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 >
@@ -425,8 +490,8 @@ export default function VendedorPerfilPage() {
                     <label className={styles.formLabel}>Provincia</label>
                     <select
                       name="provincia"
-                      /*value={vendedorData.direccion.provincia}
-                      onChange={handleVendedorChange}*/
+                      value={vendedorProfile?.direccion.provincia || ""}
+                      onChange={handleVendedorChange}
                       placeholder="Buenos Aires" 
                       className={styles.formInput} 
                       required

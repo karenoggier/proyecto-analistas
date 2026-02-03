@@ -41,7 +41,8 @@ public class VendedorMapper {
 
     public VendedorResponseDTO toDTO(Vendedor vendedor) {
         VendedorResponseDTO dto = new VendedorResponseDTO();
-        dto.setUsuarioId(vendedor.getUsuarioId());
+        //dto.setUsuarioId(vendedor.getUsuarioId());
+        dto.setEmail(vendedor.getEmail());
         dto.setNombreNegocio(vendedor.getNombreNegocio());
         dto.setNombreResponsable(vendedor.getNombreResponsable());
         dto.setApellidoResponsable(vendedor.getApellidoResponsable());
