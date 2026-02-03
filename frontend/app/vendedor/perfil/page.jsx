@@ -10,7 +10,7 @@ export default function VendedorPerfilPage() {
   const router = useRouter()
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
-   const [vendedorProfile, setVendedorProfile] = useState(null);
+  const [loadingData, setLoadingData] = useState(true)
 
   // Estado para previsualizar imágenes cargadas
   const [previews, setPreviews] = useState({
@@ -18,10 +18,11 @@ export default function VendedorPerfilPage() {
     banner: null
   })
 
-   // States for APIs locations
+  // States for APIs locations
   const [provincias, setProvincias] = useState([])
   const [localidades, setLocalidades] = useState([])
   const [loadingLocalidades, setLoadingLocalidades] = useState(false)
+  const [localidadNombre, setLocalidadNombre] = useState([])
 
   const [formData, setFormData] = useState({
     nombreNegocio: "",
@@ -55,83 +56,75 @@ export default function VendedorPerfilPage() {
       return
     }
 
-   const fetchPerfil = async () => {
+    const cargarDatos = async () => {
       try {
-        const response = await fetch('/catalogoMs/api/vendedores/perfil', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        // A. Cargar lista de Provincias
+        const resProv = await fetch('/usuariosMs/ubicacion/provincias')
+        const listaProvincias = await resProv.json()
+        setProvincias(listaProvincias)
+
+        // B. Cargar Perfil del Vendedor
+        const resPerfil = await fetch('/catalogoMs/api/vendedores/perfil', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+
+        if (resPerfil.ok) {
+            const data = await resPerfil.json()
+            
+            // --- LÓGICA DE TRADUCCIÓN (TEXTO -> ID) ---
+            
+            // 1. Buscar ID de Provincia
+            const provEncontrada = listaProvincias.find(p => p.nombre === data.direccion?.provincia)
+            const idProvincia = provEncontrada ? provEncontrada.id : ""
+
+            // 2. Buscar ID de Localidad 
+            let idLocalidad = ""
+            if (idProvincia) {
+                const resLoc = await fetch(`/usuariosMs/ubicacion/localidades/${idProvincia}`)
+                const listaLocalidades = await resLoc.json()
+                setLocalidades(listaLocalidades) 
+
+                const locEncontrada = listaLocalidades.find(l => l.nombre === data.direccion?.localidad)
+                idLocalidad = locEncontrada ? locEncontrada.id : ""
             }
-        });
 
-        if (response.ok) {
-            const data = await response.json();
-          
-            setVendedorProfile(data);
+            // --- LLENADO DEL FORMULARIO ---
+            setFormData({
+                nombreNegocio: data.nombreNegocio || "",
+                email: data.email || "", 
+                telefono: data.telefono || "",
+                nombreResponsable: data.nombreResponsable || "",
+                apellidoResponsable: data.apellidoResponsable || "",
+                horarioApertura: data.horarioApertura || "",
+                horarioCierre: data.horarioCierre || "",
+                tiempoEstimadoEspera: data.tiempoEstimadoEspera || "",
+                realizaEnvios: data.realizaEnvios || "",
+                
+                direccion: {
+                    provincia: idProvincia, 
+                    localidad: idLocalidad, 
+                    calle: data.direccion?.calle || "",
+                    numero: data.direccion?.numero || "",
+                    codigoPostal: data.direccion?.codigoPostal || "",
+                    observaciones: data.direccion?.observaciones || ""
+                },
+                logo: data.logo,
+                banner: data.banner
+            })
 
-        } else {
-            console.error("Error al obtener perfil del vendedor");
+            if(data.logo) setPreviews(prev => ({...prev, logo: data.logo}))
         }
-
       } catch (error) {
-        console.error("Error de red:", error);
-      } 
+        console.error("Error cargando datos:", error)
+      } finally {
+        setLoadingData(false)
+      }
     }
 
-    fetchPerfil();
-
+    cargarDatos()
   }, [])
 
-  // Cargar Provincias
-  useEffect(() => {
-    const fetchProvincias = async () => {
-        try {
-            const res = await fetch('/usuariosMs/ubicacion/provincias');
-            if (res.ok) {
-                const data = await res.json();
-                setProvincias(data);
-            } else {
-                console.error("Error al cargar provincias");
-            }
-        } catch (error) {
-            console.error("Error de conexión:", error);
-        }
-    };
-    fetchProvincias();
-  }, []);
-
   
-  useEffect(() => {
-    const idProvincia = vendedorProfile.direccion.provincia;
-    
-    // Si no hay provincia seleccionada, limpiamos las localidades
-    if (!idProvincia) {
-        setLocalidades([]);
-        return;
-    }
-
-    const fetchLocalidades = async () => {
-        setLoadingLocalidades(true);
-        try {
-            const res = await fetch(`/usuariosMs/ubicacion/localidades/${idProvincia}`);
-            if (res.ok) {
-                const data = await res.json();
-                setLocalidades(data);
-            } else {
-                setLocalidades([]);
-            }
-        } catch (error) {
-            console.error("Error cargando localidades:", error);
-            setLocalidades([]);
-        } finally {
-            setLoadingLocalidades(false);
-        }
-    };
-
-    fetchLocalidades();
-  }, []);
-
   useEffect(() => {
     const token = localStorage.getItem("token")
     const rol = localStorage.getItem("rol")
@@ -141,58 +134,74 @@ export default function VendedorPerfilPage() {
     }
   }, [router])
 
-  const handleVendedorChange = (e) => {
+  // 2. MANEJADOR PARA CAMPOS SIMPLES (Nivel superior)
+  const handleInputChange = (e) => {
     const { name, value } = e.target
-    const addressFields = ["provincia", "localidad", "calle", "numero", "codigoPostal", "observaciones"];
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
 
-    if (addressFields.includes(name)) {
-      setVendedorData(prev => ({
+  // 3. MANEJADOR PARA DIRECCIÓN (Nivel anidado)
+  const handleAddressChange = async (e) => {
+    const { name, value } = e.target
+
+    setFormData(prev => ({
         ...prev,
-        direccion: { 
-            ...prev.direccion, 
+        direccion: {
+            ...prev.direccion,
             [name]: value,
+            // Si cambia provincia, reseteamos localidad
             ...(name === 'provincia' ? { localidad: "" } : {})
         }
-      }))
-      if (errors[name]) setErrors({...errors, [name]: null});
-    } else {
-      setVendedorData(prev => ({ ...prev, [name]: value }))
-      if (errors[name]) setErrors({...errors, [name]: null});
+    }))
+
+    // Si cambió la provincia, cargar nuevas localidades
+    if (name === 'provincia') {
+        if (value) {
+            setLoadingLocalidades(true)
+            try {
+                const res = await fetch(`/usuariosMs/ubicacion/localidades/${value}`)
+                if (res.ok) setLocalidades(await res.json())
+                else setLocalidades([])
+            } catch (err) {
+                setLocalidades([])
+            } finally {
+                setLoadingLocalidades(false)
+            }
+        } else {
+            setLocalidades([])
+        }
     }
   }
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  // 4. MANEJADOR DE IMÁGENES
+  const handleImageChange = (e, type) => {
+    const file = e.target.files[0]
+    if (file) {
+      setFormData(prev => ({ ...prev, [type]: file }))
+      const objectUrl = URL.createObjectURL(file)
+      setPreviews(prev => ({ ...prev, [type]: objectUrl }))
+    }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log("Guardar cambios:", formData)
-    // TODO: Implement API call to save profile
+    // Aquí preparas el objeto para enviar. 
+    // Recuerda que 'provincia' y 'localidad' en formData son IDs.
+    console.log("Datos a enviar:", formData)
   }
 
-  const handleLogout = () => {
-    localStorage.clear()
-    window.location.href = "/login"
+  // Función auxiliar para buscar el nombre de forma segura
+  const getNombreLocalidad = () => {
+    const idLoc = formData.direccion.localidad;
+    if (!idLoc) return ""; 
+    const encontrada = localidades.find(l => l.id == idLoc);
+    return encontrada ? encontrada.nombre : "Cargando...";
   }
 
-  const handleNavigate = (path) => {
-    window.location.href = path
-  }
+  const handleNavigate = (path) => window.location.href = path
+  const handleLogout = () => { localStorage.clear(); window.location.href = "/login" }
 
-  // Lógica para cargar imágenes y mostrar previsualización
-  const handleImageChange = (e, type) => {
-    const file = e.target.files[0];
-    if (file) {
-      // 1. Guardar el archivo en el form data
-      setFormData(prev => ({ ...prev, [type]: file }));
-      
-      // 2. Crear URL para previsualización
-      const objectUrl = URL.createObjectURL(file);
-      setPreviews(prev => ({ ...prev, [type]: objectUrl }));
-    }
-  }
+  if (loadingData) return <div className={styles.loading}>Cargando perfil...</div>
 
   return (
     <div className={styles.pageWrapper}>
@@ -209,9 +218,10 @@ export default function VendedorPerfilPage() {
               <div className={styles.locationText}>
                 <span className={styles.locationLabel}>Ubicación</span>
                 <span className={styles.locationValue}>
-                  {vendedorProfile?.direccion 
-                  ? `${vendedorProfile.direccion.calle} ${vendedorProfile.direccion.numero}, ${vendedorProfile.direccion.localidad}`
-                  : "Mi dirección"}
+                  {formData.direccion.calle 
+                  ? `${formData.direccion.calle} ${formData.direccion.numero}, ${getNombreLocalidad()}`
+                  : "Mi dirección"
+                }
                 </span>
               </div>
             </div>
@@ -254,7 +264,7 @@ export default function VendedorPerfilPage() {
                 }}
               >
                 <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
-                <span className={styles.userButtonText}>{vendedorProfile?.nombreNegocio}</span>
+                <span className={styles.userButtonText}>{formData?.nombreNegocio}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
                   <path d="M7 10l5 5 5-5z" />
                 </svg>
@@ -262,7 +272,7 @@ export default function VendedorPerfilPage() {
               {showUserMenu && (
                 <div className={styles.userPopover}>
                   <div className={styles.userPopoverHeader}>
-                    <span>{vendedorProfile?.nombreNegocio}</span>
+                    <span>{formData?.nombreNegocio}</span>
                   </div>
                   <div className={styles.userPopoverMenu}>
                     <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor")}>
@@ -336,7 +346,7 @@ export default function VendedorPerfilPage() {
                       onChange={(e) => handleImageChange(e, 'logo')}
                     />
                     {previews.logo ? (
-                      <img src={vendedorProfile.logo} alt="Logo preview" className={styles.imagePreview} />
+                      <img src={formData.logo} alt="Logo preview" className={styles.imagePreview} />
                     ) : (
                       <>
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="#d1d5db">
@@ -359,7 +369,7 @@ export default function VendedorPerfilPage() {
                       onChange={(e) => handleImageChange(e, 'logo')}
                     />
                     {previews.logo ? (
-                      <img src={vendedorProfile.logo} alt="Logo preview" className={styles.imagePreview} />
+                      <img src={formData.logo} alt="Logo preview" className={styles.imagePreview} />
                     ) : (
                       <>
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="#d1d5db">
@@ -378,9 +388,21 @@ export default function VendedorPerfilPage() {
               <input
                 type="text"
                 name="nombreNegocio"
-                value={vendedorProfile?.nombreNegocio || ""}
+                value={formData.nombreNegocio}
                 onChange={handleInputChange}
                 className={styles.formInput}
+              />
+            </div>
+            
+            {/* email*/}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Email (No editable)</label>
+              <input 
+                type="email" 
+                name="email" 
+                value={formData.email} 
+                readOnly 
+                className={`${styles.formInput} bg-gray-100 text-gray-500 cursor-not-allowed`} 
               />
             </div>
 
@@ -390,7 +412,7 @@ export default function VendedorPerfilPage() {
               <input
                 type="tel"
                 name="telefono"
-                value={vendedorProfile?.telefono || ""}
+                value={formData.telefono}
                 onChange={handleInputChange}
                 className={styles.formInput}
               />
@@ -403,7 +425,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="text"
                   name="nombreResponsable"
-                  value={vendedorProfile?.nombreResponsable || ""}
+                  value={formData.nombreResponsable}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
@@ -414,7 +436,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="text"
                   name="apellidoResponsable"
-                  value={vendedorProfile?.apellidoResponsable || ""}
+                  value={formData.apellidoResponsable}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
@@ -428,7 +450,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="time"
                   name="horarioApertura"
-                  value={vendedorProfile?.horarioApertura || ""}
+                  value={formData.horarioApertura}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
@@ -439,7 +461,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="time"
                   name="horarioCierre"
-                  value={vendedorProfile?.horarioCierre || ""}
+                  value={formData.horarioCierre}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
@@ -453,7 +475,7 @@ export default function VendedorPerfilPage() {
                 <input
                   type="text"
                   name="tiempoEspera"
-                  value={vendedorProfile?.tiempoEspera || ""}
+                  value={formData.tiempoEspera}
                   onChange={handleInputChange}
                   className={styles.formInput}
                   placeholder="ej: 30-45 min"
@@ -464,7 +486,7 @@ export default function VendedorPerfilPage() {
                 <label className={styles.formLabel}>Realiza envíos</label>
                 <select
                   name="realizaEnvios"
-                  value={vendedorProfile?.realizaEnvios || ""}
+                  value={formData.realizaEnvios}
                   onChange={handleInputChange}
                   className={styles.formInput}
                 >
@@ -490,8 +512,8 @@ export default function VendedorPerfilPage() {
                     <label className={styles.formLabel}>Provincia</label>
                     <select
                       name="provincia"
-                      value={vendedorProfile?.direccion.provincia || ""}
-                      onChange={handleVendedorChange}
+                      value={formData.direccion.provincia}
+                      onChange={handleAddressChange}
                       placeholder="Buenos Aires" 
                       className={styles.formInput} 
                       required
@@ -507,11 +529,11 @@ export default function VendedorPerfilPage() {
                     <label className={styles.formLabel}>Localidad</label>
                     <select 
                       name="localidad"
-                      /*value={vendedorData.direccion.localidad}
-                      onChange={handleVendedorChange}*/
+                      value={formData.direccion.localidad}
+                      onChange={handleAddressChange}
                       placeholder="Ciudad Autónoma" 
                       className={styles.formInput} 
-                      /*disabled={!vendedorData.direccion.provincia}*/
+                      disabled={!formData.direccion.provincia}
                       required
                     >
                       <option value="">{loadingLocalidades ? "Cargando..." : "Seleccione"}</option>
@@ -528,8 +550,8 @@ export default function VendedorPerfilPage() {
                   <input 
                     type="text" 
                     name="calle"
-                    /*value={vendedorData.direccion.calle}
-                    onChange={handleVendedorChange}*/
+                    value={formData.direccion.calle}
+                    onChange={handleAddressChange}
                     placeholder="Avenida Corrientes" 
                     className={styles.formInput} 
                     required
@@ -543,8 +565,8 @@ export default function VendedorPerfilPage() {
                     <input 
                       type="text" 
                       name="numero"
-                      /*value={vendedorData.direccion.numero}
-                      onChange={handleVendedorChange}*/
+                      value={formData.direccion.numero}
+                      onChange={handleAddressChange}
                       placeholder="1234" 
                       className={styles.formInput} 
                       required
@@ -557,8 +579,8 @@ export default function VendedorPerfilPage() {
                     <input 
                       type="text" 
                       name="codigoPostal"
-                      /*value={vendedorData.direccion.codigoPostal}
-                      onChange={handleVendedorChange}*/
+                      value={formData.direccion.codigoPostal}
+                      onChange={handleAddressChange}
                       placeholder="1425" 
                       className={styles.formInput} 
                       required
@@ -571,8 +593,8 @@ export default function VendedorPerfilPage() {
                   <label className={styles.formLabel}>Notas Adicionales</label>
                   <textarea 
                     name="observaciones"
-                    /*value={vendedorData.direccion.observaciones}
-                    onChange={handleVendedorChange}*/
+                    value={formData.direccion.observaciones}
+                    onChange={handleAddressChange}
                     placeholder="Piso, departamento, código de acceso, etc." 
                     className={styles.formInput} 
                   />
