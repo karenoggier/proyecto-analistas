@@ -2,6 +2,8 @@ package com.seminario.ms_catalogo.mapper;
 
 import org.springframework.stereotype.Component;
 
+import com.seminario.ms_catalogo.dto.DireccionDTO;
+import com.seminario.ms_catalogo.dto.DireccionRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
@@ -63,9 +65,9 @@ public class VendedorMapper {
 
         return dto;
     }
+
     public Vendedor toEntity(VendedorRequestDTO dto) {
         Vendedor vendedor = new Vendedor();
-        vendedor.setUsuarioId(dto.getUsuarioId());
         vendedor.setNombreNegocio(dto.getNombreNegocio());
         vendedor.setNombreResponsable(dto.getNombreResponsable());
         vendedor.setApellidoResponsable(dto.getApellidoResponsable());
@@ -84,26 +86,40 @@ public class VendedorMapper {
 
     public VendedorRegistradoEvent toEvent(VendedorRequestDTO vendedorRequestDTO) {
         VendedorRegistradoEvent evento = new VendedorRegistradoEvent();
-        evento.setUsuarioId(vendedorRequestDTO.getUsuarioId());
         evento.setNombreNegocio(vendedorRequestDTO.getNombreNegocio());
         evento.setNombreResponsable(vendedorRequestDTO.getNombreResponsable());
         evento.setApellidoResponsable(vendedorRequestDTO.getApellidoResponsable());
         evento.setTelefono(vendedorRequestDTO.getTelefono());
         if (vendedorRequestDTO.getDireccion() != null) {
-            evento.setDireccion(vendedorRequestDTO.getDireccion());
+            DireccionDTO dirEvento = new DireccionDTO();
+            dirEvento.setProvincia(vendedorRequestDTO.getDireccion().getProvincia());
+            dirEvento.setLocalidad(vendedorRequestDTO.getDireccion().getLocalidad());
+            dirEvento.setCalle(vendedorRequestDTO.getDireccion().getCalle());
+            dirEvento.setNumero(vendedorRequestDTO.getDireccion().getNumero());
+            dirEvento.setCodigoPostal(vendedorRequestDTO.getDireccion().getCodigoPostal());
+            dirEvento.setObservaciones(vendedorRequestDTO.getDireccion().getObservaciones());
+        
+            evento.setDireccion(dirEvento);
         }
         return evento;
     }
 
     public VendedorRegistradoEvent toVendedorRegistradoEvent(VendedorRequestDTO vendedorRequestDTO) {
         VendedorRegistradoEvent evento = new VendedorRegistradoEvent();
-        evento.setUsuarioId(vendedorRequestDTO.getUsuarioId());
         evento.setNombreNegocio(vendedorRequestDTO.getNombreNegocio());
         evento.setNombreResponsable(vendedorRequestDTO.getNombreResponsable());
         evento.setApellidoResponsable(vendedorRequestDTO.getApellidoResponsable());
         evento.setTelefono(vendedorRequestDTO.getTelefono());
         if (vendedorRequestDTO.getDireccion() != null) {
-            evento.setDireccion(vendedorRequestDTO.getDireccion());
+            DireccionDTO dirEvent = new DireccionDTO();
+            dirEvent.setProvincia(vendedorRequestDTO.getDireccion().getProvincia());
+            dirEvent.setLocalidad(vendedorRequestDTO.getDireccion().getLocalidad());
+            dirEvent.setCalle(vendedorRequestDTO.getDireccion().getCalle());
+            dirEvent.setNumero(vendedorRequestDTO.getDireccion().getNumero());
+            dirEvent.setCodigoPostal(vendedorRequestDTO.getDireccion().getCodigoPostal());
+            dirEvent.setObservaciones(vendedorRequestDTO.getDireccion().getObservaciones());
+            
+            evento.setDireccion(dirEvent);
         }
         return evento;
     }

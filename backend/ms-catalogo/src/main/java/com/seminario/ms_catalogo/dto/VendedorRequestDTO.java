@@ -5,9 +5,6 @@ import lombok.Data;
 
 @Data
 public class VendedorRequestDTO {
-    @NotBlank(message = "El usuarioId no puede estar vacio")
-    private String usuarioId;
-    @NotBlank(message = "El nombre del negocio no puede estar vacio")
     private String nombreNegocio;
     private String nombreResponsable;
     private String apellidoResponsable;
@@ -18,6 +15,5 @@ public class VendedorRequestDTO {
     private String tiempoEstimadoEspera;
     private String logo;
     private String banner;
-
-    private DireccionDTO direccion;
+    private DireccionRequestDTO direccion;
 }

@@ -6,7 +6,21 @@ import com.seminario.ms_catalogo.model.*;
 
 @Component
 public class DireccionMapper {
-    public Direccion toEntity(DireccionDTO direccionDTO) {
+    public Direccion toEntity(DireccionRequestDTO direccionDTO) {
+        if (direccionDTO == null) {
+            return null;
+        }
+        Direccion direccion = new Direccion();
+        direccion.setProvincia(direccionDTO.getProvincia());
+        direccion.setLocalidad(direccionDTO.getLocalidad());
+        direccion.setCalle(direccionDTO.getCalle());
+        direccion.setNumero(direccionDTO.getNumero());
+        direccion.setCodigoPostal(direccionDTO.getCodigoPostal());
+        direccion.setObservaciones(direccionDTO.getObservaciones());
+        return direccion;
+    }
+
+     public Direccion toEntity(DireccionDTO direccionDTO) {
         if (direccionDTO == null) {
             return null;
         }
@@ -21,6 +35,7 @@ public class DireccionMapper {
         direccion.setLongitud(direccionDTO.getLongitud());
         return direccion;
     }
+
 
     public DireccionDTO toDTO(Direccion direccion) {
         if (direccion == null) {
