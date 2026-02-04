@@ -112,7 +112,9 @@ public class VendedorService {
             // Asumiendo que usuarioClient devuelve ResponseEntity<VendedorRegistradoEvent>
             respuestaUsuario = usuarioClient.actualizarVendedor(guardado).getBody();
         } catch (Exception e) {
-            throw new RuntimeException("Error al comunicarse con Microservicio Usuarios: " + e.getMessage());
+            String error = e.getMessage();
+            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, error);
+            //throw new RuntimeException("Error al comunicarse con Microservicio Usuarios: " + e.getMessage());
         }
 
         // Actualizar campos del Vendedor (Catalogo)

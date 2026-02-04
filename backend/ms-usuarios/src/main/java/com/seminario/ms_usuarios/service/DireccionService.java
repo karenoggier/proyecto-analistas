@@ -104,7 +104,7 @@ public class DireccionService {
         if(localidadEntidad==null) new RequestException("US", 2, HttpStatus.NOT_FOUND, "Localidad no encontrada con ID: " + dto.getLocalidad());
 
 
-        NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(dto.getCalle(), dto.getNumero(), dto.getLocalidad(), dto.getProvincia());
+        NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(dto.getCalle(), dto.getNumero(), localidadEntidad.getNombre(), provinciaEntidad.getNombre());
 
         if (coordenadas == null) {
             throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "No se pudieron obtener las coordenadas para la dirección proporcionada");
@@ -115,6 +115,7 @@ public class DireccionService {
         direccion.setCodigoPostal(dto.getCodigoPostal());
         direccion.setProvincia(provinciaEntidad); 
         direccion.setLocalidad(localidadEntidad);
+        direccion.setObservaciones(dto.getObservaciones());
         direccion.setLatitud(coordenadas.getLatitud());
         direccion.setLongitud(coordenadas.getLongitud());
 

@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(error, ex.getStatus());
     }
-    // 2. handle validation errors
+    // handle validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
