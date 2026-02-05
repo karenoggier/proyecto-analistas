@@ -9,7 +9,7 @@ import com.seminario.ms_usuarios.model.Localidad;
 
 @Repository
 public interface LocalidadRepository extends JpaRepository<Localidad, String>{
-    List<Localidad> findByProvinciaId(String provinciaId);
+   List<Localidad> findByProvinciaIdOrderByNombreAsc(String idProvincia);
 
     Localidad findByNombre(String localidad);
 }

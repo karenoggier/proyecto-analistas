@@ -88,6 +88,6 @@ public class UbicacionService {
     }
     
     public List<Localidad> obtenerLocalidadesPorProvincia(String idProvincia) {
-        return localidadRepository.findByProvinciaId(idProvincia);
+        return localidadRepository.findByProvinciaIdOrderByNombreAsc(idProvincia);
     }
 }
