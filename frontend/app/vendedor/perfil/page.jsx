@@ -11,6 +11,7 @@ export default function VendedorPerfilPage() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
+  const [errors, setErrors] = useState({})
 
   // Estado para previsualizar imágenes cargadas
   const [previews, setPreviews] = useState({
@@ -98,7 +99,7 @@ export default function VendedorPerfilPage() {
                 horarioApertura: data.horarioApertura || "",
                 horarioCierre: data.horarioCierre || "",
                 tiempoEstimadoEspera: data.tiempoEstimadoEspera || "",
-                realizaEnvios: data.realizaEnvios || "",
+                realizaEnvios: data.realizaEnvios === true ? "si" : (data.realizaEnvios === false ? "no" : ""),
                 
                 direccion: {
                     provincia: idProvincia, 
@@ -183,11 +184,103 @@ export default function VendedorPerfilPage() {
     }
   }
 
-  const handleSubmit = (e) => {
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = (error) => reject(error)
+    })
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Aquí preparas el objeto para enviar. 
-    // Recuerda que 'provincia' y 'localidad' en formData son IDs.
-    console.log("Datos a enviar:", formData)
+    setLoadingData(true)
+    setErrors({})
+
+    try {
+      const token = localStorage.getItem("token")
+      
+      // 1. CONVERTIR IMÁGENES (Solo si son archivos nuevos)
+      // Inicializamos con lo que tenga formData (null, URL vieja o Base64 viejo)
+      let logoToSend = formData.logo;
+      let bannerToSend = formData.banner;
+
+      // Solo si el usuario subió un archivo NUEVO (es tipo File), generamos el nuevo Base64
+      if (formData.logo instanceof File) {
+        logoToSend = await fileToBase64(formData.logo);
+      }
+
+      if (formData.banner instanceof File) {
+        bannerToSend = await fileToBase64(formData.banner);
+      }
+
+      // 2. ARMAR EL JSON (DTO)
+      const vendedorUpdateDTO = {
+        nombreNegocio: formData.nombreNegocio,
+        telefono: formData.telefono,
+        nombreResponsable: formData.nombreResponsable,
+        apellidoResponsable: formData.apellidoResponsable,
+        horarioApertura: formData.horarioApertura,
+        horarioCierre: formData.horarioCierre,
+        tiempoEstimadoEspera: formData.tiempoEstimadoEspera,
+        realizaEnvios: formData.realizaEnvios === "si", 
+        
+        // Enviamos las imágenes como STRING Base64
+        logo: logoToSend,   
+        banner: bannerToSend, 
+
+        direccion: {
+          calle: formData.direccion.calle,
+          numero: formData.direccion.numero,
+          codigoPostal: formData.direccion.codigoPostal,
+          observaciones: formData.direccion.observaciones,
+          provincia: formData.direccion.provincia, // ID
+          localidad: formData.direccion.localidad  // ID
+        }
+      }
+
+      // 3. ENVIAR COMO JSON 
+      const response = await fetch('/catalogoMs/api/vendedores/actualizar', {
+        method: 'PUT', 
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(vendedorUpdateDTO)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+
+          if (errorData) {
+            // CASO 1: Error de Negocio/Lógica 
+            if (errorData.ms_code) {
+                if (errorData.ms_code === "GE") {
+                    setErrors({ direccion: "No pudimos encontrar esa dirección exacta. Verifica calle y altura." });
+                } else {
+                    // Error genérico global
+                    setErrors({ global: errorData.mensaje || "Error al actualizar el perfil." });
+                }
+            } 
+            // CASO 2: Error de Validación de Campos
+            else {
+                setErrors(errorData);
+            }
+          } else {
+             setErrors({ global: "Error desconocido en el servidor" });
+          }
+          return; 
+      }
+
+      alert("¡Perfil actualizado correctamente!")
+
+    } catch (error) {
+      console.error(error)
+      alert("Hubo un error al guardar los cambios: " + error.message)
+    } finally {
+      setLoadingData(false)
+    }
   }
 
   // Función auxiliar para buscar el nombre de forma segura
@@ -201,7 +294,7 @@ export default function VendedorPerfilPage() {
   const handleNavigate = (path) => window.location.href = path
   const handleLogout = () => { localStorage.clear(); window.location.href = "/login" }
 
-  if (loadingData) return <div className={styles.loading}>Cargando perfil...</div>
+  //if (loadingData) return <div className={styles.loading}>Cargando perfil...</div>
 
   return (
     <div className={styles.pageWrapper}>
@@ -346,7 +439,7 @@ export default function VendedorPerfilPage() {
                       onChange={(e) => handleImageChange(e, 'logo')}
                     />
                     {previews.logo ? (
-                      <img src={formData.logo} alt="Logo preview" className={styles.imagePreview} />
+                      <img src={previews.logo} alt="Logo preview" className={styles.imagePreview} />
                     ) : (
                       <>
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="#d1d5db">
@@ -368,8 +461,8 @@ export default function VendedorPerfilPage() {
                       accept="image/*"
                       onChange={(e) => handleImageChange(e, 'logo')}
                     />
-                    {previews.logo ? (
-                      <img src={formData.logo} alt="Logo preview" className={styles.imagePreview} />
+                    {previews.banner ? (
+                      <img src={previews.banner} alt="Banner preview" className={styles.imagePreview} />
                     ) : (
                       <>
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="#d1d5db">
@@ -392,6 +485,7 @@ export default function VendedorPerfilPage() {
                 onChange={handleInputChange}
                 className={styles.formInput}
               />
+              {errors.nombreNegocio && <p className={styles.errorMsg}>{errors.nombreNegocio}</p>}
             </div>
             
             {/* email*/}
@@ -404,6 +498,7 @@ export default function VendedorPerfilPage() {
                 readOnly 
                 className={`${styles.formInput} bg-gray-100 text-gray-500 cursor-not-allowed`} 
               />
+              {errors.email && <p className={styles.errorMsg}>{errors.email}</p>}
             </div>
 
             {/* Teléfono */}
@@ -416,6 +511,7 @@ export default function VendedorPerfilPage() {
                 onChange={handleInputChange}
                 className={styles.formInput}
               />
+              {errors.telefono && <p className={styles.errorMsg}>{errors.telefono}</p>}
             </div>
 
             {/* Responsable */}
@@ -429,6 +525,7 @@ export default function VendedorPerfilPage() {
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
+                {errors.nombreResponsable && <p className={styles.errorMsg}>{errors.nombreResponsable}</p>}
               </div>
 
               <div className={styles.formGroup}>
@@ -440,6 +537,7 @@ export default function VendedorPerfilPage() {
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
+                {errors.apellidoResponsable && <p className={styles.errorMsg}>{errors.apellidoResponsable}</p>}
               </div>
             </div>
 
@@ -454,6 +552,7 @@ export default function VendedorPerfilPage() {
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
+                {errors.horarioApertura && <p className={styles.errorMsg}>{errors.horarioApertura}</p>}
               </div>
 
               <div className={styles.formGroup}>
@@ -465,6 +564,7 @@ export default function VendedorPerfilPage() {
                   onChange={handleInputChange}
                   className={styles.formInput}
                 />
+                {errors.horarioCierre && <p className={styles.errorMsg}>{errors.horarioCierre}</p>}
               </div>
             </div>
 
@@ -474,12 +574,13 @@ export default function VendedorPerfilPage() {
                 <label className={styles.formLabel}>Tiempo estimado de espera</label>
                 <input
                   type="text"
-                  name="tiempoEspera"
-                  value={formData.tiempoEspera}
+                  name="tiempoEstimadoEspera"
+                  value={formData.tiempoEstimadoEspera}
                   onChange={handleInputChange}
                   className={styles.formInput}
                   placeholder="ej: 30-45 min"
                 />
+                {errors.tiempoEstimadoEspera && <p className={styles.errorMsg}>{errors.tiempoEstimadoEspera}</p>}
               </div>
 
               <div className={styles.formGroup}>
@@ -495,6 +596,7 @@ export default function VendedorPerfilPage() {
                   <option value="no">No</option>
                 </select>
               </div>
+              {errors.realizaEnvios && <p className={styles.errorMsg}>{errors.realizaEnvios}</p>}
             </div>
 
             {/* Address Section */}
@@ -523,6 +625,7 @@ export default function VendedorPerfilPage() {
                             <option key={prov.id} value={prov.id}>{prov.nombre}</option>
                       ))}
                     </select>
+                    {errors.provincia && <p className={styles.errorMsg}>{errors.provincia}</p>}
   
                   </div>
                   <div className={styles.formGroup}>
@@ -541,7 +644,7 @@ export default function VendedorPerfilPage() {
                             <option key={loc.id} value={loc.id}>{loc.nombre}</option>
                         ))}
                     </select>
-
+                    {errors.localidad && <p className={styles.errorMsg}>{errors.localidad}</p>}
                   </div>
                 </div>
 
@@ -556,7 +659,7 @@ export default function VendedorPerfilPage() {
                     className={styles.formInput} 
                     required
                   />
-
+                  {errors.calle && <p className={styles.errorMsg}>{errors.calle}</p>}
                 </div>
 
                 <div className={styles.formRow}>
@@ -571,7 +674,7 @@ export default function VendedorPerfilPage() {
                       className={styles.formInput} 
                       required
                     />
-
+                    {errors.numero && <p className={styles.errorMsg}>{errors.numero}</p>}
                   </div>
 
                   <div className={styles.formGroup}>
@@ -585,7 +688,7 @@ export default function VendedorPerfilPage() {
                       className={styles.formInput} 
                       required
                     />
-
+                    {errors.codigoPostal && <p className={styles.errorMsg}>{errors.codigoPostal}</p>}
                   </div>
                 </div>
 
@@ -598,10 +701,16 @@ export default function VendedorPerfilPage() {
                     placeholder="Piso, departamento, código de acceso, etc." 
                     className={styles.formInput} 
                   />
-
+                  {errors.observaciones && <p className={styles.errorMsg}>{errors.observaciones}</p>}
                 </div>
               </div>
             </div>
+
+            {errors.global && (
+                <div className={styles.errorMessage}>
+                  <span>{errors.global}</span>
+                </div>
+            )}
 
             {/* Submit Button */}
             <button type="submit" className={styles.submitButton}>

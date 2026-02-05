@@ -1,6 +1,8 @@
 package com.seminario.ms_catalogo.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.exception.RequestException;
+import com.seminario.ms_catalogo.exception.ValidationException;
 import com.seminario.ms_catalogo.mapper.DireccionMapper;
 import com.seminario.ms_catalogo.mapper.ProductoMapper;
 import com.seminario.ms_catalogo.mapper.VendedorMapper;
@@ -92,14 +95,20 @@ public class VendedorService {
     @Transactional
     public ResponseEntity<VendedorResponseDTO> updateVendedor(VendedorRequestDTO dto, String email) {
         Vendedor vendedor = vendedorRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Vendedor no encontrado"));
+                .orElseThrow(() -> new RequestException("CAT", 404, HttpStatus.NOT_FOUND, "Vendedor no encontrado"));
+
+        Map<String, String> errores = new HashMap<>();
 
         // Validacion    
         if (Estado.ACTIVO.equals(vendedor.getEstado())) {
-            validarTodosLosCampos(dto);
+            errores = validarTodosLosCampos(dto);
         }
         else {
-            validarCamposPrincipales(dto);
+            errores = validarCamposBasicos(dto);
+        }
+
+        if (!errores.isEmpty()) {
+            throw new ValidationException(errores);
         }
 
         // Preparar datos para el MS-Usuarios
@@ -146,25 +155,69 @@ public class VendedorService {
         return ResponseEntity.ok(vendedorMapper.toDTO(vendedor));
     }
 
-    private boolean esPerfilCompleto(Vendedor v) {
-        // Verifica si todos los campos obligatorios tienen valor
-        return v.getNombreNegocio() != null && !v.getNombreNegocio().isEmpty() &&
-            v.getDireccion() != null && 
-            v.getDireccion().getCalle() != null && !v.getDireccion().getCalle().isEmpty() &&
-            v.getDireccion().getProvincia() != null && !v.getDireccion().getProvincia().isEmpty() &&
-            v.getDireccion().getLocalidad() != null && !v.getDireccion().getLocalidad().isEmpty() &&
-            v.getDireccion().getNumero() != null && !v.getDireccion().getNumero().isEmpty() &&
-            v.getDireccion().getCodigoPostal() != null && !v.getDireccion().getCodigoPostal().isEmpty() &&
-            v.getTelefono() != null && !v.getTelefono().isEmpty() &&
-            v.getHorarioApertura() != null && !v.getHorarioApertura().isEmpty() &&
-            v.getHorarioCierre() != null && !v.getHorarioCierre().isEmpty() &&
-            v.getNombreResponsable() != null && !v.getNombreResponsable().isEmpty() &&
-            v.getApellidoResponsable() != null && !v.getApellidoResponsable().isEmpty() &&
-            v.getRealizaEnvios() != null &&
-            v.getTiempoEstimadoEspera() != null && !v.getTiempoEstimadoEspera().isEmpty();
+    
+
+    private boolean hasText(String text) {
+        return text != null && !text.trim().isEmpty();
     }
 
-    private void validarTodosLosCampos(VendedorRequestDTO dto) {
+    private boolean esPerfilCompleto(Vendedor v) {
+        // Verifica si todos los campos DE TEXTO tienen valor.
+        return hasText(v.getNombreNegocio()) &&
+               hasText(v.getTelefono()) &&
+               hasText(v.getNombreResponsable()) &&
+               hasText(v.getApellidoResponsable()) &&
+               hasText(v.getHorarioApertura()) &&
+               hasText(v.getHorarioCierre()) &&
+               hasText(v.getTiempoEstimadoEspera()) &&
+               v.getRealizaEnvios() != null && 
+               v.getDireccion() != null &&
+               hasText(v.getDireccion().getCalle()) &&
+               hasText(v.getDireccion().getNumero()) &&
+               hasText(v.getDireccion().getCodigoPostal()) &&
+               v.getDireccion().getProvincia() != null && 
+               v.getDireccion().getLocalidad() != null;
+    }
+
+    private Map<String, String> validarCamposBasicos(VendedorRequestDTO dto) {
+        Map<String, String> errores = new HashMap<>();
+
+        if (!hasText(dto.getNombreNegocio())) errores.put("nombreNegocio", "El nombre es obligatorio");
+        if (!hasText(dto.getTelefono())) errores.put("telefono", "El teléfono es obligatorio");
+        if (!hasText(dto.getNombreResponsable())) errores.put("nombreResponsable", "Responsable requerido");
+        if (!hasText(dto.getApellidoResponsable())) errores.put("apellidoResponsable", "Apellido requerido");
+
+        // Dirección siempre obligatoria para que el mapa funcione
+        if (dto.getDireccion() != null) {
+            if (!hasText(dto.getDireccion().getProvincia())) errores.put("provincia", "Falta provincia");
+            if (!hasText(dto.getDireccion().getLocalidad())) errores.put("localidad", "Falta localidad");
+            if (!hasText(dto.getDireccion().getCalle())) errores.put("calle", "Falta calle");
+            if (!hasText(dto.getDireccion().getNumero())) errores.put("numero", "Falta altura");
+            if (!hasText(dto.getDireccion().getCodigoPostal())) errores.put("codigoPostal", "Falta CP");
+        } else {
+            errores.put("direccion", "Dirección requerida");
+        }
+        
+        return errores;
+    }
+
+
+    private Map<String, String> validarTodosLosCampos(VendedorRequestDTO dto) {
+        // 1. Primero chequeamos que tenga lo básico
+        Map<String, String> errores = validarCamposBasicos(dto);
+
+        // 2. Sumamos las exigencias para ser ACTIVO
+        if (!hasText(dto.getHorarioApertura())) errores.put("horarioApertura", "Requerido para estar Activo");
+        if (!hasText(dto.getHorarioCierre())) errores.put("horarioCierre", "Requerido para estar Activo");
+        if (!hasText(dto.getTiempoEstimadoEspera())) errores.put("tiempoEstimadoEspera", "Requerido para estar Activo");
+        
+        if (dto.getRealizaEnvios() == null) errores.put("realizaEnvios", "Debe definir envíos");
+
+        return errores;
+    }
+
+
+   /* private void validarTodosLosCampos(VendedorRequestDTO dto) {
         // Si intentan mandar vacío algo importante estando ACTIVO, lanzamos error - FALTA AGREGAR LAS VALIDACIONES DE LONGITUD
         if (dto.getNombreNegocio() == null || dto.getNombreNegocio().isEmpty()) {
             throw new IllegalArgumentException("No puedes dejar el nombre vacío");
@@ -238,7 +291,7 @@ public class VendedorService {
         if (dto.getDireccion().getCodigoPostal() == null || dto.getDireccion().getCodigoPostal().isEmpty()) {
             throw new IllegalArgumentException("No puedes dejar el CP vacío");
         }
-    }
+    }*/
     
 
    /* public ResponseEntity<VendedorResponseDTO> updateVendedor(VendedorRequestDTO vendedorRequestDTO) {
