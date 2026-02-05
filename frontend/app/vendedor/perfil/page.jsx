@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import styles from "./perfil.module.css"
 import Link from "next/link"
 import Image from "next/image"
+import VendedorNavbar from "../../../components/ui/vendedor-navbar"
 
 export default function VendedorPerfilPage() {
   const router = useRouter()
@@ -113,7 +114,11 @@ export default function VendedorPerfilPage() {
                 banner: data.banner
             })
 
-            if(data.logo) setPreviews(prev => ({...prev, logo: data.logo}))
+            setPreviews(prev => ({
+                ...prev,
+                logo: data.logo || null,     
+                banner: data.banner || null  
+            }))
         }
       } catch (error) {
         console.error("Error cargando datos:", error)
@@ -135,13 +140,32 @@ export default function VendedorPerfilPage() {
     }
   }, [router])
 
-  // 2. MANEJADOR PARA CAMPOS SIMPLES (Nivel superior)
+  useEffect(() => {
+    const errorKeys = Object.keys(errors);
+    
+    if (errorKeys.length > 0) {
+      const firstFieldWithError = errorKeys.find(key => key !== 'global');
+
+      if (firstFieldWithError) {
+        const element = document.querySelector(`[name="${firstFieldWithError}"]`);
+
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.focus();
+        }
+      } else if (errors.global) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }, [errors]);
+
+  // MANEJADOR PARA CAMPOS SIMPLES (Nivel superior)
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  // 3. MANEJADOR PARA DIRECCIÓN (Nivel anidado)
+  // MANEJADOR PARA DIRECCIÓN (Nivel anidado)
   const handleAddressChange = async (e) => {
     const { name, value } = e.target
 
@@ -294,123 +318,29 @@ export default function VendedorPerfilPage() {
   const handleNavigate = (path) => window.location.href = path
   const handleLogout = () => { localStorage.clear(); window.location.href = "/login" }
 
+  const handleRemoveImage = (e, field) => {
+    e.preventDefault() 
+    e.stopPropagation()
+
+    setPreviews((prev) => ({ ...prev, [field]: null }))
+    setFormData((prev) => ({ ...prev, [field]: null }))
+  }
+
+  const datosParaNavbar = {
+      nombreNegocio: formData.nombreNegocio,
+      logo: formData.logo,
+      direccion: {
+          calle: formData.direccion.calle,
+          numero: formData.direccion.numero,
+          localidad: getNombreLocalidad() 
+      }
+  }
+
   //if (loadingData) return <div className={styles.loading}>Cargando perfil...</div>
 
   return (
     <div className={styles.pageWrapper}>
-      {/* NAVBAR */}
-      <nav className={styles.navbar}>
-        <div className={styles.navbarInner}>
-          <div className={styles.navbarLeft}>
-            <Link href="/vendedor" className={styles.logo}>
-              <Image src="/logo.png" alt="PediloYa Logo" width={50} height={60} className={styles.logo} priority />
-              <span className={styles.logoText}>PediloYa</span>
-            </Link>
-            <div className={styles.location}>
-              <Image src="/pin-de-ubicacion.png" alt="Pin de ubicación" width={30} height={40} />
-              <div className={styles.locationText}>
-                <span className={styles.locationLabel}>Ubicación</span>
-                <span className={styles.locationValue}>
-                  {formData.direccion.calle 
-                  ? `${formData.direccion.calle} ${formData.direccion.numero}, ${getNombreLocalidad()}`
-                  : "Mi dirección"
-                }
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.navbarRight}>
-            <div className={styles.navbarIconWrapper}>
-              <button
-                className={styles.navbarIcon}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowNotifications(!showNotifications)
-                  setShowUserMenu(false)
-                }}
-              >
-                <Image src="/campana-de-notificacion.png" alt="Notificaciones" width={28} height={38} />
-              </button>
-              {showNotifications && (
-                <div className={styles.notificationPopover}>
-                  <div className={styles.notificationHeader}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#9ca3af">
-                      <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-                    </svg>
-                    <span>Notificaciones</span>
-                  </div>
-                  <div className={styles.notificationContent}>
-                    <p>No tenés notificaciones</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.navbarIconWrapper}>
-              <button
-                className={styles.userButton}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowUserMenu(!showUserMenu)
-                  setShowNotifications(false)
-                }}
-              >
-                <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
-                <span className={styles.userButtonText}>{formData?.nombreNegocio}</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
-                  <path d="M7 10l5 5 5-5z" />
-                </svg>
-              </button>
-              {showUserMenu && (
-                <div className={styles.userPopover}>
-                  <div className={styles.userPopoverHeader}>
-                    <span>{formData?.nombreNegocio}</span>
-                  </div>
-                  <div className={styles.userPopoverMenu}>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                      </svg>
-                      <span>Inicio</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/perfil")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                      </svg>
-                      <span>Mi perfil</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/productos")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z" />
-                      </svg>
-                      <span>Mis productos</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/pedidos")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                      </svg>
-                      <span>Pedidos</span>
-                    </button>
-                    <button className={styles.userPopoverItem}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
-                      </svg>
-                      <span>Cupones</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={handleLogout}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
-                      </svg>
-                      <span>Salir</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <VendedorNavbar profile={datosParaNavbar} />
 
       {/* CONTENT */}
       <div className={styles.content}>
@@ -439,13 +369,27 @@ export default function VendedorPerfilPage() {
                       onChange={(e) => handleImageChange(e, 'logo')}
                     />
                     {previews.logo ? (
-                      <img src={previews.logo} alt="Logo preview" className={styles.imagePreview} />
+                      <div className={styles.previewWrapper}> 
+                        <img src={previews.logo} alt="Logo preview" className={styles.imagePreview} />
+                        
+                        <button 
+                          className={styles.removeButton} 
+                          onClick={(e) => handleRemoveImage(e, 'logo')}
+                          type="button"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                          </svg>
+                        </button>
+                      </div> 
+
                     ) : (
-                      <>
+                      <div className={styles.placeholderContent}>
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="#d1d5db">
                           <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
                         </svg>
-                      </>
+                        <span style={{fontSize: '12px', color: '#6b7280', marginTop: '5px'}}>Subir Logo</span>
+                      </div>
                     )}
                   </label>
                   <p className={styles.uploadLabel}>Logo del negocio</p>
@@ -453,22 +397,35 @@ export default function VendedorPerfilPage() {
 
                 {/* BANNER UPLOAD */}
                 <div className={styles.formGroup}>
-                  <label className={styles.uploadBox} htmlFor="logo-upload">
+                  <label className={styles.uploadBox} htmlFor="banner-upload">
                     <input 
                       type="file" 
-                      id="logo-upload" 
+                      id="banner-upload" 
                       hidden
                       accept="image/*"
-                      onChange={(e) => handleImageChange(e, 'logo')}
+                      onChange={(e) => handleImageChange(e, 'banner')}
                     />
                     {previews.banner ? (
-                      <img src={previews.banner} alt="Banner preview" className={styles.imagePreview} />
+                      <div className={styles.previewWrapper}>
+                        <img src={previews.banner} alt="Banner preview" className={styles.imagePreview} />
+                        {/* BOTÓN ELIMINAR */}
+                        <button 
+                          className={styles.removeButton} 
+                          onClick={(e) => handleRemoveImage(e, 'banner')}
+                          type="button"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                          </svg>
+                        </button>
+                      </div>
                     ) : (
-                      <>
+                      <div className={styles.placeholderContent}>
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="#d1d5db">
                           <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
                         </svg>
-                      </>
+                        <span style={{fontSize: '12px', color: '#6b7280', marginTop: '5px'}}>Subir Banner</span>
+                      </div>
                     )}
                   </label>
                   <p className={styles.uploadLabel}>Banner de fondo</p>
