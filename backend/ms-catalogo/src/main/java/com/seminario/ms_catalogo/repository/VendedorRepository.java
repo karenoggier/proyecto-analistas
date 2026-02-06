@@ -15,6 +15,6 @@ public interface VendedorRepository extends MongoRepository<Vendedor, String> {
 
     Optional<Vendedor> findByEmail(String email);
 
-    ArrayList<Vendedor> findByDireccion_ProvinciaAndDireccion_Localidad(String provincia, String localidad);
+    //ArrayList<Vendedor> findByDireccion_ProvinciaAndDireccion_Localidad(String provincia, String localidad);
 
 }

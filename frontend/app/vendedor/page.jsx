@@ -98,7 +98,7 @@ export default function VendedorPage() {
       el.removeEventListener("scroll", handleCheck);
       window.removeEventListener("resize", handleCheck);
     };
-  }, []);
+  }, [vendedorProfile]);
 
   const scrollLeft = () => {
     productsRef.current.scrollBy({ left: -300, behavior: "smooth" });
@@ -149,17 +149,6 @@ export default function VendedorPage() {
             </>
           )}
         </div>
-        {/*{isProfileComplete && (
-          <div className={styles.heroImage}>
-            <Image
-              src="/mcdonalds-burger-fries-meal-red-background.jpg"
-              alt="McDonald's Hero"
-              width={450}
-              height={280}
-              style={{ objectFit: "contain" }}
-            />
-          </div>
-        )}*/}
       </section>
 
       <main className={styles.mainContent}>
@@ -183,91 +172,55 @@ export default function VendedorPage() {
           </div>
 
           <div className={styles.productsGrid} ref={productsRef}>
-            {isProfileComplete ? (
-              <>
-                <div className={styles.productCard}>
+            {vendedorProfile?.productos && vendedorProfile.productos.length > 0 ? (
+              vendedorProfile.productos.map((prod) => (
+                <div className={styles.productCard} key={prod.id}>
                   <div className={styles.productInfo}>
-                    <h3 className={styles.productTitle}>Doble carne Doble queso + Papas medianas</h3>
+                    <h3 className={styles.productTitle}>{prod.nombre}</h3>
                     <p className={styles.productDescription}>
-                      Hamburguesa doble carne junior 100% vacuno, dos fetas de queso cheddar, lechuga, mostaza y
-                      ketchup. Acompañada de papas medianas.
+                      {prod.descripcion}
                     </p>
                   </div>
                   <div className={styles.productRight}>
                     <div className={styles.productImageWrapper}>
-                      <Image src="/double-cheeseburger-with-fries.jpg" alt="Burger" width={90} height={90} />
+                      {prod.imagen ? (
+                        <img 
+                          src={prod.imagen} 
+                          alt={prod.nombre} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        />
+                      ) : (
+                        // Fallback si el producto no tiene imagen
+                        <div style={{width: '100%', height: '100%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#ccc"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                        </div>
+                      )}
                     </div>
-                    <p className={styles.productPrice}>$ 10000</p>
+                    <p className={styles.productPrice}>$ {prod.precio}</p>
                   </div>
                 </div>
-
-                <div className={styles.productCard}>
-                  <div className={styles.productInfo}>
-                    <h3 className={styles.productTitle}>McPollo + Papas Pequeñas</h3>
-                    <p className={styles.productDescription}>
-                      Medallón de pollo frito, mayonesa y lechuga con papas pequeñas.
-                    </p>
-                  </div>
-                  <div className={styles.productRight}>
-                    <div className={styles.productImageWrapper}>
-                      <Image src="/chicken-burger-with-small-fries.jpg" alt="McPollo" width={90} height={90} />
+              ))
+              ) : (
+                // PLACEHOLDER (Se muestra si no hay productos)
+                <div className={styles.productCardPlaceholder}>
+                    <div className={styles.productInfo}>
+                        <h3 className={styles.placeholderTitle}>Añadí un producto a tu catálogo</h3>
+                        <p className={styles.placeholderSubtitle}>
+                            descripción del producto
+                        </p>
                     </div>
-                    <p className={styles.productPrice}>$ 7000</p>
-                  </div>
-                </div>
-
-                <div className={styles.productCard}>
-                  <div className={styles.productInfo}>
-                    <h3 className={styles.productTitle}>McFlurry Oreo</h3>
-                    <p className={styles.productDescription}>
-                      Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.
-                    </p>
-                  </div>
-                  <div className={styles.productRight}>
-                    <div className={styles.productImageWrapper}>
-                      <Image src="/mcflurry-oreo-ice-cream.jpg" alt="McFlurry" width={90} height={90} />
+                    <div className={styles.productRight}>
+                        <div className={styles.placeholderIcon}>
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="#d1d5db">
+                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                            </svg>
+                        </div>
+                        <p className={styles.placeholderPrice}>$ precio</p>
                     </div>
-                    <p className={styles.productPrice}>$ 4000</p>
-                  </div>
                 </div>
-
-                <div className={styles.productCard}>
-                  <div className={styles.productInfo}>
-                    <h3 className={styles.productTitle}>McFlurry Oreo</h3>
-                    <p className={styles.productDescription}>
-                      Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.
-                    </p>
-                  </div>
-                  <div className={styles.productRight}>
-                    <div className={styles.productImageWrapper}>
-                      <Image src="/mcflurry-oreo-ice-cream.jpg" alt="McFlurry" width={90} height={90} />
-                    </div>
-                    <p className={styles.productPrice}>$ 4000</p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              
-              <div className={styles.productCardPlaceholder}>
-                  <div className={styles.productInfo}>
-                    <h3 className={styles.placeholderTitle}>Añadi un producto a tu catálogo</h3>
-                    <p className={styles.placeholderSubtitle}>
-                      descripción del producto
-                    </p>
-                  </div>
-                  <div className={styles.productRight}>
-                    <div className={styles.placeholderIcon}>
-                      <svg width="64" height="64" viewBox="0 0 24 24" fill="#d1d5db">
-                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                      </svg>
-                    </div>
-                    <p className={styles.placeholderPrice}>$ precio</p>
-                  </div>
-                </div>
-              
             )}
           </div>
-
+            
           <button
             className={`${styles.addButton} ${!isProfileComplete ? styles.addButtonDisabled : ""}`}
             onClick={() => isProfileComplete && handleNavigate("/vendedor/productos")}

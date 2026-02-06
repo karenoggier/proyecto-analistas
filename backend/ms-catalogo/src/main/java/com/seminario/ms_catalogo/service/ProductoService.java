@@ -20,6 +20,7 @@ public class ProductoService {
     private final VendedorService vendedorService;
     private final ProductoMapper productoMapper;
 
+    /* 
     public ProductoResponseDTO updateProducto(String vendedorId, String productoId, ProductoResponseDTO productoRequestDTO) {
         Vendedor vendedor = vendedorService.usuarioExistente(vendedorId);
         if (vendedor == null) {
@@ -42,7 +43,8 @@ public class ProductoService {
         }
         throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado");  
     }
-
+*/
+/* 
     public Producto getProductoByIdAndVendedorId(String productoId, String vendedorId) {
         Vendedor vendedor = vendedorService.usuarioExistente(vendedorId);
         
@@ -53,7 +55,7 @@ public class ProductoService {
         }
         throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado");  
     }
-
+*/
 
     
 

@@ -20,5 +20,5 @@ public class VendedorResponseDTO {
     private String banner;
     private String estado;
     private DireccionDTO direccion;
-    private ArrayList<ProductoResponseDTO> productos;
+    //private ArrayList<ProductoResponseDTO> productos;
 }

@@ -59,9 +59,9 @@ public class VendedorMapper {
         if (vendedor.getDireccion() != null) {
             dto.setDireccion(direccionMapper.toDTO(vendedor.getDireccion()));
         }
-        if (vendedor.getProductos() != null) {
+        /*if (vendedor.getProductos() != null) {
             dto.setProductos(productoMapper.toDTOList(vendedor.getProductos()));
-        }
+        }*/
 
         return dto;
     }

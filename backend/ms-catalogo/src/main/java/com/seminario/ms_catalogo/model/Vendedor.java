@@ -30,5 +30,4 @@ public class Vendedor {
     private Estado estado;
     private Direccion direccion;
     private ArrayList<Producto> productos;
-    //private Boolean perfilCompleto;
 }

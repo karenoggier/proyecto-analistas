@@ -1,7 +1,9 @@
 package com.seminario.ms_catalogo.controller;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,7 @@ import com.seminario.ms_catalogo.dto.consultas_ms_pedido.ProductoResumidoDTO;
 import com.seminario.ms_catalogo.mapper.ProductoMapper;
 import com.seminario.ms_catalogo.service.ProductoService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -23,10 +26,14 @@ public class ProductoController {
     private final ProductoService productoService;
     private final VendedorController vendedorController;
 
-    @GetMapping("/getAllProductosFromVendedor")
-    public ResponseEntity<ArrayList<ProductoResponseDTO>> getAllProductosFromVendedor(@RequestParam String usuarioId) {
-        return ResponseEntity.ok(vendedorController.obtenerVendedorPorUsuarioId(usuarioId).getBody().getProductos());
-    }
+    /* 
+    @GetMapping("/mis-productos")
+    @Operation(summary = "Obtener los productos de un vendedor logueado")
+    public List<ProductoResponseDTO> misProductos(Authentication authentication) {
+        String email = authentication.getName();
+        return productoService.listarPorVendedor(email);
+    }*/
+
 
     /*@GetMapping("/getAllProductosFromAllVendedores")
     public ResponseEntity<ArrayList<ProductoResponseDTO>> getAllProductosFromAllVendedores
@@ -36,7 +43,7 @@ public class ProductoController {
     }*/
 
 
-    @GetMapping("/updateProducto")
+    /*@GetMapping("/updateProducto")
     public ProductoResponseDTO updateProducto(@RequestParam String vendedorId, @RequestParam String productoId,
             @RequestParam ProductoResponseDTO productoRequestDTO) {
         return productoService.updateProducto(vendedorId, productoId, productoRequestDTO);
@@ -47,7 +54,7 @@ public class ProductoController {
     public ResponseEntity<ProductoResumidoDTO> getProductoByIdAndVendedorId(@RequestParam String productoId,
             @RequestParam String vendedorId) {
         return ResponseEntity.ok(ProductoMapper.toResumenDTO(productoService.getProductoByIdAndVendedorId(productoId, vendedorId), vendedorId));
-    }
+    }*/
         
 
 }
