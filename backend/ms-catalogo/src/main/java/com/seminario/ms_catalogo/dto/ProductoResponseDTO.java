@@ -7,7 +7,7 @@ public class ProductoResponseDTO {
     private String descripcion;
     private double precio;
     private String estado; 
-    private String disponible;
+    private Boolean disponible;
     private String observaciones; 
     private String categoria;
     private String subcategoria;

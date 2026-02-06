@@ -10,11 +10,13 @@ public enum Subcategoria {
     PASTA(Categoria.COMIDA),
     PARRILLA(Categoria.COMIDA),
     ENSALADA(Categoria.COMIDA),
-    VEGANO(Categoria.COMIDA),
+    VEGETARIANO(Categoria.COMIDA),
     CELIACO(Categoria.COMIDA),
     SUSHI(Categoria.COMIDA),
+    HELADO (Categoria.COMIDA),
     POSTRE(Categoria.COMIDA),
     PAPAS(Categoria.COMIDA),
+    OTRO_COMIDA(Categoria.COMIDA),
     
     // --- BEBIDAS ---
     GASEOSA(Categoria.BEBIDA),
@@ -22,7 +24,8 @@ public enum Subcategoria {
     CERVEZA(Categoria.BEBIDA),
     VINO(Categoria.BEBIDA),
     TRAGO(Categoria.BEBIDA),
-    CAFE(Categoria.BEBIDA);
+    CAFE(Categoria.BEBIDA),
+    OTRO_BEBIDA(Categoria.BEBIDA);
 
     // Atributo para vincular con el padre
     private final Categoria categoriaPadre;

@@ -2,8 +2,11 @@ package com.seminario.ms_catalogo.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,8 +24,10 @@ import com.seminario.ms_catalogo.mapper.DireccionMapper;
 import com.seminario.ms_catalogo.mapper.ProductoMapper;
 import com.seminario.ms_catalogo.mapper.VendedorMapper;
 import com.seminario.ms_catalogo.model.Producto;
+import com.seminario.ms_catalogo.model.Subcategoria;
 import com.seminario.ms_catalogo.model.Vendedor;
 import com.seminario.ms_catalogo.repository.VendedorRepository;
+import com.seminario.ms_catalogo.model.Categoria;
 import com.seminario.ms_catalogo.model.Estado;
 
 import lombok.RequiredArgsConstructor;
@@ -33,8 +38,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class VendedorService {
+    @Autowired
     private final VendedorRepository vendedorRepository;
-    /*private final ProductoMapper productoMapper;*/
+    @Autowired
+    private final ProductoMapper productoMapper;
     private final DireccionMapper direccionMapper;
     private final VendedorMapper vendedorMapper;
     private final UsuarioClient usuarioClient;
@@ -59,7 +66,6 @@ public class VendedorService {
 
     //Recibe el registro de vendedor desde ms-usuarios por HTTP sincrónico
     public void recibirRegistroVendedor(VendedorRegistradoEvent evento) {
-           
             Vendedor vendedor = vendedorMapper.toNewEntity(evento);
             
             // Guardar vendedor en mongodb
@@ -159,14 +165,11 @@ public class VendedorService {
         return ResponseEntity.ok(vendedorMapper.toDTO(vendedor));
     }
 
-    
-
     private boolean hasText(String text) {
         return text != null && !text.trim().isEmpty();
     }
 
     private boolean esPerfilCompleto(Vendedor v) {
-        // Verifica si todos los campos DE TEXTO tienen valor.
         return hasText(v.getNombreNegocio()) &&
                hasText(v.getTelefono()) &&
                hasText(v.getNombreResponsable()) &&
@@ -217,6 +220,43 @@ public class VendedorService {
         if (dto.getRealizaEnvios() == null) errores.put("realizaEnvios", "Debe definir envíos");
 
         return errores;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductoResponseDTO> listarProductos(String email) {
+        Vendedor vendedor = vendedorRepository.findByEmail(email)
+                .orElseThrow(() -> new RequestException("CAT", 404, HttpStatus.NOT_FOUND, "Vendedor no encontrado"));
+
+        if (vendedor.getProductos() == null) {
+            return new ArrayList<>();
+        }
+
+        return vendedor.getProductos().stream()
+                .map(producto -> productoMapper.toDTO(producto))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public ProductoResponseDTO agregarProducto(String email, ProductoRequestDTO dto) {
+        Vendedor vendedor = vendedorRepository.findByEmail(email)
+                .orElseThrow(() -> new RequestException("CAT", 404, HttpStatus.NOT_FOUND, "Vendedor no encontrado"));
+
+        Producto nuevoProducto = productoMapper.toEntity(dto);
+
+        if (!nuevoProducto.getSubcategoria().esDeTipo(nuevoProducto.getCategoria())) {
+             throw new RuntimeException("La subcategoría " + nuevoProducto.getSubcategoria() + 
+                                        " no corresponde a la categoría " + nuevoProducto.getCategoria());
+        }
+
+        if (vendedor.getProductos() == null) {
+            vendedor.setProductos(new ArrayList<>());
+        }
+
+        vendedor.getProductos().add(nuevoProducto);
+
+        vendedorRepository.save(vendedor);
+
+        return productoMapper.toDTO(nuevoProducto);
     }
 
     /* 

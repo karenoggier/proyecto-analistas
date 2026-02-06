@@ -1,13 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import styles from "./productos.module.css"
 import Link from "next/link"
 import Image from "next/image"
+import VendedorNavbar from "../../../components/ui/vendedor-navbar"
 
 export default function VendedorProductosPage() {
   const router = useRouter()
+  const nombreRef = useRef(null)
+
+  const [categoriasMap, setCategoriasMap] = useState({})
+  const [vendedorProfile, setVendedorProfile] = useState(null)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
@@ -16,148 +21,15 @@ export default function VendedorProductosPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [isNewProduct, setIsNewProduct] = useState(false)
 
-  // Estado para previsualizar imágenes cargadas
+  const [fieldErrors, setFieldErrors] = useState({}) 
+  const [globalError, setGlobalError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false) 
+
   const [previews, setPreviews] = useState({
-    logo: null,
-    banner: null
+    imagen: null 
   })
 
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      nombre: "Doble carne Doble queso + Papas medianas",
-      descripcion:
-        "Hamburguesa doble carne junior 100% vacuno, dos fetas de queso cheddar, ketchup, mostaza y cebolla. Acompañada de papas medianas.",
-      precio: 10000,
-      imagen: "/double-cheeseburger-with-fries.jpg",
-      categoria: "Comida",
-      subcategoria: "Hamburguesa",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 2,
-      nombre: "Doble carne Doble queso + Papas medianas",
-      descripcion:
-        "Hamburguesa doble carne junior 100% vacuno, dos fetas de queso cheddar, ketchup, mostaza y cebolla. Acompañada de papas medianas.",
-      precio: 10000,
-      imagen: "/double-cheeseburger-with-fries.jpg",
-      categoria: "Comida",
-      subcategoria: "Hamburguesa",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 3,
-      nombre: "McPollo + Papas Pequeñas",
-      descripcion: "Medallón de pollo frito, mayonesa y lechuga con papas pequeñas.",
-      precio: 7000,
-      imagen: "/chicken-burger-with-small-fries.jpg",
-      categoria: "Comida",
-      subcategoria: "Hamburguesa",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 4,
-      nombre: "McPollo + Papas Pequeñas",
-      descripcion: "Medallón de pollo frito, mayonesa y lechuga con papas pequeñas.",
-      precio: 7000,
-      imagen: "/chicken-burger-with-small-fries.jpg",
-      categoria: "Comida",
-      subcategoria: "Hamburguesa",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 5,
-      nombre: "McFlurry Oreo",
-      descripcion: "Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.",
-      precio: 4000,
-      imagen: "/mcflurry-oreo-ice-cream.jpg",
-      categoria: "Comida",
-      subcategoria: "Postre",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 6,
-      nombre: "McFlurry Oreo",
-      descripcion: "Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.",
-      precio: 4000,
-      imagen: "/mcflurry-oreo-ice-cream.jpg",
-      categoria: "Comida",
-      subcategoria: "Postre",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 7,
-      nombre: "McFlurry Oreo",
-      descripcion: "Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.",
-      precio: 4000,
-      imagen: "/mcflurry-oreo-ice-cream.jpg",
-      categoria: "Comida",
-      subcategoria: "Postre",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 8,
-      nombre: "McFlurry Oreo",
-      descripcion: "Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.",
-      precio: 4000,
-      imagen: "/mcflurry-oreo-ice-cream.jpg",
-      categoria: "Comida",
-      subcategoria: "Postre",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 9,
-      nombre: "McFlurry Oreo",
-      descripcion: "Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.",
-      precio: 4000,
-      imagen: "/mcflurry-oreo-ice-cream.jpg",
-      categoria: "Comida",
-      subcategoria: "Postre",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 10,
-      nombre: "McFlurry Oreo",
-      descripcion: "Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.",
-      precio: 4000,
-      imagen: "/mcflurry-oreo-ice-cream.jpg",
-      categoria: "Comida",
-      subcategoria: "Postre",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 11,
-      nombre: "McFlurry Oreo",
-      descripcion: "Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.",
-      precio: 4000,
-      imagen: "/mcflurry-oreo-ice-cream.jpg",
-      categoria: "Comida",
-      subcategoria: "Postre",
-      disponible: true,
-      observaciones: "",
-    },
-    {
-      id: 12,
-      nombre: "McFlurry Oreo",
-      descripcion: "Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.",
-      precio: 4000,
-      imagen: "/mcflurry-oreo-ice-cream.jpg",
-      categoria: "Comida",
-      subcategoria: "Postre",
-      disponible: true,
-      observaciones: "",
-    },
-  ])
+  const [products, setProducts] = useState([])
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -176,27 +48,6 @@ export default function VendedorProductosPage() {
     disponibilidad: [],
   })
 
-  const subcategoriasList = [
-    "Hamburguesa",
-    "Ensalada",
-    "Gaseoso",
-    "Pizza",
-    "Sushi",
-    "Agua",
-    "Empanada",
-    "Helado",
-    "Cerveza",
-    "Milanesa",
-    "Postre",
-    "Vino",
-    "Pasta",
-    "Calzaco",
-    "Trago",
-    "Parrilla",
-    "Vegetariano",
-    "Café",
-  ]
-
   const filterCount = filters.categorias.length + filters.subcategorias.length + filters.disponibilidad.length
 
   useEffect(() => {
@@ -206,8 +57,86 @@ export default function VendedorProductosPage() {
     if (!token || rol !== "VENDEDOR") {
       router.push("/login")
     }
-  }, [router])
 
+    const fetchDatos = async () => {
+          try {
+              const headers = {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+              };
+
+              const [perfilRes, productosRes, categoriasRes] = await Promise.all([
+                  fetch('/catalogoMs/api/vendedores/perfil', { method: 'GET', headers }),
+                  fetch('/catalogoMs/api/vendedores/productos', { method: 'GET', headers }),
+                  fetch('/catalogoMs/api/categorias', { method: 'GET', headers })
+              ]);
+
+              if (perfilRes.ok) {
+                  const dataPerfil = await perfilRes.json();
+                  setVendedorProfile(dataPerfil); 
+              }
+
+              if (productosRes.ok) {
+                  const dataProductos = await productosRes.json();
+                  setProducts(dataProductos);
+              } else {
+                  console.error("Error al cargar productos");
+              }
+
+              if (categoriasRes.ok) {
+                  const mapa = await categoriasRes.json();
+                  setCategoriasMap(mapa); 
+              }
+
+          } catch (error) {
+              console.error("Error de red:", error);
+          }
+      }
+
+      fetchDatos();
+    }, [router])
+
+    useEffect(() => {
+      if (isNewProduct && isEditing && nombreRef.current) {
+          nombreRef.current.focus();
+      }
+    }, [isNewProduct, isEditing]);
+
+  // --- LÓGICA DE FILTRADO Y BÚSQUEDA ---
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.nombre.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          product.descripcion?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = filters.categorias.length === 0 || filters.categorias.includes(product.categoria);
+
+    const matchesSubcategory = filters.subcategorias.length === 0 || filters.subcategorias.includes(product.subcategoria);
+
+    const disponibilidadStr = (product.disponible === true || product.disponible === "ACTIVO" || product.disponible === "Disponible") ? "Disponible" : "No disponible";
+    const matchesAvailability = filters.disponibilidad.length === 0 || filters.disponibilidad.includes(disponibilidadStr);
+
+    return matchesSearch && matchesCategory && matchesSubcategory && matchesAvailability;
+  });
+
+  const handleBackgroundClick = () => {
+    if (selectedProduct || isNewProduct || isEditing) {
+        setSelectedProduct(null)
+        setIsEditing(false)
+        setIsNewProduct(false)
+        setPreviews({ imagen: null })
+        setFormData({
+            nombre: "",
+            descripcion: "",
+            precio: "",
+            categoria: "",
+            subcategoria: "",
+            disponible: "",
+            observaciones: "",
+            imagen: "",
+        })
+    }
+  }
+
+  // --- HANDLERS ---
   const handleProductClick = (product) => {
     setSelectedProduct(product)
     setFormData({
@@ -220,6 +149,7 @@ export default function VendedorProductosPage() {
       observaciones: product.observaciones || "",
       imagen: product.imagen,
     })
+    setPreviews({ imagen: null })
     setIsEditing(false)
     setIsNewProduct(false)
   }
@@ -236,6 +166,7 @@ export default function VendedorProductosPage() {
       observaciones: "",
       imagen: "",
     })
+    setPreviews({ imagen: null })
     setIsEditing(true)
     setIsNewProduct(true)
   }
@@ -247,7 +178,20 @@ export default function VendedorProductosPage() {
     }
   }
 
-  const handleEliminarClick = () => {
+  // NOTA: Aquí deberías conectar con tu endpoint DELETE /api/vendedores/productos/{id}
+  const handleEliminarClick = async () => {
+    if (selectedProduct) {
+        const confirm = window.confirm("¿Estás seguro de eliminar este producto?");
+        if(confirm) {
+            // Simulación visual:
+            setProducts(products.filter((p) => p.id !== selectedProduct.id))
+            setSelectedProduct(null)
+            setIsEditing(false)
+            // Aquí iría: await fetch(`/catalogoMs/api/vendedores/productos/${selectedProduct.id}`, { method: 'DELETE', ... })
+        }
+    }
+  }
+  /*const handleEliminarClick = () => {
     if (selectedProduct) {
       setProducts(products.filter((p) => p.id !== selectedProduct.id))
       setSelectedProduct(null)
@@ -262,48 +206,91 @@ export default function VendedorProductosPage() {
         imagen: "",
       })
     }
-  }
+  }*/
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    
+    setFormData((prev) => {
+        if (name === "categoria") {
+            return { ...prev, [name]: value, subcategoria: "" }
+        }
+
+        return { ...prev, [name]: value }
+    })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (isNewProduct) {
-      const newProduct = {
-        id: Date.now(),
+    
+    setFieldErrors({})
+    setGlobalError("")
+    setIsSubmitting(true)
+
+    const payload = {
         nombre: formData.nombre,
         descripcion: formData.descripcion,
-        precio: Number.parseInt(formData.precio),
+        precio: formData.precio ? parseFloat(formData.precio) : null,
         categoria: formData.categoria,
         subcategoria: formData.subcategoria,
         disponible: formData.disponible === "Disponible",
         observaciones: formData.observaciones,
-        imagen: formData.imagen || "/mcflurry-oreo-ice-cream.jpg",
-      }
-      setProducts([...products, newProduct])
-    } else if (selectedProduct) {
-      setProducts(
-        products.map((p) =>
-          p.id === selectedProduct.id
-            ? {
-                ...p,
-                nombre: formData.nombre,
-                descripcion: formData.descripcion,
-                precio: Number.parseInt(formData.precio),
-                categoria: formData.categoria,
-                subcategoria: formData.subcategoria,
-                disponible: formData.disponible === "Disponible",
-                observaciones: formData.observaciones,
-              }
-            : p,
-        ),
-      )
+        imagen: formData.imagen 
     }
-    setIsEditing(false)
-    setIsNewProduct(false)
+
+    const token = localStorage.getItem("token")
+    
+    try {
+        let url = '/catalogoMs/api/vendedores/productos'
+        let method = 'POST'
+
+        if (!isNewProduct && selectedProduct) {
+            // url = `/catalogoMs/api/vendedores/productos/${selectedProduct.id}`
+            // method = 'PUT'
+            // Por ahora nos centramos en el POST que pediste
+            console.warn("Edición no implementada en backend aún")
+            return 
+        }
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+
+        if (response.ok) {
+            const productoCreado = await response.json()
+            
+            setProducts((prev) => [...prev, productoCreado])
+            
+            setIsEditing(false)
+            setIsNewProduct(false)
+            setSelectedProduct(productoCreado) 
+            setFormData({ ...formData, imagen: "" }) 
+            alert("Producto guardado con éxito")
+            
+        } else {
+            const errorData = await response.json()
+            
+            if (response.status === 400) {
+                if (errorData.error) {
+                     setGlobalError(errorData.error)
+                } else {
+                     setFieldErrors(errorData)
+                }
+            } else {
+                setGlobalError("Ocurrió un error inesperado en el servidor. Intente nuevamente.")
+            }
+        }
+    } catch (error) {
+        console.error("Error de red:", error)
+        setGlobalError("No se pudo conectar con el servidor. Verifique su conexión.")
+    } finally {
+        setIsSubmitting(false)
+    }
   }
 
   const handleFilterChange = (type, value) => {
@@ -334,132 +321,27 @@ export default function VendedorProductosPage() {
     window.location.href = path
   }
 
-  // Lógica para cargar imágenes y mostrar previsualización
-  const handleImageChange = (e, type) => {
+
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
+    
     if (file) {
-      // 1. Guardar el archivo en el form data
-      setFormData(prev => ({ ...prev, [type]: file }));
-      
-      // 2. Crear URL para previsualización
-      const objectUrl = URL.createObjectURL(file);
-      setPreviews(prev => ({ ...prev, [type]: objectUrl }));
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        const base64String = reader.result; 
+        setFormData(prev => ({ ...prev, imagen: base64String }));
+        setPreviews(prev => ({ ...prev, imagen: base64String }));
+      };
     }
   }
 
   return (
     <div className={styles.pageWrapper}>
-      {/* NAVBAR */}
-      <nav className={styles.navbar}>
-        <div className={styles.navbarInner}>
-          <div className={styles.navbarLeft}>
-            <Link href="/vendedor" className={styles.logo}>
-              <Image src="/logo.png" alt="PediloYa Logo" width={50} height={60} className={styles.logo} priority />
-              <span className={styles.logoText}>PediloYa</span>
-            </Link>
-            <div className={styles.location}>
-              <Image src="/pin-de-ubicacion.png" alt="Pin de ubicación" width={30} height={40} />
-              <div className={styles.locationText}>
-                <span className={styles.locationLabel}>Ubicación</span>
-                <span className={styles.locationValue}>Mi dirección</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.navbarRight}>
-            <div className={styles.navbarIconWrapper}>
-              <button
-                className={styles.navbarIcon}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowNotifications(!showNotifications)
-                  setShowUserMenu(false)
-                }}
-              >
-                <Image src="/campana-de-notificacion.png" alt="Notificaciones" width={28} height={38} />
-              </button>
-              {showNotifications && (
-                <div className={styles.notificationPopover}>
-                  <div className={styles.notificationHeader}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#9ca3af">
-                      <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-                    </svg>
-                    <span>Notificaciones</span>
-                  </div>
-                  <div className={styles.notificationContent}>
-                    <p>No tenés notificaciones</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.navbarIconWrapper}>
-              <button
-                className={styles.userButton}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowUserMenu(!showUserMenu)
-                  setShowNotifications(false)
-                }}
-              >
-                <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
-                <span className={styles.userButtonText}>Local</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
-                  <path d="M7 10l5 5 5-5z" />
-                </svg>
-              </button>
-              {showUserMenu && (
-                <div className={styles.userPopover}>
-                  <div className={styles.userPopoverHeader}>
-                    <span>Local</span>
-                  </div>
-                  <div className={styles.userPopoverMenu}>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                      </svg>
-                      <span>Inicio</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/perfil")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                      </svg>
-                      <span>Mi perfil</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/productos")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z" />
-                      </svg>
-                      <span>Mis productos</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/pedidos")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                      </svg>
-                      <span>Pedidos</span>
-                    </button>
-                    <button className={styles.userPopoverItem}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
-                      </svg>
-                      <span>Cupones</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={handleLogout}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
-                      </svg>
-                      <span>Salir</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <VendedorNavbar profile={vendedorProfile} />
 
       {/* MAIN CONTENT */}
-      <main className={styles.mainContent}>
+      <main className={styles.mainContent} onClick={handleBackgroundClick}>
         {/* LEFT SIDE - Products */}
         <div className={styles.leftPanel}>
           {/* Header */}
@@ -478,7 +360,7 @@ export default function VendedorProductosPage() {
               <input
                 type="text"
                 className={styles.searchInput}
-                placeholder=""
+                placeholder="Buscar producto..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -497,44 +379,70 @@ export default function VendedorProductosPage() {
 
           {/* Products Grid */}
           <div className={styles.productsGrid}>
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className={`${styles.productCard} ${selectedProduct?.id === product.id ? styles.productCardSelected : ""}`}
-                onClick={() => handleProductClick(product)}
-              >
-                <div className={styles.productCardContent}>
-                  <div className={styles.productInfo}>
-                    <h3 className={styles.productName}>{product.nombre}</h3>
-                    <p className={styles.productDescription}>{product.descripcion}</p>
-                    <p className={styles.productPrice}>$ {product.precio}</p>
-                  </div>
-                  <div className={styles.productImage}>
-                    <img src={product.imagen || "/placeholder.svg"} alt={product.nombre} />
+            {filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className={`${styles.productCard} ${selectedProduct?.id === product.id ? styles.productCardSelected : ""}`}
+                  //onClick={() => handleProductClick(product)}
+                  onClick={(e) => {
+                        e.stopPropagation(); 
+                        handleProductClick(product);
+                    }}
+                >
+                  <div className={styles.productCardContent}>
+                    <div className={styles.productInfo}>
+                      <h3 className={styles.productName}>{product.nombre}</h3>
+                      <p className={styles.productDescription}>{product.descripcion}</p>
+                      <p className={styles.productPrice}>$ {product.precio}</p>
+                    </div>
+                    <div className={styles.productImage}>
+                      {product.imagen ? (
+                        <img 
+                          src={product.imagen} 
+                          alt={product.nombre} 
+                          style={{width:'100%', height:'100%', objectFit:'cover'}} 
+                        />
+                      ) : (
+                          <div style={{width:'100%', height:'100%', background:'#eee', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                            <span style={{fontSize:'10px', color:'#999'}}>Sin imagen</span>
+                          </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+                ))
+            ) : (
+                // MENSAJE CUANDO NO HAY PRODUCTOS
+                <div className={styles.emptyState}>
+                    <p>No se encontraron productos.</p>
+                    {products.length === 0 && (
+                        <span style={{fontSize: '0.9rem', color: '#666', marginTop: '10px'}}>
+                            ¡Comienza agregando uno nuevo desde el panel derecho!
+                        </span>
+                    )}
+                </div>
+            )}
           </div>
         </div>
 
         {/* RIGHT SIDE - Form Panel */}
-        <div className={styles.rightPanel}>
+        <div className={styles.rightPanel} onClick={(e) => e.stopPropagation()}>
           {/* Action Buttons */}
           <div className={styles.actionButtons}>
-            <button className={styles.actionBtn} onClick={handleNuevoClick}>
+            <button className={styles.actionBtn} onClick={handleNuevoClick} >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
               </svg>
               Nuevo
             </button>
-            <button className={styles.actionBtn} onClick={handleEditarClick}>
+            <button className={styles.actionBtn} onClick={handleEditarClick} disabled={!selectedProduct}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
               </svg>
               Editar
             </button>
-            <button className={styles.actionBtn} onClick={handleEliminarClick}>
+            <button className={styles.actionBtn} onClick={handleEliminarClick} disabled={!selectedProduct}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
               </svg>
@@ -551,7 +459,8 @@ export default function VendedorProductosPage() {
                   id="producto-upload" 
                   hidden
                   accept="image/*"
-                  onChange={(e) => handleImageChange(e, 'logo')} 
+                  onChange={handleImageChange}
+                  disabled={!isEditing}
                 />
                 {(previews.logo || formData.imagen) ? (
                   <img 
@@ -582,6 +491,7 @@ export default function VendedorProductosPage() {
                   disabled={!isEditing}
                   rows={2}
                 />
+                {fieldErrors.nombre && <p className={styles.errorMsg}>{fieldErrors.nombre}</p>}
               </div>
 
               <div className={styles.formGroup}>
@@ -594,6 +504,7 @@ export default function VendedorProductosPage() {
                   disabled={!isEditing}
                   rows={5}
                 />
+                {fieldErrors.descripcion && <p className={styles.errorMsg}>{fieldErrors.descripcion}</p>}
               </div>
 
               <div className={styles.formGroup}>
@@ -606,6 +517,7 @@ export default function VendedorProductosPage() {
                   onChange={handleInputChange}
                   disabled={!isEditing}
                 />
+                {fieldErrors.precio && <p className={styles.errorMsg}>{fieldErrors.precio}</p>}
               </div>
 
               <div className={styles.formGroup}>
@@ -617,10 +529,14 @@ export default function VendedorProductosPage() {
                   onChange={handleInputChange}
                   disabled={!isEditing}
                 >
-                  <option value=""></option>
-                  <option value="Comida">Comida</option>
-                  <option value="Bebida">Bebida</option>
+                  <option value="">Seleccione</option>
+                  {Object.keys(categoriasMap).map((cat) => (
+                      <option key={cat} value={cat}>
+                          {cat}
+                      </option>
+                  ))}
                 </select>
+                {fieldErrors.categoria && <p className={styles.errorMsg}>{fieldErrors.categoria}</p>}
               </div>
 
               <div className={styles.formGroup}>
@@ -632,13 +548,14 @@ export default function VendedorProductosPage() {
                   onChange={handleInputChange}
                   disabled={!isEditing}
                 >
-                  <option value=""></option>
-                  {subcategoriasList.map((sub) => (
-                    <option key={sub} value={sub}>
-                      {sub}
-                    </option>
+                  <option value="">Seleccione</option>
+                  {(categoriasMap[formData.categoria] || []).map((sub) => (
+                      <option key={sub} value={sub}>
+                          {sub}
+                      </option>
                   ))}
                 </select>
+                {fieldErrors.subcategoria && <p className={styles.errorMsg}>{fieldErrors.subcategoria}</p>}
               </div>
 
               <div className={styles.formGroup}>
@@ -650,10 +567,11 @@ export default function VendedorProductosPage() {
                   onChange={handleInputChange}
                   disabled={!isEditing}
                 >
-                  <option value=""></option>
+                  <option value="">Seleccione</option>
                   <option value="Disponible">Disponible</option>
                   <option value="No disponible">No disponible</option>
                 </select>
+                {fieldErrors.disponible && <p className={styles.errorMsg}>{fieldErrors.disponible}</p>}
               </div>
 
               <div className={styles.formGroup}>
@@ -666,7 +584,14 @@ export default function VendedorProductosPage() {
                   disabled={!isEditing}
                   rows={3}
                 />
+                {fieldErrors.observaciones && <p className={styles.errorMsg}>{fieldErrors.observaciones}</p>}
               </div>
+
+              {globalError && (
+                <div className={styles.errorMessage}>
+                  <span>{globalError}</span>
+                </div>
+              )}
 
               {isEditing && (
                 <button type="submit" className={styles.submitBtn}>

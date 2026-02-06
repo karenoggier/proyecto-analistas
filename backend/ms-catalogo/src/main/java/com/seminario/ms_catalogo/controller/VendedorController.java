@@ -1,5 +1,7 @@
 package com.seminario.ms_catalogo.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
+import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
@@ -17,6 +21,7 @@ import com.seminario.ms_catalogo.service.VendedorService;
 import org.springframework.security.core.Authentication;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,5 +67,22 @@ public class VendedorController {
        String usuarioIdentity = authentication.getName();
        return ResponseEntity.ok(vendedorService.buscarVendedorPorEmail(usuarioIdentity));
        
+    }
+
+    @GetMapping("/productos")
+    @Operation(summary = "Obtener los productos de un vendedor logueado")
+    public List<ProductoResponseDTO> misProductos(Authentication authentication) {
+        String email = authentication.getName();
+        return vendedorService.listarProductos(email);
+    }
+
+    @PostMapping("/productos")
+    @Operation(summary = "Agregar un producto a la lista de productos de un vendedor logueado")
+    public ResponseEntity<ProductoResponseDTO> agregarProducto(
+            Authentication authentication,
+            @Valid @RequestBody ProductoRequestDTO request) {
+        
+        String email = authentication.getName();
+        return ResponseEntity.ok(vendedorService.agregarProducto(email, request));
     }
 }

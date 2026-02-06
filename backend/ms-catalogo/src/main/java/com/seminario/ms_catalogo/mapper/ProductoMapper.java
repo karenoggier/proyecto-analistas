@@ -13,21 +13,26 @@ import com.seminario.ms_catalogo.dto.consultas_ms_pedido.ProductoResumidoDTO;
 
 @Component
 public class ProductoMapper {
+
     public Producto toEntity(ProductoRequestDTO productoRequestDTO) {
         if (productoRequestDTO == null) {
             return null;
         }
+
         Producto producto = new Producto();
+
         producto.setNombre(productoRequestDTO.getNombre());
         producto.setDescripcion(productoRequestDTO.getDescripcion());
         producto.setPrecio(productoRequestDTO.getPrecio());
-        producto.setEstado(Estado.ACTIVO);
-        producto.setDisponible(Estado.valueOf(productoRequestDTO.getDisponible()));
-        producto.setObservaciones(productoRequestDTO.getObservaciones());
-        producto.setCategoria(Categoria.valueOf(productoRequestDTO.getCategoria()));
-        producto.setSubcategoria(Subcategoria.valueOf(productoRequestDTO.getSubcategoria()));
         producto.setImagen(productoRequestDTO.getImagen());
-     
+        producto.setObservaciones(productoRequestDTO.getObservaciones());
+
+        producto.setEstado(Estado.ACTIVO);
+        producto.setDisponible(productoRequestDTO.getDisponible());
+
+        producto.setCategoria(Categoria.valueOf(productoRequestDTO.getCategoria().toUpperCase()));
+        producto.setSubcategoria(Subcategoria.valueOf(productoRequestDTO.getSubcategoria().toUpperCase()));
+        
         return producto;
 
 }
@@ -35,20 +40,27 @@ public class ProductoMapper {
         if (producto == null) {
             return null;
         }
+
         ProductoResponseDTO productoResponseDTO = new ProductoResponseDTO();
+
         productoResponseDTO.setId(producto.getId());
         productoResponseDTO.setNombre(producto.getNombre());
         productoResponseDTO.setDescripcion(producto.getDescripcion());
         productoResponseDTO.setPrecio(producto.getPrecio());
-        productoResponseDTO.setCategoria(producto.getCategoria().toString());
-        productoResponseDTO.setSubcategoria(producto.getSubcategoria().toString());
-        productoResponseDTO.setDisponible(producto.getDisponible().toString());
         productoResponseDTO.setObservaciones(producto.getObservaciones());
         productoResponseDTO.setImagen(producto.getImagen());
 
+        productoResponseDTO.setDisponible(producto.getDisponible());
+
         
+        if (producto.getCategoria() != null) productoResponseDTO.setCategoria(producto.getCategoria().name());
+        if (producto.getSubcategoria() != null) productoResponseDTO.setSubcategoria(producto.getSubcategoria().name());
+
+        if (producto.getEstado() != null) productoResponseDTO.setEstado(producto.getEstado().name());
+
         return productoResponseDTO;
     }
+
     public ArrayList<ProductoResponseDTO> toDTOList(ArrayList<Producto> productos) {
         ArrayList<ProductoResponseDTO> dtoList = new ArrayList<>();
         for (Producto producto : productos) {

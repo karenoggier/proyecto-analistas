@@ -11,7 +11,7 @@ public class Producto {
     private String descripcion;
     private double precio;
     private Estado estado; 
-    private Estado disponible;
+    private Boolean disponible;
     private String observaciones;
     private Categoria categoria;
     private Subcategoria subcategoria; 
