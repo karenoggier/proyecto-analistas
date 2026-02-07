@@ -71,6 +71,13 @@ export default function VendedorProductosPage() {
                   fetch('/catalogoMs/api/categorias', { method: 'GET', headers })
               ]);
 
+              if (response.status === 401 || response.status === 403) {
+                  localStorage.clear(); 
+                  window.location.href = "/login?expired=true"; 
+                  return;
+              }
+
+
               if (perfilRes.ok) {
                   const dataPerfil = await perfilRes.json();
                   setVendedorProfile(dataPerfil); 

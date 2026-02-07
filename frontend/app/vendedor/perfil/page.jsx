@@ -70,6 +70,13 @@ export default function VendedorPerfilPage() {
             headers: { 'Authorization': `Bearer ${token}` }
         })
 
+        if (response.status === 401 || response.status === 403) {
+            localStorage.clear(); 
+            window.location.href = "/login?expired=true"; 
+            return;
+        }
+
+
         if (resPerfil.ok) {
             const data = await resPerfil.json()
             
