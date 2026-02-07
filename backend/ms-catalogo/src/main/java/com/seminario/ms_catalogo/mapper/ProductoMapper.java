@@ -61,15 +61,35 @@ public class ProductoMapper {
         return productoResponseDTO;
     }
 
-    public ArrayList<ProductoResponseDTO> toDTOList(ArrayList<Producto> productos) {
+    public void updateEntity(Producto productoExistente, ProductoRequestDTO dto) {
+        if (productoExistente == null || dto == null) return;
+
+        productoExistente.setNombre(dto.getNombre());
+        productoExistente.setDescripcion(dto.getDescripcion());
+        productoExistente.setPrecio(dto.getPrecio());
+        productoExistente.setObservaciones(dto.getObservaciones());
+        
+        productoExistente.setImagen(dto.getImagen());
+
+        productoExistente.setDisponible(dto.getDisponible());
+
+        try {
+            productoExistente.setCategoria(Categoria.valueOf(dto.getCategoria().toUpperCase()));
+            productoExistente.setSubcategoria(Subcategoria.valueOf(dto.getSubcategoria().toUpperCase()));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new RuntimeException("Categoría o Subcategoría inválida en la edición");
+        }
+    }
+
+    /*public ArrayList<ProductoResponseDTO> toDTOList(ArrayList<Producto> productos) {
         ArrayList<ProductoResponseDTO> dtoList = new ArrayList<>();
         for (Producto producto : productos) {
             dtoList.add(toDTO(producto));
         }
         return dtoList;
-    }
+    }*/
 
-    public static ProductoResumidoDTO toResumenDTO(Producto producto, String vendedorId) {
+    /*public static ProductoResumidoDTO toResumenDTO(Producto producto, String vendedorId) {
         if (producto == null) {
             return null;
         }
@@ -79,6 +99,6 @@ public class ProductoMapper {
         productoResumidoDTO.setMontoUnitario(producto.getPrecio());
         productoResumidoDTO.setObservaciones(producto.getObservaciones());
         return productoResumidoDTO;
-    }
+    }*/
 
 }

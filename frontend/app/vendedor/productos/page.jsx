@@ -118,6 +118,11 @@ export default function VendedorProductosPage() {
   });
 
   const handleBackgroundClick = () => {
+    if (isEditing || isNewProduct) {
+        const confirm = window.confirm("Tienes cambios sin guardar. ¿Quieres cerrar y perder los cambios?");
+        if (!confirm) return; 
+    }
+
     if (selectedProduct || isNewProduct || isEditing) {
         setSelectedProduct(null)
         setIsEditing(false)
@@ -178,35 +183,55 @@ export default function VendedorProductosPage() {
     }
   }
 
-  // NOTA: Aquí deberías conectar con tu endpoint DELETE /api/vendedores/productos/{id}
   const handleEliminarClick = async () => {
-    if (selectedProduct) {
-        const confirm = window.confirm("¿Estás seguro de eliminar este producto?");
-        if(confirm) {
-            // Simulación visual:
-            setProducts(products.filter((p) => p.id !== selectedProduct.id))
+    if (!selectedProduct) return;
+
+    const confirm = window.confirm(`¿Estás seguro de eliminar "${selectedProduct.nombre}"?`);
+    if(!confirm) return;
+
+    const token = localStorage.getItem("token")
+
+    try {
+        const response = await fetch(`/catalogoMs/api/vendedores/productos/${selectedProduct.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            setProducts((prev) => prev.filter((p) => p.id !== selectedProduct.id))
+            
             setSelectedProduct(null)
             setIsEditing(false)
-            // Aquí iría: await fetch(`/catalogoMs/api/vendedores/productos/${selectedProduct.id}`, { method: 'DELETE', ... })
+            setPreviews({ imagen: null })
+            setFormData({
+                nombre: "",
+                descripcion: "",
+                precio: "",
+                categoria: "",
+                subcategoria: "",
+                disponible: "",
+                observaciones: "",
+                imagen: "",
+            })
+            
+            alert("Producto eliminado correctamente")
+
+        } else {
+            let mensajeError = "No se pudo eliminar el producto.";
+            try {
+                const errorData = await response.json();
+                if (errorData.error) mensajeError = errorData.error;
+            } catch (e) {
+            }
+            setGlobalError(mensajeError);
         }
+    } catch (error) {
+        console.error("Error al eliminar:", error);
+        setGlobalError("Error de conexión al intentar eliminar.");
     }
   }
-  /*const handleEliminarClick = () => {
-    if (selectedProduct) {
-      setProducts(products.filter((p) => p.id !== selectedProduct.id))
-      setSelectedProduct(null)
-      setFormData({
-        nombre: "",
-        descripcion: "",
-        precio: "",
-        categoria: "",
-        subcategoria: "",
-        disponible: "",
-        observaciones: "",
-        imagen: "",
-      })
-    }
-  }*/
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -233,7 +258,7 @@ export default function VendedorProductosPage() {
         precio: formData.precio ? parseFloat(formData.precio) : null,
         categoria: formData.categoria,
         subcategoria: formData.subcategoria,
-        disponible: formData.disponible === "Disponible",
+        disponible: formData.disponible === "" ? null : (formData.disponible === "Disponible"),
         observaciones: formData.observaciones,
         imagen: formData.imagen 
     }
@@ -245,11 +270,8 @@ export default function VendedorProductosPage() {
         let method = 'POST'
 
         if (!isNewProduct && selectedProduct) {
-            // url = `/catalogoMs/api/vendedores/productos/${selectedProduct.id}`
-            // method = 'PUT'
-            // Por ahora nos centramos en el POST que pediste
-            console.warn("Edición no implementada en backend aún")
-            return 
+            url = `/catalogoMs/api/vendedores/productos/${selectedProduct.id}` 
+            method = 'PUT' 
         }
 
         const response = await fetch(url, {
@@ -262,15 +284,22 @@ export default function VendedorProductosPage() {
         })
 
         if (response.ok) {
-            const productoCreado = await response.json()
-            
-            setProducts((prev) => [...prev, productoCreado])
+           const productoGuardado = await response.json() 
+
+            if (method === 'POST') {
+                setProducts((prev) => [...prev, productoGuardado])
+                alert("Producto creado con éxito")
+            } else {
+                setProducts((prev) => prev.map(p => p.id === productoGuardado.id ? productoGuardado : p))
+                alert("Producto actualizado con éxito")
+            }
             
             setIsEditing(false)
             setIsNewProduct(false)
-            setSelectedProduct(productoCreado) 
-            setFormData({ ...formData, imagen: "" }) 
-            alert("Producto guardado con éxito")
+            
+            setSelectedProduct(productoGuardado)
+
+            //setFormData({ ...formData, imagen: "" }) 
             
         } else {
             const errorData = await response.json()
@@ -335,6 +364,9 @@ export default function VendedorProductosPage() {
       };
     }
   }
+
+  const todasLasSubcategorias = Object.values(categoriasMap).flat();
+  const todasLasCategorias = Object.keys(categoriasMap);
 
   return (
     <div className={styles.pageWrapper}>
@@ -634,20 +666,17 @@ export default function VendedorProductosPage() {
                 </div>
                 <div className={styles.filterOptions}>
                   <label className={styles.filterOption}>
-                    <input
-                      type="checkbox"
-                      checked={filters.categorias.includes("Comida")}
-                      onChange={() => handleFilterChange("categorias", "Comida")}
-                    />
-                    <span>Comida</span>
-                  </label>
-                  <label className={styles.filterOption}>
-                    <input
-                      type="checkbox"
-                      checked={filters.categorias.includes("Bebida")}
-                      onChange={() => handleFilterChange("categorias", "Bebida")}
-                    />
-                    <span>Bebida</span>
+                    {todasLasCategorias.map((cat) => (
+                    <label key={cat} className={styles.filterOption}>
+                      <input
+                        type="checkbox"
+                        checked={filters.categorias.includes(cat)}
+                        onChange={() => handleFilterChange("categorias", cat)}
+                      />
+                      <span>{cat}</span>
+                    </label>
+                  ))}
+                  {todasLasCategorias.length === 0 && <span style={{fontSize:'0.8rem', color:'#999'}}>Cargando...</span>}
                   </label>
                 </div>
               </div>
@@ -661,7 +690,7 @@ export default function VendedorProductosPage() {
                   </svg>
                 </div>
                 <div className={styles.filterOptionsGrid}>
-                  {subcategoriasList.map((sub) => (
+                  {todasLasSubcategorias.map((sub) => (
                     <label key={sub} className={styles.filterOption}>
                       <input
                         type="checkbox"

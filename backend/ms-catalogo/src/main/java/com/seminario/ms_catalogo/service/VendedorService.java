@@ -232,6 +232,7 @@ public class VendedorService {
         }
 
         return vendedor.getProductos().stream()
+                .filter(p -> !Estado.INACTIVO.equals(p.getEstado()))
                 .map(producto -> productoMapper.toDTO(producto))
                 .collect(Collectors.toList());
     }
@@ -257,6 +258,50 @@ public class VendedorService {
         vendedorRepository.save(vendedor);
 
         return productoMapper.toDTO(nuevoProducto);
+    }
+
+    @Transactional
+    public ProductoResponseDTO editarProducto(String email, String idProducto, ProductoRequestDTO dto) {
+        Vendedor vendedor = vendedorRepository.findByEmail(email)
+                .orElseThrow(() -> new RequestException("CAT", 404, HttpStatus.NOT_FOUND, "Vendedor no encontrado"));
+
+
+        Producto producto = vendedor.getProductos().stream()
+                .filter(p -> p.getId().equals(idProducto))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+
+        Categoria catEnum = Categoria.valueOf(dto.getCategoria().toUpperCase());
+        Subcategoria subEnum = Subcategoria.valueOf(dto.getSubcategoria().toUpperCase());
+
+        if (!subEnum.getCategoriaPadre().equals(catEnum)) {
+             throw new RuntimeException("La subcategoría " + dto.getSubcategoria() + 
+                                        " no pertenece a la categoría " + dto.getCategoria());
+        }
+
+        productoMapper.updateEntity(producto, dto);
+
+        vendedorRepository.save(vendedor);
+
+        return productoMapper.toDTO(producto);
+    }
+
+    @Transactional
+    public void eliminarProducto(String email, String idProducto) {
+        Vendedor vendedor = vendedorRepository.findByEmail(email)
+                .orElseThrow(() -> new RequestException("CAT", 404, HttpStatus.NOT_FOUND, "Vendedor no encontrado"));
+
+        Producto producto = vendedor.getProductos().stream()
+                .filter(p -> p.getId().equals(idProducto))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        producto.setEstado(Estado.INACTIVO);
+        
+        producto.setDisponible(false); 
+
+        vendedorRepository.save(vendedor);
     }
 
     /* 

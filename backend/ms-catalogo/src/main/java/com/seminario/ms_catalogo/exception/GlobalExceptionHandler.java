@@ -36,5 +36,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleManualValidation(ValidationException ex) {
         return ResponseEntity.badRequest().body(ex.getErrores());
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage()); 
+        return ResponseEntity.badRequest().body(error);
+    }
     
 }

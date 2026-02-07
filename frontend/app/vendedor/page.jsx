@@ -27,20 +27,27 @@ export default function VendedorPage() {
 
    const fetchPerfil = async () => {
       try {
-        const response = await fetch('/catalogoMs/api/vendedores/perfil', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+
+        const [perfilRes, productosRes] = await Promise.all([
+            fetch('/catalogoMs/api/vendedores/perfil', { method: 'GET', headers }),
+            fetch('/catalogoMs/api/vendedores/productos', { method: 'GET', headers })
+        ]);
+
+        if (perfilRes.ok) {
+            const dataPerfil = await perfilRes.json();
+    
+            if (productosRes.ok) {
+                const dataProductos = await productosRes.json();
+                setVendedorProfile({ ...dataPerfil, productos: dataProductos });
+            } else {
+                setVendedorProfile(dataPerfil);
             }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
+            setIsProfileComplete(dataPerfil.estado === "ACTIVO");
           
-            setVendedorProfile(data);
-            setIsProfileComplete(data.estado === "ACTIVO");
-
         } else {
             console.error("Error al obtener perfil del vendedor");
             setIsProfileComplete(false);

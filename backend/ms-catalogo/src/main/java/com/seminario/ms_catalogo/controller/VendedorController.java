@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -84,5 +86,26 @@ public class VendedorController {
         
         String email = authentication.getName();
         return ResponseEntity.ok(vendedorService.agregarProducto(email, request));
+    }
+
+    @PutMapping("/productos/{id}")
+    public ResponseEntity<ProductoResponseDTO> editarProducto(
+            Authentication authentication,
+            @PathVariable String id,
+            @Valid @RequestBody ProductoRequestDTO request) {
+        
+        String email = authentication.getName();
+        return ResponseEntity.ok(vendedorService.editarProducto(email, id, request));
+    }
+
+    @DeleteMapping("/productos/{id}")
+    public ResponseEntity<Void> eliminarProducto(
+            Authentication authentication,
+            @PathVariable String id) {
+        
+        String email = authentication.getName();
+        vendedorService.eliminarProducto(email, id);
+        
+        return ResponseEntity.noContent().build();
     }
 }

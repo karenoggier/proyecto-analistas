@@ -14,7 +14,7 @@ public class ProductoRequestDTO {
 
     @NotNull(message = "El precio es obligatorio")
     @Positive(message = "El precio debe ser mayor a cero")
-    private double precio;
+    private Double precio;
 
     @NotBlank(message = "La categoria no puede estar vacia")
     private String categoria;  
