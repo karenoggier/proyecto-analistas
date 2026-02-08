@@ -2,8 +2,18 @@ package com.seminario.ms_pedido.model;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -32,4 +42,10 @@ public class Pedido {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "idPedido", referencedColumnName = "id")
     private DetallePedido[] detalles;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idCliente", nullable = false) // this line specifies the foreign key column  idUsuario in the "direccion" table
+    
+    @ToString.Exclude // important to avoid circular references in toString() method
+    private Cliente cliente;
 }

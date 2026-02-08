@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.seminario.ms_usuarios.dto.ClienteRequestDTO;
 import com.seminario.ms_usuarios.dto.ClienteResponseDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.ClienteRegistradoEvent;
 import com.seminario.ms_usuarios.model.Cliente;
 import com.seminario.ms_usuarios.model.EstadoUsuario;
 import com.seminario.ms_usuarios.model.RolUsuario;
@@ -45,5 +46,19 @@ public class ClienteMapper {
         dto.setFechaNacimiento(entity.getFechaNacimiento());
         
         return dto;
+    }
+
+    public ClienteRegistradoEvent toClienteRegistrado(Cliente guardado) {
+        if (guardado == null) return null;
+
+        ClienteRegistradoEvent evento = new ClienteRegistradoEvent();
+        evento.setUsuarioId(guardado.getId());
+        evento.setEmail(guardado.getEmail());
+        evento.setNombre(guardado.getNombre());
+        evento.setApellido(guardado.getApellido());
+        evento.setTelefono(guardado.getTelefono());
+        evento.setFechaNacimiento(guardado.getFechaNacimiento());
+        
+        return evento;
     }
 }
