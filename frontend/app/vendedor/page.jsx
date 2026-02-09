@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image"
 import styles from "./vendedor.module.css"
 import Link from "next/link"
-import VendedorNavbar from "../../components/ui/vendedor-navbar"
+import VendedorNavbar from "./components/vendedor-navbar"
 
 export default function VendedorPage() {
   const [isProfileComplete, setIsProfileComplete] = useState(false)

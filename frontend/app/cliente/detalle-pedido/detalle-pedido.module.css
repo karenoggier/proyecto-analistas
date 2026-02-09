@@ -1,0 +1,252 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.main {
+  flex: 1;
+  padding: 24px 32px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.backBtn {
+  text-decoration: none;
+  display: flex;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #e84c6a;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+/* Content Layout */
+.contentRow {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.leftCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rightCol {
+  width: 260px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+}
+
+/* Cards */
+.card {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 12px 0;
+}
+
+.infoRow {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.infoLabel {
+  color: #888;
+  white-space: nowrap;
+}
+
+.infoValue {
+  color: #222;
+  font-weight: 500;
+}
+
+/* Product Item */
+.productItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.productImg {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.productInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.productName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+}
+
+.productQty {
+  font-size: 12px;
+  color: #888;
+}
+
+.productPrice {
+  font-size: 14px;
+  font-weight: 700;
+  color: #222;
+  white-space: nowrap;
+}
+
+/* Status Timeline */
+.statusTimeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 8px 0;
+}
+
+.statusStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 60px;
+}
+
+.statusStep span {
+  font-size: 11px;
+  color: #aaa;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.statusStepDone span {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.statusCircle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #22c55e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.statusLine {
+  flex: 1;
+  height: 3px;
+  background: #ddd;
+  margin-bottom: 24px;
+}
+
+.statusLineDone {
+  background: #22c55e;
+}
+
+/* Summary Card */
+.summaryCard {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.summaryTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 12px 0;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 700;
+  color: #222;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+  margin-bottom: 16px;
+}
+
+.cancelBtn {
+  width: 100%;
+  padding: 10px;
+  background: #fff;
+  color: #e84c6a;
+  border: 2px solid #e84c6a;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelBtn:hover {
+  background: #fef0f2;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 16px;
+  }
+
+  .contentRow {
+    flex-direction: column;
+  }
+
+  .rightCol {
+    width: 100%;
+    position: static;
+  }
+
+  .statusTimeline {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+}

@@ -1,0 +1,258 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.main {
+  flex: 1;
+  padding: 24px 32px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.backBtn {
+  text-decoration: none;
+  display: flex;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #e84c6a;
+  margin: 0;
+  letter-spacing: 1px;
+  flex: 1;
+}
+
+.filterIconBtn {
+  background: none;
+  border: 1px solid #f0f0f0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.filterIconBtn:hover {
+  background: #fef0f2;
+}
+
+/* Order List */
+.orderList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.orderCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  transition: box-shadow 0.2s;
+}
+
+.orderCard:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.orderLogo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.orderLogoInner {
+  width: 100%;
+  height: 100%;
+  background: #e84c6a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.orderInfo {
+  flex: 1;
+}
+
+.orderVendor {
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 2px 0;
+}
+
+.orderStatus {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 2px 0;
+}
+
+.statusDelivered {
+  color: #22c55e;
+}
+
+.statusCancelled {
+  color: #ef4444;
+}
+
+.orderMeta {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
+
+.orderDetailLink {
+  font-size: 13px;
+  color: #e84c6a;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.orderDetailLink:hover {
+  text-decoration: underline;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 90%;
+  padding: 24px;
+  position: relative;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modalHeader h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.modalClose:hover {
+  background: #f5f5f5;
+}
+
+/* Filter Sections */
+.filterSection {
+  margin-bottom: 20px;
+}
+
+.filterSectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 10px 0;
+}
+
+.filterOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkboxLabel,
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.checkbox,
+.radio {
+  accent-color: #e84c6a;
+}
+
+.filterActions {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.filterApplyBtn {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #f7797d, #e84c6a);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filterApplyBtn:hover {
+  opacity: 0.9;
+}
+
+.filterClearBtn {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #f7a0a0, #f7797d);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filterClearBtn:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 16px;
+  }
+
+  .orderCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
