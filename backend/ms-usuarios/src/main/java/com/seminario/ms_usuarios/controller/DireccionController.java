@@ -3,11 +3,14 @@ package com.seminario.ms_usuarios.controller;
 import java.util.ArrayList;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_usuarios.dto.DireccionRequestDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.DireccionRequestEvent;
+import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.DireccionResponseEvent;
 import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.service.DireccionService;
 
@@ -31,4 +34,9 @@ public class DireccionController {
         return direccionService.buscarDireccionesPorUsuario(usuario);
     }
 
+    @GetMapping("/obtener")
+    public ResponseEntity<DireccionResponseEvent> obtenerDireccion(DireccionRequestEvent dto) {
+        return ResponseEntity.ok(direccionService.obtenerDireccion(dto));
+
+    }
 }

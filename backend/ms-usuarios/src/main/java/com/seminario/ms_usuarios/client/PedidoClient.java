@@ -28,7 +28,7 @@ public class PedidoClient {
     @Retry(name = "pedidoClient")
     public ResponseEntity<Void> registrarCliente(ClienteRegistradoEvent evento) {
         try {
-            String url = pedidoBaseUrl + "/pedidoMs/api/clientes/registrar";
+            String url = pedidoBaseUrl + "/pedidoMs/clientes/registrar";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
