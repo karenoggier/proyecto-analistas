@@ -1,25 +1,34 @@
 package com.seminario.ms_pedido.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Entity
 @Table(name = "Pedido")
 public class Pedido {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     private String id;
     @Column(name = "clienteId")
@@ -41,10 +50,10 @@ public class Pedido {
     private DetalleEnvio detalleEnvio;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "idPedido", referencedColumnName = "id")
-    private DetallePedido[] detalles;
+    private List<DetallePedido> detalles;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idCliente", nullable = false) // this line specifies the foreign key column  idUsuario in the "direccion" table
+    @JoinColumn(name = "idCliente", nullable = true) // this line specifies the foreign key column  idUsuario in the "direccion" table
     
     @ToString.Exclude // important to avoid circular references in toString() method
     private Cliente cliente;
