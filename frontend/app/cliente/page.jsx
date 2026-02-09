@@ -1,55 +1,178 @@
 'use client';
-import { Search, MapPin, Star, Clock } from 'lucide-react';
+
+import { useRef } from 'react';
+import Image from 'next/image';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import styles from './cliente.module.css';
 
-export default function ClientePage() {
+const categories = [
+  { name: 'Hamburguesa', img: '/images/cat-hamburguesa.jpg' },
+  { name: 'Ensalada', img: '/images/cat-ensalada.jpg' },
+  { name: 'Gaseosa', img: '/images/cat-gaseosa.jpg' },
+  { name: 'Pizza', img: '/images/cat-pizza.jpg' },
+  { name: 'Helado', img: '/images/cat-helado.jpg' },
+  { name: 'Vino', img: '/images/cat-vino.jpg' },
+  { name: 'Cafe', img: '/images/cat-cafe.jpg' },
+];
+
+const stores = [
+  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
+  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
+  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
+  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
+  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
+  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
+];
+
+export default function ClienteHome() {
+  const scrollRef = useRef(null);
+
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -280, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 280, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className={styles.container}>
-      {/* Header Sticky */}
-      <header className={styles.header}>
-        <div className={styles.addressBar}>
-          <MapPin size={18} className={styles.iconRed} />
-          <span className={styles.address}>Calle Falsa 123</span>
-        </div>
-        <div className={styles.searchWrapper}>
-          <Search className={styles.searchIcon} size={20} />
-          <input type="text" placeholder="¿Qué vas a pedir hoy?" className={styles.searchInput} />
-        </div>
-      </header>
+    <div className={styles.page}>
+      <Navbar showSearchBar />
 
-      {/* Categorías */}
-      <section className={styles.categories}>
-        {['Hamburguesas', 'Pizza', 'Helado', 'Sushi', 'Pollo', 'Bebidas'].map((cat, i) => (
-          <div key={i} className={styles.categoryItem}>
-            <div className={styles.catCircle}>🍔</div>
-            <span>{cat}</span>
-          </div>
-        ))}
-      </section>
-
-      {/* Listado de Restaurantes */}
-      <section className={styles.feed}>
-        <h2 className={styles.sectionTitle}>Cerca de ti</h2>
-        
-        {/* Card Restaurante 1 */}
-        {[1, 2, 3].map((item) => (
-          <div key={item} className={styles.card}>
-            <div className={styles.cardImage}>
-              <span className={styles.promoBadge}>Envío Gratis</span>
+      <main className={styles.main}>
+        {/* Hero Section */}
+        <section className={styles.hero}>
+          <div className={styles.heroInner}>
+            <div className={styles.heroCardComida}>
+              <span className={styles.heroLabel}>COMIDA</span>
+              <Image
+                src="/images/hero-comida.jpg"
+                alt="Comida"
+                width={160}
+                height={120}
+                className={styles.heroImg}
+              />
             </div>
-            <div className={styles.cardInfo}>
-              <div className={styles.cardHeader}>
-                <h3>Burger King</h3>
-                <span className={styles.rating}><Star size={12} fill="currentColor"/> 4.5</span>
-              </div>
-              <p className={styles.meta}>Hamburguesas • $$</p>
-              <div className={styles.deliveryInfo}>
-                <Clock size={14} /> 20-30 min
-              </div>
+            <div className={styles.heroCardBebida}>
+              <Image
+                src="/images/hero-bebida.jpg"
+                alt="Bebida"
+                width={140}
+                height={120}
+                className={styles.heroImg}
+              />
+              <span className={styles.heroLabel}>BEBIDA</span>
             </div>
           </div>
-        ))}
-      </section>
+        </section>
+
+        {/* Categories */}
+        <section className={styles.categories}>
+          {categories.map((cat) => (
+            <div key={cat.name} className={styles.categoryItem}>
+              <div className={styles.categoryCircle}>
+                <Image src={cat.img || "/placeholder.svg"} alt={cat.name} width={80} height={80} className={styles.categoryImg} />
+              </div>
+              <span className={styles.categoryName}>{cat.name}</span>
+            </div>
+          ))}
+        </section>
+
+        {/* Discover Section */}
+        <section className={styles.discover}>
+          <div className={styles.discoverHeader}>
+            <h2 className={styles.discoverTitle}>Descubri estas opciones</h2>
+            <div className={styles.discoverNav}>
+              <button className={styles.navArrow} onClick={scrollLeft} aria-label="Scroll left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <button className={styles.navArrowActive} onClick={scrollRight} aria-label="Scroll right">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.storeScroll} ref={scrollRef}>
+            {stores.map((store, i) => (
+              <div key={i} className={styles.storeCard}>
+                <div className={styles.storeLogo}>
+                  <div className={styles.storeLogoPlaceholder}>M</div>
+                </div>
+                <h3 className={styles.storeName}>{store.name}</h3>
+                <div className={styles.storeMeta}>
+                  <span className={styles.storeTime}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    {store.time}
+                  </span>
+                  <span className={styles.storeTravel}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    {store.travel}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Footer Banner */}
+        <section className={styles.footerBanner}>
+          <div className={styles.bannerLeft}>
+            <Image
+              src="/images/footer-girl.jpg"
+              alt="Girl eating pizza"
+              width={200}
+              height={250}
+              className={styles.bannerImg}
+            />
+          </div>
+          <div className={styles.bannerRight}>
+            <div className={styles.bannerBlock}>
+              <div className={styles.bannerIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
+              <div>
+                <h3>Top Ciudades</h3>
+                <p>Santa Fe, Buenos Aires, Cordoba, La Plata, San Miguel de Tucuman, Rosita, San Miguel, Mar del Plata.</p>
+              </div>
+            </div>
+            <div className={styles.bannerBlock}>
+              <div className={styles.bannerIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M18 8h1a4 4 0 010 8h-1" />
+                  <path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />
+                  <line x1="6" y1="1" x2="6" y2="4" />
+                  <line x1="10" y1="1" x2="10" y2="4" />
+                  <line x1="14" y1="1" x2="14" y2="4" />
+                </svg>
+              </div>
+              <div>
+                <h3>Top Comidas</h3>
+                <p>Helados, Pizzas, Hamburguesas, Empanadas, Postres, Sandwiches.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
     </div>
   );
 }
