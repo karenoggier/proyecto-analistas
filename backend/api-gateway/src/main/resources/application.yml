@@ -20,3 +20,7 @@ spring:
           uri: http://localhost:8081
           predicates:
             - Path=/catalogoMs/**
+        - id: ms-pedido
+          uri: http://localhost:8082
+          predicates:
+            - Path=/pedidoMs/**
