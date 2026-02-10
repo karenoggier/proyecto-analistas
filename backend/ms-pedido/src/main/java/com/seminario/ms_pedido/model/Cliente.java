@@ -1,7 +1,7 @@
 package com.seminario.ms_pedido.model;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -12,7 +12,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @AllArgsConstructor
@@ -35,7 +37,12 @@ public class Cliente {
     private LocalDate fechaNacimiento;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ArrayList<Direccion> direccion;
+    @ToString.Exclude // Evita el bucle infinito al hacer log o print
+    @EqualsAndHashCode.Exclude 
+    private List<Direccion> direccion;
+
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ArrayList<Pedido> pedidos;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Pedido> pedidos;
 }

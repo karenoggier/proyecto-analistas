@@ -25,6 +25,7 @@ public class SecurityConfig {
                 //.requestMatchers("/**").permitAll() // Temporary: Allow all endpoints
                 .requestMatchers("/auth/**").permitAll() // Allow access to login and registration
                 .requestMatchers("/ubicacion/**").permitAll()
+                .requestMatchers("/direcciones/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll() // Allow acces to swagger
                 .anyRequest().authenticated() // Anything else requires login
             );

@@ -7,10 +7,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seminario.ms_pedido.DTOs.DireccionRequestDTO;
 import com.seminario.ms_pedido.DTOs.DireccionResponseDTO;
 import com.seminario.ms_pedido.exception.RequestException;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,39 +54,42 @@ public class UsuarioClient {
                 "Error al sincronizar con ms-usuario: " + e.getMessage());
         }
     }*/
+    @CircuitBreaker(name = "usuarioClient", fallbackMethod = "BuscarDatosDireccionFallback")
+    @Retry(name = "usuarioClient")
     public DireccionResponseDTO buscarDatosDireccion(DireccionRequestDTO event) {
-        String url = usuariosBaseUrl + "/usuariosMs/direcciones/obtener";
-        try {
-            ResponseEntity<DireccionResponseDTO> response = restTemplate.postForEntity(url, event, DireccionResponseDTO.class);
+    String url = usuariosBaseUrl + "/usuariosMs/direcciones/obtener";
+    try {
+        ResponseEntity<DireccionResponseDTO> response = restTemplate.postForEntity(url, event, DireccionResponseDTO.class);
+        return response.getBody();
 
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return response.getBody();
-            }
-            
-            throw new RequestException("USU", 500, HttpStatus.INTERNAL_SERVER_ERROR, "Respuesta vacía del servidor");
+    } catch (HttpStatusCodeException e) {
+        // 1. Log the raw error for internal debugging
+        log.error("Error calling {}: Status {} - Body {}", url, e.getStatusCode(), e.getResponseBodyAsString());
 
-        } catch (HttpStatusCodeException e) {
-            // Errores HTTP específicos del microservicio de usuarios
-            throw new RequestException("USU", e.getStatusCode().value(), (HttpStatus) e.getStatusCode(), 
-                "Error remoto: " + e.getResponseBodyAsString());
-        } catch (Exception e) {
-            // Errores de timeout o conexión
-            throw new RequestException("USU", 500, HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Error de comunicación: " + e.getMessage());
-        }
-    }
-    //Fallback method cuando el circuit breaker está abierto
-    public DireccionResponseDTO BuscarDatosDireccionFallback(DireccionRequestDTO event, Throwable exception) {
-        System.err.println("Fallback activado por: " + exception.getMessage());
+        // 2. Try to extract the remote message, otherwise use a default
+        String remoteMessage = extractMessage(e.getResponseBodyAsString());
+        
         throw new RequestException(
             "USU", 
-            503, 
-            HttpStatus.SERVICE_UNAVAILABLE, 
-            "El servicio de gestión de usuarios/direcciones no responde. Intente nuevamente en unos minutos."
+            e.getStatusCode().value(), 
+            (HttpStatus) e.getStatusCode(), 
+            remoteMessage
         );
+    } catch (Exception e) {
+        throw new RequestException("USU", 500, HttpStatus.INTERNAL_SERVER_ERROR, 
+            "Error de comunicación: " + e.getMessage());
     }
+}
 
-    
+// Helper method to parse the JSON error body
+private String extractMessage(String body) {
+    try {
+        // Use ObjectMapper to read the "mensaje" field from the JSON string
+        return new ObjectMapper().readTree(body).get("mensaje").asText();
+    } catch (Exception e) {
+        return "Error remoto sin descripción específica.";
+    }
+}
        
 
 

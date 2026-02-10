@@ -14,6 +14,8 @@ import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.DireccionResponseEvent;
 import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.service.DireccionService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -35,8 +37,8 @@ public class DireccionController {
     }
 
     @GetMapping("/obtener")
-    public ResponseEntity<DireccionResponseEvent> obtenerDireccion(DireccionRequestEvent dto) {
+    @Operation(summary = "Obtener datos de provincia, localidad y cordenadas")
+    public ResponseEntity<DireccionResponseEvent> obtenerDireccion(@RequestBody DireccionRequestEvent dto) {
         return ResponseEntity.ok(direccionService.obtenerDireccion(dto));
-
     }
 }

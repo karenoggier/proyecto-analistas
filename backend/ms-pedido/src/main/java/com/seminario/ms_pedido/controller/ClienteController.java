@@ -2,6 +2,7 @@ package com.seminario.ms_pedido.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,10 +32,16 @@ public class ClienteController {
     
     @GetMapping("/perfil")
     @Operation(summary = "Obtener perfil del cliente logueado")
-    public Cliente obtenerPerfil(org.apache.tomcat.util.net.openssl.ciphers.Authentication authentication) {
-       String usuarioIdentity = authentication.name();
+    public Cliente obtenerPerfil(Authentication authentication) {
+       String usuarioIdentity = authentication.getName();
+       System.out.println("Obteniendo perfil para usuario: " + usuarioIdentity);
        return clienteService.buscarClientePorEmail(usuarioIdentity);
     }
+
+    public Cliente obtenerPerfil(String email) {
+       return clienteService.buscarClientePorEmail(email);
+    }
+
 
 
 
