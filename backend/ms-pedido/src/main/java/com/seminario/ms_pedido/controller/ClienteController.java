@@ -25,7 +25,7 @@ public class ClienteController {
     private final ClienteService clienteService;
     
     @PostMapping("/registrar")
-    public ResponseEntity<Void> registrarCliente(@RequestBody ClienteRegistradoEvent cliente) {
+    public ResponseEntity<Void> registrarCliente(@RequestBody ClienteRegistradoEvent cliente){
         clienteService.registrarCliente(cliente);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
