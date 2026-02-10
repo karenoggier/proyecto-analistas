@@ -37,7 +37,7 @@ export default function VendedorPage() {
             fetch('/catalogoMs/api/vendedores/productos', { method: 'GET', headers })
         ]);
 
-        if (response.status === 401 || response.status === 403) {
+        if (perfilRes.status === 401 || perfilRes.status === 403) {
             localStorage.clear(); 
             window.location.href = "/login?expired=true"; 
             return;

@@ -72,7 +72,7 @@ export default function Navbar({ showSearchBar = false }) {
                   </div>
                 </label>
               </div>
-              <Link href="/cliente/mis-direcciones" className={styles.addAddressLink} onClick={() => setAddressOpen(false)}>
+              <Link href="/cliente/direcciones" className={styles.addAddressLink} onClick={() => setAddressOpen(false)}>
                 + Agregar direccion
               </Link>
             </div>

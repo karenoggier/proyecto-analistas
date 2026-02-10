@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
-import Footer from './components/Footer';
+import Footer from '../components/Footer';
 import styles from './detalle-pedido.module.css';
 
 export default function DetallePedidoPage() {

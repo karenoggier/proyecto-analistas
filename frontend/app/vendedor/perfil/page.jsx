@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import styles from "./perfil.module.css"
 import Link from "next/link"
 import Image from "next/image"
-import VendedorNavbar from "../../../components/ui/vendedor-navbar"
+import VendedorNavbar from "../components/vendedor-navbar"
 
 export default function VendedorPerfilPage() {
   const router = useRouter()
@@ -70,7 +70,7 @@ export default function VendedorPerfilPage() {
             headers: { 'Authorization': `Bearer ${token}` }
         })
 
-        if (response.status === 401 || response.status === 403) {
+        if (resPerfil.status === 401 || resPerfil.status === 403) {
             localStorage.clear(); 
             window.location.href = "/login?expired=true"; 
             return;

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
-import Footer from './../components/Footer';
+import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
 import ResumenCompra from '../../components/ResumenCompra';
 import styles from '../proceso-pedido.module.css';

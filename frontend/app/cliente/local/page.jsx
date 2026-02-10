@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
-import Footer from './components/Footer';
+import Footer from '../components/Footer';
 import styles from './local.module.css';
 
 const allProducts = [

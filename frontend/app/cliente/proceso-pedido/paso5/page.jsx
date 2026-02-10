@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
-import Footer from './../components/Footer';
+import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
 import styles from '../proceso-pedido.module.css';
 
@@ -50,7 +50,7 @@ export default function Paso5Page() {
           </div>
 
           <div className={styles.successActions}>
-            <Link href="/cliente/mis-pedidos" className={styles.successPrimaryBtn}>
+            <Link href="/cliente/pedidos" className={styles.successPrimaryBtn}>
               Ir a mis pedidos
             </Link>
             <Link href="/cliente" className={styles.successSecondaryBtn}>
