@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import styles from "./productos.module.css"
 import Link from "next/link"
 import Image from "next/image"
-import VendedorNavbar from "../../../components/ui/vendedor-navbar"
+import VendedorNavbar from "../components/vendedor-navbar"
 
 export default function VendedorProductosPage() {
   const router = useRouter()
@@ -71,7 +71,7 @@ export default function VendedorProductosPage() {
                   fetch('/catalogoMs/api/categorias', { method: 'GET', headers })
               ]);
 
-              if (response.status === 401 || response.status === 403) {
+              if (perfilRes.status === 401 || perfilRes.status === 403) {
                   localStorage.clear(); 
                   window.location.href = "/login?expired=true"; 
                   return;

@@ -1,6 +1,11 @@
 package com.seminario.ms_pedido.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
@@ -8,6 +13,7 @@ import lombok.Data;
 @Table(name = "DetalleEnvio")
 public class DetalleEnvio {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     @Column(name = "idPedido")
     private String idPedido;
@@ -16,7 +22,7 @@ public class DetalleEnvio {
     private String calle;
     private String codigoPostal;
     private String numero;
-    private String latitud;
-    private String longitud;
+    private Double latitud;
+    private Double longitud;
     private String obs;
 }

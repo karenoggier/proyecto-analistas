@@ -30,7 +30,7 @@ services:
     image: postgres:15-alpine
     container_name: pedido-db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_DB=pedidos_db      # La BD se crea sola con este nombre
       - POSTGRES_USER=postgres

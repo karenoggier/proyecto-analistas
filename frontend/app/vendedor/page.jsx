@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image"
 import styles from "./vendedor.module.css"
 import Link from "next/link"
-import VendedorNavbar from "../../components/ui/vendedor-navbar"
+import VendedorNavbar from "./components/vendedor-navbar"
 
 export default function VendedorPage() {
   const [isProfileComplete, setIsProfileComplete] = useState(false)
@@ -37,7 +37,7 @@ export default function VendedorPage() {
             fetch('/catalogoMs/api/vendedores/productos', { method: 'GET', headers })
         ]);
 
-        if (response.status === 401 || response.status === 403) {
+        if (perfilRes.status === 401 || perfilRes.status === 403) {
             localStorage.clear(); 
             window.location.href = "/login?expired=true"; 
             return;
