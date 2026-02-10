@@ -1,4 +1,7 @@
 package com.seminario.ms_pedido.Services;
+import java.util.ArrayList;
+
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +42,15 @@ public class DireccionService {
         direccionRepository.save(direccionNew);
 
         return direccionMapper.toResponseDTO(direccionNew);
+    }
+
+    public ArrayList<DireccionResponseDTO> obtenerDireccion(Cliente obtenerPerfil) {
+        ArrayList<Direccion> direcciones = direccionRepository.findByCliente(obtenerPerfil);
+        ArrayList<DireccionResponseDTO> direccionesResponse = new ArrayList<>();
+        for (Direccion direccion : direcciones) {
+            direccionesResponse.add(direccionMapper.toResponseDTO(direccion));
+        }
+        return direccionesResponse;
     }
 
 }
