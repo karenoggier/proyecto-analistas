@@ -172,13 +172,13 @@ export default function Navbar({ showSearchBar = false }) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/cliente/mis-pedidos" onClick={() => setUserOpen(false)}>
+                  <Link href="/cliente/pedidos" onClick={() => setUserOpen(false)}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
                     Mis pedidos
                   </Link>
                 </li>
                 <li>
-                  <Link href="/cliente/mis-direcciones" onClick={() => setUserOpen(false)}>
+                  <Link href="/cliente/direcciones" onClick={() => setUserOpen(false)}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
                     Mis direcciones
                   </Link>

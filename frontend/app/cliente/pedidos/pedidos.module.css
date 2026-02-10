@@ -1,53 +1,58 @@
-.page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #fff;
+.container {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
 }
 
-.main {
-  flex: 1;
-  padding: 24px 32px;
-}
-
-.header {
+.titleRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
 .backBtn {
-  text-decoration: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #F5425D;
+  border: none;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .title {
   font-size: 22px;
   font-weight: 800;
-  color: #e84c6a;
+  color: #F5425D;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
   margin: 0;
-  letter-spacing: 1px;
-  flex: 1;
 }
 
-.filterIconBtn {
-  background: none;
-  border: 1px solid #f0f0f0;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+.filterBar {
+  margin-bottom: 20px;
+}
+
+.filterBtn {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: none;
   cursor: pointer;
+  color: #666;
+  font-size: 14px;
+  padding: 0;
 }
 
-.filterIconBtn:hover {
-  background: #fef0f2;
+.filterBtn:hover {
+  color: #333;
 }
 
-/* Order List */
 .orderList {
   display: flex;
   flex-direction: column;
@@ -55,83 +60,84 @@
 }
 
 .orderCard {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px;
-  border: 1px solid #f0f0f0;
-  border-radius: 12px;
-  transition: box-shadow 0.2s;
 }
 
-.orderCard:hover {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-}
-
-.orderLogo {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  overflow: hidden;
+.vendorLogo {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: contain;
   flex-shrink: 0;
-}
-
-.orderLogoInner {
-  width: 100%;
-  height: 100%;
-  background: #e84c6a;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 14px;
 }
 
 .orderInfo {
   flex: 1;
+  min-width: 0;
 }
 
-.orderVendor {
+.statusBadge {
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 2px;
+}
+
+.statusEntregado {
+  color: #4CAF50;
+}
+
+.statusCancelado {
+  color: #F44336;
+}
+
+.statusEnCurso {
+  color: #FF9800;
+}
+
+.vendorName {
   font-size: 15px;
   font-weight: 700;
   color: #222;
-  margin: 0 0 2px 0;
-}
-
-.orderStatus {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0 0 2px 0;
-}
-
-.statusDelivered {
-  color: #22c55e;
-}
-
-.statusCancelled {
-  color: #ef4444;
+  margin: 0 0 2px;
 }
 
 .orderMeta {
   font-size: 12px;
-  color: #888;
+  color: #999;
   margin: 0;
 }
 
-.orderDetailLink {
-  font-size: 13px;
-  color: #e84c6a;
-  text-decoration: none;
-  font-weight: 600;
-  white-space: nowrap;
+.orderRight {
+  text-align: right;
+  flex-shrink: 0;
 }
 
-.orderDetailLink:hover {
+.orderTotal {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 6px;
+}
+
+.detailLink {
+  font-size: 12px;
+  color: #F5425D;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.detailLink:hover {
   text-decoration: underline;
 }
 
-/* Modal */
+/* Filter Modal */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -139,15 +145,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 200;
 }
 
-.modal {
+.modalContent {
   background: #fff;
   border-radius: 16px;
-  max-width: 420px;
-  width: 90%;
-  padding: 24px;
+  padding: 28px 32px;
+  width: 360px;
+  max-width: 90vw;
   position: relative;
 }
 
@@ -158,101 +164,121 @@
   margin-bottom: 20px;
 }
 
-.modalHeader h2 {
+.modalTitle {
   font-size: 20px;
   font-weight: 700;
   color: #222;
   margin: 0;
 }
 
-.modalClose {
+.modalCloseBtn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
+  font-size: 22px;
+  color: #666;
+  padding: 0;
+  line-height: 1;
 }
 
-.modalClose:hover {
-  background: #f5f5f5;
-}
-
-/* Filter Sections */
 .filterSection {
   margin-bottom: 20px;
 }
 
-.filterSectionTitle {
-  font-size: 16px;
-  font-weight: 700;
-  color: #222;
-  margin: 0 0 10px 0;
+.filterSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 12px;
 }
 
-.filterOptions {
+.filterSectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.collapseBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #333;
+  padding: 0;
+  line-height: 1;
+}
+
+.radioList {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.checkboxLabel,
-.radioLabel {
+.radioItem {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  color: #333;
   cursor: pointer;
 }
 
-.checkbox,
-.radio {
-  accent-color: #e84c6a;
+.radioCircle {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.filterActions {
+.radioCircle.selected {
+  border-color: #F5425D;
+}
+
+.radioCircle.selected::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #F5425D;
+}
+
+.radioLabel {
+  font-size: 14px;
+  color: #444;
+}
+
+.modalActions {
   display: flex;
   gap: 12px;
-  padding-top: 8px;
+  margin-top: 24px;
 }
 
-.filterApplyBtn {
-  padding: 10px 24px;
-  background: linear-gradient(135deg, #f7797d, #e84c6a);
+.applyBtn {
+  background: linear-gradient(135deg, #F5425D, #FF7B7B);
   color: #fff;
   border: none;
-  border-radius: 24px;
+  border-radius: 20px;
+  padding: 10px 28px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
 
-.filterApplyBtn:hover {
-  opacity: 0.9;
-}
-
-.filterClearBtn {
+.clearBtn {
+  background: transparent;
+  color: #F5425D;
+  border: 1.5px solid #F5425D;
+  border-radius: 20px;
   padding: 10px 24px;
-  background: linear-gradient(135deg, #f7a0a0, #f7797d);
-  color: #fff;
-  border: none;
-  border-radius: 24px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-}
-
-.filterClearBtn:hover {
-  opacity: 0.9;
-}
-
-@media (max-width: 768px) {
-  .main {
-    padding: 16px;
-  }
-
-  .orderCard {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 }

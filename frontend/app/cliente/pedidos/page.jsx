@@ -1,174 +1,226 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Navbar from '../components/Navbar';
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import styles from "./pedidos.module.css";
 import Footer from '../components/Footer';
-import styles from './pedidos.module.css';
+import Navbar from '../components/Navbar';
 
-const orders = [
+const ORDERS = [
   {
-    id: 1,
-    vendor: 'Burger King Obelisco',
-    status: 'Entregado',
-    date: '05/02/2026',
+    id: "462595752",
+    vendor: "Burger King Obelisco",
+    logo: "/images/burger-king-logo.jpg",
+    status: "En curso",
+    statusKey: "enCurso",
+    products: 1,
+    date: "09/02/2026",
     total: 11700,
-    initial: 'BK',
   },
   {
-    id: 2,
-    vendor: "McDonald's Lav",
-    status: 'Entregado',
-    date: '03/02/2026',
-    total: 15700,
-    initial: 'M',
-  },
-  {
-    id: 3,
-    vendor: 'Mostaza Pellegrini',
-    status: 'Cancelado',
-    date: '01/02/2026',
-    total: 8500,
-    initial: 'MP',
-  },
-  {
-    id: 4,
-    vendor: 'Big Pons - Corrientes',
-    status: 'Entregado',
-    date: '28/01/2026',
-    total: 12300,
-    initial: 'BP',
-  },
-  {
-    id: 5,
-    vendor: 'Burger King Obelisco',
-    status: 'Entregado',
-    date: '25/01/2026',
-    total: 10000,
-    initial: 'BK',
+    id: "585264864",
+    vendor: "McDonald's",
+    logo: "/images/mcdonalds-logo.jpg",
+    status: "Entregado",
+    statusKey: "entregado",
+    products: 3,
+    date: "01/02/2026",
+    total: 35050,
   },
 ];
 
-const estados = ['Entregados', 'Cancelados'];
-const periodos = ['Ultima semana', 'Ultimo mes', 'Ultimos 3 meses', 'Ultimo ano'];
+const STATUS_FILTERS = ["Entregados", "Cancelados"];
+const PERIOD_FILTERS = [
+  "Ultima semana",
+  "Ultimos 15 dias",
+  "Ultimos 30 dias",
+  "Ultimos 3 meses",
+  "Ultimos 6 meses",
+];
 
 export default function MisPedidosPage() {
-  const [showFilter, setShowFilter] = useState(false);
-  const [filterEstado, setFilterEstado] = useState([]);
-  const [filterPeriodo, setFilterPeriodo] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
 
-  const toggleEstado = (val) => {
-    setFilterEstado(filterEstado.includes(val)
-      ? filterEstado.filter((v) => v !== val)
-      : [...filterEstado, val]
-    );
+  const activeFilterCount =
+    (selectedStatus ? 1 : 0) + (selectedPeriod ? 1 : 0);
+
+  function handleClear() {
+    setSelectedStatus(null);
+    setSelectedPeriod(null);
+  }
+
+  function handleApply() {
+    setShowFilters(false);
+  }
+
+  const statusClassName = (key) => {
+    if (key === "entregado") return styles.statusEntregado;
+    if (key === "cancelado") return styles.statusCancelado;
+    return styles.statusEnCurso;
   };
 
-  const filteredOrders = orders.filter((o) => {
-    if (filterEstado.length > 0) {
-      const matchMap = { Entregados: 'Entregado', Cancelados: 'Cancelado' };
-      const statuses = filterEstado.map((e) => matchMap[e]);
-      if (!statuses.includes(o.status)) return false;
-    }
-    return true;
-  });
-
   return (
-    <div className={styles.page}>
+    <div>
       <Navbar />
+    <div className={styles.container}>
+      <div className={styles.titleRow}>
+        <Link href="/" className={styles.backBtn} aria-label="Volver">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"
+              fill="#fff"
+            />
+          </svg>
+        </Link>
+        <h1 className={styles.title}>Mis Pedidos</h1>
+      </div>
 
-      <main className={styles.main}>
-        <div className={styles.header}>
-          <Link href="/cliente" className={styles.backBtn}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="11" fill="#fef0f2" stroke="#e84c6a" strokeWidth="1.5" />
-              <path d="M14 8l-4 4 4 4" stroke="#e84c6a" strokeWidth="2" />
-            </svg>
-          </Link>
-          <h1 className={styles.title}>MIS PEDIDOS</h1>
-          <button className={styles.filterIconBtn} onClick={() => setShowFilter(true)} aria-label="Filtrar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-            </svg>
-          </button>
-        </div>
+      <div className={styles.filterBar}>
+        <button
+          className={styles.filterBtn}
+          onClick={() => setShowFilters(true)}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"
+              fill="#666"
+            />
+          </svg>
+          Filtrar por...
+        </button>
+      </div>
 
-        <div className={styles.orderList}>
-          {filteredOrders.map((order) => (
-            <div key={order.id} className={styles.orderCard}>
-              <div className={styles.orderLogo}>
-                <div className={styles.orderLogoInner}>{order.initial}</div>
-              </div>
-              <div className={styles.orderInfo}>
-                <h3 className={styles.orderVendor}>{order.vendor}</h3>
-                <p className={`${styles.orderStatus} ${order.status === 'Cancelado' ? styles.statusCancelled : styles.statusDelivered}`}>
-                  {order.status}
-                </p>
-                <p className={styles.orderMeta}>{order.date} - ${order.total.toLocaleString()}</p>
-              </div>
-              <Link href="/cliente/detalle-pedido" className={styles.orderDetailLink}>
-                ver el detalle
+      <div className={styles.orderList}>
+        {ORDERS.map((order) => (
+          <div key={order.id} className={styles.orderCard}>
+            <Image
+              src={order.logo || "/placeholder.svg"}
+              alt={order.vendor}
+              width={64}
+              height={64}
+              className={styles.vendorLogo}
+            />
+            <div className={styles.orderInfo}>
+              <span
+                className={`${styles.statusBadge} ${statusClassName(order.statusKey)}`}
+              >
+                {order.status}
+              </span>
+              <p className={styles.vendorName}>{order.vendor}</p>
+              <p className={styles.orderMeta}>
+                {order.products} producto{order.products > 1 ? "s" : ""}
+              </p>
+              <p className={styles.orderMeta}>
+                Fecha de realizacion: {order.date}
+              </p>
+            </div>
+            <div className={styles.orderRight}>
+              <p className={styles.orderTotal}>
+                ${order.total.toLocaleString("es-AR")}
+              </p>
+              <Link
+                href={`/cliente/detalle-pedido/${order.id}`}
+                className={styles.detailLink}
+              >
+                ver el detalle del pedido {order.id}
               </Link>
             </div>
-          ))}
-        </div>
-      </main>
+          </div>
+        ))}
+      </div>
 
-      <Footer />
-
-      {/* Filter Modal */}
-      {showFilter && (
-        <div className={styles.modalOverlay} onClick={() => setShowFilter(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      {showFilters && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowFilters(false)}
+        >
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.modalHeader}>
-              <h2>Filtros</h2>
-              <button className={styles.modalClose} onClick={() => setShowFilter(false)}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
+              <h2 className={styles.modalTitle}>
+                Filtros ({activeFilterCount})
+              </h2>
+              <button
+                className={styles.modalCloseBtn}
+                onClick={() => setShowFilters(false)}
+                aria-label="Cerrar filtros"
+              >
+                &times;
               </button>
             </div>
 
             <div className={styles.filterSection}>
-              <h3 className={styles.filterSectionTitle}>Estado</h3>
-              <div className={styles.filterOptions}>
-                {estados.map((e) => (
-                  <label key={e} className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={filterEstado.includes(e)}
-                      onChange={() => toggleEstado(e)}
-                      className={styles.checkbox}
-                    />
-                    {e}
-                  </label>
-                ))}
+              <div className={styles.filterSectionHeader}>
+                <h3 className={styles.filterSectionTitle}>Estado</h3>
+                <button className={styles.collapseBtn} aria-label="Colapsar">
+                  &minus;
+                </button>
               </div>
+              <ul className={styles.radioList}>
+                {STATUS_FILTERS.map((s) => (
+                  <li
+                    key={s}
+                    className={styles.radioItem}
+                    onClick={() =>
+                      setSelectedStatus(selectedStatus === s ? null : s)
+                    }
+                  >
+                    <span
+                      className={`${styles.radioCircle} ${selectedStatus === s ? styles.selected : ""}`}
+                    />
+                    <span className={styles.radioLabel}>{s}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div className={styles.filterSection}>
-              <h3 className={styles.filterSectionTitle}>Periodo</h3>
-              <div className={styles.filterOptions}>
-                {periodos.map((p) => (
-                  <label key={p} className={styles.radioLabel}>
-                    <input
-                      type="radio"
-                      name="periodo"
-                      value={p}
-                      checked={filterPeriodo === p}
-                      onChange={() => setFilterPeriodo(p)}
-                      className={styles.radio}
-                    />
-                    {p}
-                  </label>
-                ))}
+              <div className={styles.filterSectionHeader}>
+                <h3 className={styles.filterSectionTitle}>Periodo</h3>
+                <button className={styles.collapseBtn} aria-label="Colapsar">
+                  &minus;
+                </button>
               </div>
+              <ul className={styles.radioList}>
+                {PERIOD_FILTERS.map((p) => (
+                  <li
+                    key={p}
+                    className={styles.radioItem}
+                    onClick={() =>
+                      setSelectedPeriod(selectedPeriod === p ? null : p)
+                    }
+                  >
+                    <span
+                      className={`${styles.radioCircle} ${selectedPeriod === p ? styles.selected : ""}`}
+                    />
+                    <span className={styles.radioLabel}>{p}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className={styles.filterActions}>
-              <button className={styles.filterApplyBtn} onClick={() => setShowFilter(false)}>Aplicar</button>
-              <button className={styles.filterClearBtn} onClick={() => { setFilterEstado([]); setFilterPeriodo(''); }}>
+            <div className={styles.modalActions}>
+              <button className={styles.applyBtn} onClick={handleApply}>
+                Aplicar
+              </button>
+              <button className={styles.clearBtn} onClick={handleClear}>
                 Limpiar filtros
               </button>
             </div>
@@ -176,5 +228,7 @@ export default function MisPedidosPage() {
         </div>
       )}
     </div>
+    <Footer />
+</div>
   );
 }
