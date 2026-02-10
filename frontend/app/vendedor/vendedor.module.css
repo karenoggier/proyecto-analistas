@@ -10,7 +10,6 @@
 }
 
 /* ===================== HERO SECTION ===================== */
-/* Make hero full-bleed with 100vw width */
 .hero {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
@@ -20,7 +19,7 @@
   min-height: 300px;
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%); /* ACA VA LA FOTO DEL BANNER SI PUSIERON*/
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%); 
 }
 
 .heroIncomplete {

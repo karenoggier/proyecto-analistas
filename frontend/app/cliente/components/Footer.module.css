@@ -1,11 +1,13 @@
 .footer {
-  background: linear-gradient(135deg, #f7797d, #e84c6a);
-  color: #fff;
-  text-align: center;
-  padding: 16px 32px;
-  font-size: 14px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  padding: var(--space-xl) 0;
 }
 
-.footer p {
-  margin: 0;
+.footerInner {
+  text-align: center;
+}
+
+.footerText {
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
 }

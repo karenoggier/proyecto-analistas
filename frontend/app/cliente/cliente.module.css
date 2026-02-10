@@ -3,18 +3,22 @@
   display: flex;
   flex-direction: column;
   background: #fff;
+  overflow-x: hidden;
 }
 
 .main {
   flex: 1;
 }
 
-/* Hero */
+/* ===================== HERO SECTION ===================== */
 .hero {
-  background: linear-gradient(135deg, #f7797d 0%, #fbc2c4 50%, #fce4ec 100%);
+  width: 100vw;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%); 
   padding: 40px 32px;
   display: flex;
   justify-content: center;
+  min-height: 300px;
+  overflow: hidden;
 }
 
 .heroInner {

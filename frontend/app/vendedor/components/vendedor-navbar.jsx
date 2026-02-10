@@ -11,10 +11,10 @@ export default function VendedorNavbar({ profile }) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
 
-  const handleNavigate = (path) => {
+  /*const handleNavigate = (path) => {
     router.push(path)
     setShowUserMenu(false)
-  }
+  }*/
 
   const handleLogout = () => {
     localStorage.clear()
@@ -37,6 +37,7 @@ export default function VendedorNavbar({ profile }) {
               <Image src="/logo.png" alt="PediloYa Logo" width={50} height={60} className={styles.logo} priority />
               <span className={styles.logoText}>PediloYa</span>
             </Link>
+
             <div className={styles.location}>
               <Image src="/pin-de-ubicacion.png" alt="Pin de ubicación" width={30} height={40} />
               <div className={styles.locationText}>
@@ -53,25 +54,33 @@ export default function VendedorNavbar({ profile }) {
           <div className={styles.navbarRight}>
             <div className={styles.navbarIconWrapper}>
               <button
-                className={styles.navbarIcon}
+                className={styles.iconBtn}
                 onClick={(e) => {
                   e.stopPropagation()
                   setShowNotifications(!showNotifications)
                   setShowUserMenu(false)
                 }}
               >
-                <Image src="/campana-de-notificacion.png" alt="Notificaciones" width={28} height={38} />
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
+                  <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 01-3.46 0" />
+                </svg>
+                {/*<Image src="/campana-de-notificacion.png" alt="Notificaciones" width={28} height={38} /> */}
               </button>
               {showNotifications && (
-                <div className={styles.notificationPopover}>
-                  <div className={styles.notificationHeader}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#9ca3af">
-                      <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-                    </svg>
-                    <span>Notificaciones</span>
+                <div className={styles.popover}>
+                  <div className={styles.popoverHeader}>
+                    <div className={styles.popoverHeaderIcon}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
+                        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 01-3.46 0" />
+                      </svg>
+                      <span>Notificaciones</span>
+                    </div>
                   </div>
-                  <div className={styles.notificationContent}>
-                    <p>No tenés notificaciones</p>
+                  <div className={styles.emptyNotif}>
+                    <strong>No tenes notificaciones</strong>
+                    <p>¡Aprovecha para descubrir productos increibles!</p>
                   </div>
                 </div>
               )}
@@ -90,7 +99,7 @@ export default function VendedorNavbar({ profile }) {
                 <img 
                     src={profile.logo} 
                     alt="Logo negocio" 
-                    className={styles.userAvatar} // Clase nueva para hacerlo redondo
+                    className={styles.userAvatar} 
                   />
                 ) : (
                 <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
@@ -100,13 +109,73 @@ export default function VendedorNavbar({ profile }) {
                   <path d="M7 10l5 5 5-5z" />
                 </svg>
               </button>
+
               {showUserMenu && (
-                <div className={styles.userPopover}>
-                  <div className={styles.userPopoverHeader}>
+                <div className={styles.popover}>
+                  <div className={styles.userMenuHeader}>
+                    <div className={styles.avatar}>
+                      {profile?.logo ? (
+                        <img 
+                            src={profile.logo} 
+                            alt="Logo negocio" 
+                            className={styles.userAvatar} 
+                          />
+                        ) : (
+                        <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
+                        )}
+                    </div>
                     <span>{profile?.nombreNegocio || "Usuario"}</span>
                   </div>
-                  <div className={styles.userPopoverMenu}>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor")}>
+                  <ul className={styles.userMenuList}>
+                    <li>
+                      <Link href="/vendedor" onClick={() => setShowUserMenu(false)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                        Inicio
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/vendedor/perfil" onClick={() => setShowUserMenu(false)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                        Mi perfil
+                       </Link>
+                    </li>
+                    <li>
+                      <Link href="/vendedor/productos" onClick={() => setShowUserMenu(false)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                          <path d="m3.3 7 8.7 5 8.7-5" />
+                          <path d="M12 22V12" />
+                        </svg>
+                        Mis productos
+                       </Link>
+                    </li>
+                    <li>
+                      <Link href="/vendedor/pedidos" onClick={() => setShowUserMenu(false)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M16 2H10a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6z" />
+                          <path d="M12 18h4" /><path d="M12 14h4" /><path d="M12 10h4" /><path d="M16 2v4h4" />
+                        </svg>
+                        Pedidos
+                       </Link>
+                    </li>
+                    <li>
+                      <div className={styles.disabledLinkContent}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 5V7" /><path d="M15 11V13" /><path d="M15 17V19" />
+                          <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z" />
+                        </svg>
+                        Cupones
+                        <span className={styles.comingSoon}>Próximamente</span>
+                      </div>
+                    </li>
+                     <li>
+                      <Link href="/" className={styles.logoutLink} onClick={() => setUserOpen(false)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                        Salir
+                      </Link>
+                    </li>
+                    
+                    {/*<button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor")}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                       </svg>
@@ -141,8 +210,9 @@ export default function VendedorNavbar({ profile }) {
                         <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
                       </svg>
                       <span>Salir</span>
-                    </button>
-                  </div>
+                    </button>*/}
+
+                  </ul>
                 </div>
               )}
             </div>

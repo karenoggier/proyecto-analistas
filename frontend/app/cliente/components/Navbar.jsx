@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from "next/navigation";
 import Link from 'next/link';
+import Image from "next/image"
 import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
 
@@ -27,10 +29,13 @@ export default function Navbar({ showSearchBar = false }) {
   }, []);
 
   return (
+   <>
+    {/* ========== NAVBAR ========== */}
     <nav className={styles.navbar}>
+      <div className={styles.navbarInner}>
       <div className={styles.navLeft}>
         <Link href="/cliente" className={styles.logo}>
-          <span className={styles.logoIcon}>🛒</span>
+          <Image src="/logo.png" alt="PediloYa Logo" width={50} height={60} className={styles.logo} priority />
           <span className={styles.logoText}>PediloYa</span>
         </Link>
 
@@ -39,10 +44,11 @@ export default function Navbar({ showSearchBar = false }) {
             className={styles.addressBtn}
             onClick={() => setAddressOpen(!addressOpen)}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
+            {/*<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
               <circle cx="12" cy="10" r="3" />
-            </svg>
+            </svg>*/}
+            <Image src="/pin-de-ubicacion.png" alt="Pin de ubicación" width={30} height={40} />
             <span className={styles.addressLabel}>
               <small className={styles.addressSmall}>Enviar a</small>
               Mi direccion
@@ -52,8 +58,9 @@ export default function Navbar({ showSearchBar = false }) {
             </svg>
           </button>
 
+          {/*
           {addressOpen && (
-            <div className={styles.popover}>
+            <div className={styles.popoverAddress}>
               <div className={styles.popoverHeader}>
                 <h3>Direcciones</h3>
                 <button className={styles.popoverClose} onClick={() => setAddressOpen(false)}>
@@ -76,6 +83,39 @@ export default function Navbar({ showSearchBar = false }) {
                 + Agregar direccion
               </Link>
             </div>
+          )} */}
+
+          {addressOpen && (
+            <div className={styles.modalOverlay} onClick={() => setAddressOpen(false)}>
+              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.popoverHeader}>
+                  <h3>Direcciones</h3>
+                  <button className={styles.popoverClose} onClick={() => setAddressOpen(false)}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <p className={styles.popoverSubtext}>Elija una direccion...</p>
+
+                <div className={styles.addressContainer}>
+                  <div className={styles.addressList}>
+                    <label className={styles.addressItem}>
+                      <input type="radio" name="address" defaultChecked className={styles.addressRadio} />
+                      <div className={styles.addressText}>
+                        <strong>Santos Vianni 1032</strong>
+                        <span>CP: 3081 - Humboldt, Santa Fe</span>
+                      </div>
+                    </label>
+                    {/* Aquí podrías mapear más direcciones */}
+                  </div>
+
+                  <Link href="/cliente/direcciones" className={styles.addAddressLink} onClick={() => setAddressOpen(false)}>
+                    <span className={styles.plusIcon}>+</span> Agregar dirección
+                  </Link>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
@@ -89,9 +129,8 @@ export default function Navbar({ showSearchBar = false }) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <Link href={`/cliente/buscar?q=${encodeURIComponent(searchQuery)}`} className={styles.searchBtn}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
               </svg>
             </Link>
           </div>
@@ -101,7 +140,7 @@ export default function Navbar({ showSearchBar = false }) {
       <div className={styles.navRight}>
         <div className={styles.iconWrapper} ref={notifRef}>
           <button className={styles.iconBtn} onClick={() => { setNotifOpen(!notifOpen); setUserOpen(false); }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 01-3.46 0" />
             </svg>
@@ -110,7 +149,7 @@ export default function Navbar({ showSearchBar = false }) {
             <div className={styles.popover}>
               <div className={styles.popoverHeader}>
                 <div className={styles.popoverHeaderIcon}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
                     <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
                     <path d="M13.73 21a2 2 0 01-3.46 0" />
                   </svg>
@@ -119,14 +158,14 @@ export default function Navbar({ showSearchBar = false }) {
               </div>
               <div className={styles.emptyNotif}>
                 <strong>No tenes notificaciones</strong>
-                <p>Aprovecha para descubrir productos increibles!</p>
+                <p>¡Aprovecha para descubrir productos increibles!</p>
               </div>
             </div>
           )}
         </div>
 
         <Link href="/cliente/carrito" className={styles.iconBtn}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
             <circle cx="9" cy="21" r="1" />
             <circle cx="20" cy="21" r="1" />
             <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
@@ -136,10 +175,11 @@ export default function Navbar({ showSearchBar = false }) {
         <div className={styles.iconWrapper} ref={userRef}>
           <button className={styles.userBtn} onClick={() => { setUserOpen(!userOpen); setNotifOpen(false); }}>
             <div className={styles.avatar}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
+              {/*<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
-              </svg>
+              </svg>*/}
+              <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
             </div>
             <span className={styles.userName}>Nombre</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -151,10 +191,7 @@ export default function Navbar({ showSearchBar = false }) {
             <div className={styles.popover}>
               <div className={styles.userMenuHeader}>
                 <div className={styles.avatar}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
+                  <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
                 </div>
                 <span>Nombre y Apellido</span>
               </div>
@@ -166,10 +203,11 @@ export default function Navbar({ showSearchBar = false }) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/cliente" onClick={() => setUserOpen(false)}>
+                  <div className={styles.disabledLinkContent}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                     Mi perfil
-                  </Link>
+                    <span className={styles.comingSoon}>Próximamente</span>
+                  </div>
                 </li>
                 <li>
                   <Link href="/cliente/pedidos" onClick={() => setUserOpen(false)}>
@@ -194,6 +232,8 @@ export default function Navbar({ showSearchBar = false }) {
           )}
         </div>
       </div>
+      </div>
     </nav>
+    </>
   );
 }
