@@ -51,8 +51,8 @@ export default function VendedorProductosPage() {
   const filterCount = filters.categorias.length + filters.subcategorias.length + filters.disponibilidad.length
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    const rol = localStorage.getItem("rol")
+    const token = sessionStorage.getItem("token")
+    const rol = sessionStorage.getItem("rol")
 
     if (!token || rol !== "VENDEDOR") {
       router.push("/login")
@@ -72,7 +72,7 @@ export default function VendedorProductosPage() {
               ]);
 
               if (perfilRes.status === 401 || perfilRes.status === 403) {
-                  localStorage.clear(); 
+                  sessionStorage.clear(); 
                   window.location.href = "/login?expired=true"; 
                   return;
               }
@@ -196,7 +196,7 @@ export default function VendedorProductosPage() {
     const confirm = window.confirm(`¿Estás seguro de eliminar "${selectedProduct.nombre}"?`);
     if(!confirm) return;
 
-    const token = localStorage.getItem("token")
+    const token = sessionStorage.getItem("token")
 
     try {
         const response = await fetch(`/catalogoMs/api/vendedores/productos/${selectedProduct.id}`, {
@@ -270,7 +270,7 @@ export default function VendedorProductosPage() {
         imagen: formData.imagen 
     }
 
-    const token = localStorage.getItem("token")
+    const token = sessionStorage.getItem("token")
     
     try {
         let url = '/catalogoMs/api/vendedores/productos'
@@ -349,7 +349,7 @@ export default function VendedorProductosPage() {
   }
 
   const handleLogout = () => {
-    localStorage.clear()
+    sessionStorage.clear()
     window.location.href = "/login"
   }
 

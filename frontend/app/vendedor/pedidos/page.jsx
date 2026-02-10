@@ -95,8 +95,8 @@ export default function VendedorPedidosPage() {
   ])
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    const rol = localStorage.getItem("rol")
+    const token = sessionStorage.getItem("token")
+    const rol = sessionStorage.getItem("rol")
 
     if (!token || rol !== "VENDEDOR") {
       router.push("/login")
@@ -209,7 +209,7 @@ export default function VendedorPedidosPage() {
   })
 
   const handleLogout = () => {
-    localStorage.clear()
+    sessionStorage.clear()
     router.push("/login")
   }
 

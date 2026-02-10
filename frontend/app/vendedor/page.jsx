@@ -17,8 +17,8 @@ export default function VendedorPage() {
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    const rol = localStorage.getItem("rol")
+    const token = sessionStorage.getItem("token")
+    const rol = sessionStorage.getItem("rol")
 
     if (!token || rol !== "VENDEDOR") {
       window.location.href = "/login"
@@ -38,7 +38,7 @@ export default function VendedorPage() {
         ]);
 
         if (perfilRes.status === 401 || perfilRes.status === 403) {
-            localStorage.clear(); 
+            sessionStorage.clear(); 
             window.location.href = "/login?expired=true"; 
             return;
         }
@@ -69,7 +69,7 @@ export default function VendedorPage() {
   }, [])
 
   const handleLogout = () => {
-    localStorage.clear()
+    sessionStorage.clear()
     window.location.href = "/login"
   }
 

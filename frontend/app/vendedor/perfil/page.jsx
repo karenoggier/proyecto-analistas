@@ -50,8 +50,8 @@ export default function VendedorPerfilPage() {
 
   // ========= EFFECTS (CARGA DE DATOS) =========
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    const rol = localStorage.getItem("rol")
+    const token = sessionStorage.getItem("token")
+    const rol = sessionStorage.getItem("rol")
 
     if (!token || rol !== "VENDEDOR") {
       window.location.href = "/login"
@@ -71,7 +71,7 @@ export default function VendedorPerfilPage() {
         })
 
         if (resPerfil.status === 401 || resPerfil.status === 403) {
-            localStorage.clear(); 
+            sessionStorage.clear(); 
             window.location.href = "/login?expired=true"; 
             return;
         }
@@ -139,8 +139,8 @@ export default function VendedorPerfilPage() {
 
   
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    const rol = localStorage.getItem("rol")
+    const token = sessionStorage.getItem("token")
+    const rol = sessionStorage.getItem("rol")
 
     if (!token || rol !== "VENDEDOR") {
       router.push("/login")
@@ -230,7 +230,7 @@ export default function VendedorPerfilPage() {
     setErrors({})
 
     try {
-      const token = localStorage.getItem("token")
+      const token = sessionStorage.getItem("token")
       
       // 1. CONVERTIR IMÁGENES (Solo si son archivos nuevos)
       // Inicializamos con lo que tenga formData (null, URL vieja o Base64 viejo)
@@ -323,7 +323,7 @@ export default function VendedorPerfilPage() {
   }
 
   const handleNavigate = (path) => window.location.href = path
-  const handleLogout = () => { localStorage.clear(); window.location.href = "/login" }
+  const handleLogout = () => { sessionStorage.clear(); window.location.href = "/login" }
 
   const handleRemoveImage = (e, field) => {
     e.preventDefault() 

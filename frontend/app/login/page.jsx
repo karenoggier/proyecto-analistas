@@ -40,8 +40,8 @@ export default function LoginPage() {
 
         if (res.ok) {
             // === LOGIN EXITOSO ===
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("rol", data.rol);
+            sessionStorage.setItem("token", data.token);
+            sessionStorage.setItem("rol", data.rol);
             //localStorage.setItem("email", data.email);
             //localStorage.setItem("userId", data.id);
 
