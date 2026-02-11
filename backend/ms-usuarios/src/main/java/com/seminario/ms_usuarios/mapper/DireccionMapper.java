@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.seminario.ms_usuarios.dto.DireccionRequestDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.DireccionCatDTO;
+import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.DireccionResponseEvent;
 import com.seminario.ms_usuarios.model.Direccion;
 import com.seminario.ms_usuarios.model.Localidad;
 import com.seminario.ms_usuarios.model.Provincia;
@@ -78,6 +79,22 @@ public class DireccionMapper {
         direccionCatDTO.setLongitud(direccion.getLongitud());
 
         return direccionCatDTO;
+    }
+
+    public DireccionResponseEvent toResponseEvent(DireccionResponseDTO registrarDireccion) {
+        if (registrarDireccion == null) return null;
+
+        DireccionResponseEvent responseEvent = new DireccionResponseEvent();
+        responseEvent.setProvincia(registrarDireccion.getProvincia().getNombre());
+        responseEvent.setLocalidad(registrarDireccion.getLocalidad().getNombre());
+        responseEvent.setCalle(registrarDireccion.getCalle());
+        responseEvent.setNumero(registrarDireccion.getNumero());
+        responseEvent.setCodigoPostal(registrarDireccion.getCodigoPostal());
+        responseEvent.setObservaciones(registrarDireccion.getObservaciones());
+        responseEvent.setLatitud(registrarDireccion.getLatitud());
+        responseEvent.setLongitud(registrarDireccion.getLongitud());
+
+        return responseEvent;
     }
 
 

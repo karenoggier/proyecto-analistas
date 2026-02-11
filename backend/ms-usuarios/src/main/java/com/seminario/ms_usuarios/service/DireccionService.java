@@ -132,30 +132,7 @@ public class DireccionService {
         return direccionMapper.toResponse(direccion);
     }
 
-    //metodo para obtener datos de una direccion a partir de un evento del ms-pedido - esta diraccion no esta en la bd ni se aguarda ahí
-    public DireccionResponseEvent obtenerDireccion(DireccionRequestEvent dto) {
-        DireccionResponseEvent responseDTO = new DireccionResponseEvent(); 
-        if (dto.getId_localidad() != null) {
-            Provincia provincia = provinciaRepository.findById(dto.getId_provincia())
-                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Provincia no encontrada con ID: " + dto.getId_provincia()));
-            responseDTO.setProvincia(provincia.getNombre());
-        }
-        if (dto.getId_localidad() != null) {
-            Localidad localidad = localidadRepository.findById(dto.getId_localidad())
-                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Localidad no encontrada con ID: " + dto.getId_localidad()));
-            responseDTO.setLocalidad(localidad.getNombre());
-        }
-        NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(dto.getCalle(), dto.getNumero(), responseDTO.getLocalidad(), responseDTO.getProvincia());
-
-        if (coordenadas == null) {
-            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "No se pudieron obtener las coordenadas para la dirección proporcionada");
-        }
-        responseDTO.setLatitud(coordenadas.getLatitud());
-        responseDTO.setLongitud(coordenadas.getLongitud());
-        
-        return responseDTO;
-
-    }
+    
 
 
 }

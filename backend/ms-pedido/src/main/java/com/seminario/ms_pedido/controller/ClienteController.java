@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.seminario.ms_pedido.DTOs.ClienteResponseDTO;
 import com.seminario.ms_pedido.DTOs.eventos_ms_usuarios.ClienteRegistradoEvent;
+import com.seminario.ms_pedido.Mapper.ClienteMapper;
 import com.seminario.ms_pedido.Services.ClienteService;
 import com.seminario.ms_pedido.model.Cliente;
 
@@ -23,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ClienteController {
     private final ClienteService clienteService;
+    private final ClienteMapper clienteMapper;
     
     @PostMapping("/registrar")
     public ResponseEntity<Void> registrarCliente(@RequestBody ClienteRegistradoEvent cliente){
@@ -32,6 +35,15 @@ public class ClienteController {
     
     @GetMapping("/perfil")
     @Operation(summary = "Obtener perfil del cliente logueado")
+    public ResponseEntity<ClienteResponseDTO> obtenerCliente(Authentication authentication) {
+        Cliente cliente = obtenerPerfil(authentication);
+        ClienteResponseDTO responseDTO = clienteMapper.toResponseDTO(cliente);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+
+
+
     public Cliente obtenerPerfil(Authentication authentication) {
        String usuarioIdentity = authentication.getName();
        System.out.println("Obteniendo perfil para usuario: " + usuarioIdentity);

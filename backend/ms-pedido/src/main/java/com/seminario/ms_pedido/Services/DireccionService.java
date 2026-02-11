@@ -1,7 +1,6 @@
 package com.seminario.ms_pedido.Services;
 import java.util.ArrayList;
 
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,7 @@ public class DireccionService {
     @Transactional
     public DireccionResponseDTO registrarDireccion(DireccionRequestDTO direccionRequestDTO, Cliente cliente) {
         DireccionResponseDTO direccionResponseDTO = new DireccionResponseDTO();
-        direccionResponseDTO = usuarioClient.buscarDatosDireccion(direccionRequestDTO);
+        direccionResponseDTO = usuarioClient.buscarDatosDireccion(direccionRequestDTO, cliente.getId());
         Direccion direccionNew = new Direccion();
         direccionNew.setProvincia(direccionResponseDTO.getProvincia());
         direccionNew.setLocalidad(direccionResponseDTO.getLocalidad());

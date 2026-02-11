@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seminario.ms_pedido.DTOs.DireccionRequestDTO;
 import com.seminario.ms_pedido.DTOs.DireccionResponseDTO;
 import com.seminario.ms_pedido.exception.RequestException;
@@ -54,43 +53,30 @@ public class UsuarioClient {
                 "Error al sincronizar con ms-usuario: " + e.getMessage());
         }
     }*/
-    @CircuitBreaker(name = "usuarioClient", fallbackMethod = "BuscarDatosDireccionFallback")
+    @CircuitBreaker(name = "usuarioClient", fallbackMethod = "buscarDatosDireccionFallback")
     @Retry(name = "usuarioClient")
-    public DireccionResponseDTO buscarDatosDireccion(DireccionRequestDTO event) {
-    String url = usuariosBaseUrl + "/usuariosMs/direcciones/obtener";
-    try {
-        ResponseEntity<DireccionResponseDTO> response = restTemplate.postForEntity(url, event, DireccionResponseDTO.class);
-        return response.getBody();
-
-    } catch (HttpStatusCodeException e) {
-        // 1. Log the raw error for internal debugging
-        log.error("Error calling {}: Status {} - Body {}", url, e.getStatusCode(), e.getResponseBodyAsString());
-
-        // 2. Try to extract the remote message, otherwise use a default
-        String remoteMessage = extractMessage(e.getResponseBodyAsString());
+    public DireccionResponseDTO buscarDatosDireccion(DireccionRequestDTO event, String clienteId) {
+        // Agregamos el clienteId a la URL si es un PathVariable
+        String url = usuariosBaseUrl + "/usuariosMs/clientes/registrarDireccion/{usuarioId}";
         
-        throw new RequestException(
-            "USU", 
-            e.getStatusCode().value(), 
-            (HttpStatus) e.getStatusCode(), 
-            remoteMessage
-        );
-    } catch (Exception e) {
-        throw new RequestException("USU", 500, HttpStatus.INTERNAL_SERVER_ERROR, 
-            "Error de comunicación: " + e.getMessage());
+        try {
+            ResponseEntity<DireccionResponseDTO> response = restTemplate.postForEntity(
+                url, event, DireccionResponseDTO.class, clienteId);
+            return response.getBody();
+        } catch (HttpStatusCodeException e) {
+            log.error("Error en microservicio usuarios: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RequestException("USU", e.getStatusCode().value(), (HttpStatus) e.getStatusCode(), "Error en ms-usuarios: " + e.getResponseBodyAsString());
+        } catch (Exception e) {
+            throw new RequestException("USU", 500, HttpStatus.INTERNAL_SERVER_ERROR, "Error de red: " + e.getMessage());
+        }
     }
-}
 
-// Helper method to parse the JSON error body
-private String extractMessage(String body) {
-    try {
-        // Use ObjectMapper to read the "mensaje" field from the JSON string
-        return new ObjectMapper().readTree(body).get("mensaje").asText();
-    } catch (Exception e) {
-        return "Error remoto sin descripción específica.";
+// El método Fallback
+    public DireccionResponseDTO buscarDatosDireccionFallback(DireccionRequestDTO event, String clienteId, Throwable t) {
+        log.error("Circuit Breaker activado o reintentos agotados. Razón: {}", t.getMessage());
+        // Retornar un objeto por defecto o lanzar una excepción personalizada
+        return new DireccionResponseDTO(); 
     }
-}
-       
 
 
 }
