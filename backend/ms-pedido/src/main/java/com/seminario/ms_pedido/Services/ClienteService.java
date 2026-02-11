@@ -1,9 +1,12 @@
 package com.seminario.ms_pedido.Services;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.seminario.ms_pedido.DTOs.ClienteResponseDTO;
 import com.seminario.ms_pedido.DTOs.eventos_ms_usuarios.ClienteRegistradoEvent;
 import com.seminario.ms_pedido.Mapper.ClienteMapper;
 import com.seminario.ms_pedido.Repositories.ClienteRepository;
+import com.seminario.ms_pedido.exception.RequestException;
 import com.seminario.ms_pedido.model.Cliente;
 
 import lombok.RequiredArgsConstructor;
@@ -21,9 +24,12 @@ public class ClienteService {
         clienteRepository.save(clienteEntity);
     }
 
-    public Cliente buscarClientePorEmail(String usuarioIdentity) {
-        return (clienteRepository.findByEmail(usuarioIdentity))
-                 .orElseThrow(() -> new RuntimeException("No se encontró cliente con email: " + usuarioIdentity)); 
+    public ClienteResponseDTO obtenerPerfilPorEmail(String email) {
+
+        Cliente cliente = clienteRepository.findByEmail(email)
+            .orElseThrow(() -> new RequestException("US", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+            
+        return clienteMapper.toResponseDTO(cliente);
     }
 
 }

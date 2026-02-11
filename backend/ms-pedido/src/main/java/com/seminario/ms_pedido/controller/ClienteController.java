@@ -26,31 +26,20 @@ import lombok.extern.slf4j.Slf4j;
 public class ClienteController {
     private final ClienteService clienteService;
     private final ClienteMapper clienteMapper;
-    
+   
     @PostMapping("/registrar")
+     @Operation(summary = "Registra un nuevo cliente. Llamado internamente por ms-usuarios")
     public ResponseEntity<Void> registrarCliente(@RequestBody ClienteRegistradoEvent cliente){
         clienteService.registrarCliente(cliente);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
     
     @GetMapping("/perfil")
-    @Operation(summary = "Obtener perfil del cliente logueado")
+    @Operation(summary = "Obtiene perfil de un cliente logueado")
     public ResponseEntity<ClienteResponseDTO> obtenerCliente(Authentication authentication) {
-        Cliente cliente = obtenerPerfil(authentication);
-        ClienteResponseDTO responseDTO = clienteMapper.toResponseDTO(cliente);
-        return ResponseEntity.ok(responseDTO);
+        String email = authentication.getName();
+        return ResponseEntity.ok(clienteService.obtenerPerfilPorEmail(email));
     }
-
-    public Cliente obtenerPerfil(Authentication authentication) {
-       String usuarioIdentity = authentication.getName();
-       System.out.println("Obteniendo perfil para usuario: " + usuarioIdentity);
-       return clienteService.buscarClientePorEmail(usuarioIdentity);
-    }
-
-    public Cliente obtenerPerfil(String email) {
-       return clienteService.buscarClientePorEmail(email);
-    }
-
 
 
 

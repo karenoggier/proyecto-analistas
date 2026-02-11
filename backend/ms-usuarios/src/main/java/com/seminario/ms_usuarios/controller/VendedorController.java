@@ -13,6 +13,7 @@ import com.seminario.ms_usuarios.mapper.VendedorMapper;
 import com.seminario.ms_usuarios.model.Vendedor;
 import com.seminario.ms_usuarios.service.VendedorService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +26,7 @@ public class VendedorController {
     private final VendedorService vendedorService;
 
     @PostMapping("/actualizar")
+     @Operation(summary = "Actualiza un vendedor y su dirección. Llamado internamente por ms-catalogo")
     public ResponseEntity<VendedorRegistradoEvent> actualizarVendedor(@RequestBody VendedorRegistradoEvent vendedorDTO) {
 
         return ResponseEntity.ok(vendedorService.guardarVendedor(vendedorDTO));

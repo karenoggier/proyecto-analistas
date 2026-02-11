@@ -46,7 +46,8 @@ public class VendedorController {
         return vendedorService.obtenerVendedorPorUsuarioId(usuarioId);
     }*/
 
-    @PutMapping("/actualizar") 
+    @PutMapping("/actualizar")
+     @Operation(summary = "Actualiza el perfil de un vendedor logueado")
     public ResponseEntity<VendedorResponseDTO> updateVendedor(
             @RequestBody VendedorRequestDTO vendedorRequestDTO,
             Authentication authentication) { 
@@ -58,13 +59,14 @@ public class VendedorController {
 
     //Endpoint HTTP desde ms-usuarios
     @PostMapping("/registrar")
+    @Operation(summary = "Registra un nuevo vendedor. Llamado internamente por ms-usuarios")
     public ResponseEntity<Void> registrarVendedor(@RequestBody VendedorRegistradoEvent evento) {
             vendedorService.recibirRegistroVendedor(evento);
             return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/perfil")
-    @Operation(summary = "Obtener perfil del vendedor logueado")
+    @Operation(summary = "Obtiene el perfil de un vendedor logueado")
     public ResponseEntity<VendedorResponseDTO> obtenerPerfil(Authentication authentication) {
        String usuarioIdentity = authentication.getName();
        return ResponseEntity.ok(vendedorService.buscarVendedorPorEmail(usuarioIdentity));
@@ -72,14 +74,14 @@ public class VendedorController {
     }
 
     @GetMapping("/productos")
-    @Operation(summary = "Obtener los productos de un vendedor logueado")
+    @Operation(summary = "Obtiene los productos de un vendedor logueado")
     public List<ProductoResponseDTO> misProductos(Authentication authentication) {
         String email = authentication.getName();
         return vendedorService.listarProductos(email);
     }
 
     @PostMapping("/productos")
-    @Operation(summary = "Agregar un producto a la lista de productos de un vendedor logueado")
+    @Operation(summary = "Agrega un producto a la lista de productos de un vendedor logueado")
     public ResponseEntity<ProductoResponseDTO> agregarProducto(
             Authentication authentication,
             @Valid @RequestBody ProductoRequestDTO request) {
@@ -89,6 +91,7 @@ public class VendedorController {
     }
 
     @PutMapping("/productos/{id}")
+    @Operation(summary = "Modifica un producto de un vendedor logueado")
     public ResponseEntity<ProductoResponseDTO> editarProducto(
             Authentication authentication,
             @PathVariable String id,
@@ -99,6 +102,7 @@ public class VendedorController {
     }
 
     @DeleteMapping("/productos/{id}")
+    @Operation(summary = "Baja lógica un producto de un vendedor logueado")
     public ResponseEntity<Void> eliminarProducto(
             Authentication authentication,
             @PathVariable String id) {
