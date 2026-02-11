@@ -2,17 +2,24 @@ package com.seminario.ms_usuarios.controller;
 
 import java.util.ArrayList;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_usuarios.dto.DireccionRequestDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.DireccionResponseEvent;
+import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.DireccionMapper;
 import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.service.DireccionService;
+import com.seminario.ms_usuarios.service.UsuarioService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,6 +27,24 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DireccionController {
 
+    private final UsuarioService usuarioService;
+    private final DireccionService direccionService;
+
+    @PostMapping("/{usuarioId}") 
+    @Operation(summary = "Valida y guarda una nueva dirección para un usuario. Llamado internamente por ms-pedido")
+    public ResponseEntity<DireccionResponseEvent> agregarDireccion(
+            @PathVariable String usuarioId, 
+            @RequestBody DireccionRequestDTO dto) {
+        
+        Usuario usuario = usuarioService.buscarPorId(usuarioId)
+                .orElseThrow(() -> new RequestException("US", 404, HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        
+        return ResponseEntity.ok(direccionService.registrarDireccionParaPedido(dto, usuario));
+        
+    }
+
+
+    /* 
     private final DireccionService direccionService;
     private final DireccionMapper direccionMapper;
 
@@ -38,6 +63,6 @@ public class DireccionController {
     
     public ResponseEntity<ArrayList<DireccionResponseDTO>> obtenerDirecciones(Usuario usuario) {
         return direccionService.buscarDireccionesPorUsuario(usuario);
-    }
+    }*/
 
 }

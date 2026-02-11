@@ -22,7 +22,7 @@ import lombok.ToString;
 @Table(name = "direccion")
 public class Direccion {
      @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    //@GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     private String id;
     

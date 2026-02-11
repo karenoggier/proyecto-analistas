@@ -21,5 +21,25 @@ public class DireccionMapper {
         return responseDTO;
     }
 
+    public Direccion toEntity(DireccionResponseDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Direccion direccion = new Direccion();
+        
+        direccion.setId(dto.getId()); 
+        
+        direccion.setProvincia(dto.getProvincia());
+        direccion.setLocalidad(dto.getLocalidad());
+        direccion.setCalle(dto.getCalle());
+        direccion.setNumero(dto.getNumero());
+        direccion.setCodigoPostal(dto.getCodigoPostal());
+        direccion.setLatitud(dto.getLatitud());
+        direccion.setLongitud(dto.getLongitud());
+        direccion.setObservaciones(dto.getObservaciones());
+
+        return direccion;
+    }
 
 }

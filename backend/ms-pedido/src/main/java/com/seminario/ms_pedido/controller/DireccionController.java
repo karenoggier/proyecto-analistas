@@ -14,7 +14,8 @@ import com.seminario.ms_pedido.DTOs.DireccionResponseDTO;
 import com.seminario.ms_pedido.Services.DireccionService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,25 +25,26 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class DireccionController {
+    
     private final DireccionService direccionService;
     private final ClienteController clienteController;
 
-    @PostMapping("/registrar")
-    public  ResponseEntity<DireccionResponseDTO> registrarDireccion( @RequestBody DireccionRequestDTO direccionRequestDTO, Authentication authentication) {
-        return ResponseEntity.ok(direccionService.registrarDireccion(direccionRequestDTO, clienteController.obtenerPerfil(authentication)));
+    @PostMapping
+    @Operation(summary = "Registra nueva dirección para un cliente logueado")
+    public ResponseEntity<DireccionResponseDTO> registrarDireccion( 
+        @Valid @RequestBody DireccionRequestDTO direccionRequestDTO, 
+        Authentication authentication) {
+
+        String email = authentication.getName();
+        
+        return ResponseEntity.ok(direccionService.agregarDireccion(email, direccionRequestDTO));
         
     }
 
-    @PostMapping("/registrarprueba")
-    public  ResponseEntity<DireccionResponseDTO> registrarDireccionPrueba( @RequestBody DireccionRequestDTO direccionRequestDTO, String email) {
-        return ResponseEntity.ok(direccionService.registrarDireccion(direccionRequestDTO, clienteController.obtenerPerfil(email)));
-        
-    }
-
-    @GetMapping("/obtener")
+    /*@GetMapping("/obtener")
     @Operation(summary = "Obtener dirección del cliente logueado")
     public ResponseEntity<ArrayList<DireccionResponseDTO>> obtenerDireccion(Authentication authentication) {
         return ResponseEntity.ok(direccionService.obtenerDireccion(clienteController.obtenerPerfil(authentication)));
-    }
+    }*/
 
 }

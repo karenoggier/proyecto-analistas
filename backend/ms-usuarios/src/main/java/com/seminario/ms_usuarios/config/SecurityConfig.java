@@ -23,10 +23,11 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable) // deactivate CSRF for APIs REST
             .authorizeHttpRequests(auth -> auth
                 //.requestMatchers("/**").permitAll() // Temporary: Allow all endpoints
+                
                 .requestMatchers("/vendedores/actualizar").permitAll()
+                .requestMatchers("/direcciones/**").permitAll()
                 .requestMatchers("/auth/**").permitAll() // Allow access to login and registration
                 .requestMatchers("/ubicacion/**").permitAll()
-                .requestMatchers("/clientes/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll() // Allow acces to swagger
                 .anyRequest().authenticated() // Anything else requires login
             );

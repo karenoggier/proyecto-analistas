@@ -81,10 +81,11 @@ public class DireccionMapper {
         return direccionCatDTO;
     }
 
-    public DireccionResponseEvent toResponseEvent(DireccionResponseDTO registrarDireccion) {
+    public DireccionResponseEvent toResponseEvent(Direccion registrarDireccion) {
         if (registrarDireccion == null) return null;
 
         DireccionResponseEvent responseEvent = new DireccionResponseEvent();
+        responseEvent.setId(registrarDireccion.getId());
         responseEvent.setProvincia(registrarDireccion.getProvincia().getNombre());
         responseEvent.setLocalidad(registrarDireccion.getLocalidad().getNombre());
         responseEvent.setCalle(registrarDireccion.getCalle());
@@ -97,6 +98,23 @@ public class DireccionMapper {
         return responseEvent;
     }
 
+    public DireccionResponseEvent toPedidoResponse(Direccion direccion) {
+        if (direccion == null) return null;
+        
+        DireccionResponseEvent event = new DireccionResponseEvent();
+  
+        event.setId(direccion.getId()); 
+        event.setProvincia(direccion.getProvincia().getNombre()); 
+        event.setLocalidad(direccion.getLocalidad().getNombre());
+        event.setCalle(direccion.getCalle());
+        event.setNumero(direccion.getNumero());
+        event.setCodigoPostal(direccion.getCodigoPostal());
+        event.setLatitud(direccion.getLatitud());
+        event.setLongitud(direccion.getLongitud());
+        event.setObservaciones(direccion.getObservaciones());
+        
+        return event;
+    }
 
 
 

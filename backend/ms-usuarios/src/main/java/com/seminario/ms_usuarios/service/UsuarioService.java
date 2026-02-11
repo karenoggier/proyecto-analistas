@@ -1,4 +1,6 @@
 package com.seminario.ms_usuarios.service;
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final VendedorService vendedorService;
-    private final ClienteService clienteService;
-    private final DireccionService direccionService;
-    private final VendedorMapper vendedorMapper;
  
-
     public boolean existeEmail(String email) {
         return usuarioRepository.findByEmail(email).isPresent();
     }
@@ -28,6 +25,10 @@ public class UsuarioService {
     public Usuario findByEmail(String email) {
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RequestException("US",2, HttpStatus.NOT_FOUND, "Credenciales inválidas"));
+    }
+
+    public Optional<Usuario> buscarPorId(String id) {
+        return usuarioRepository.findById(id);
     }
 
    /*  public VendedorResponseDTO actualizarVendedor(VendedorUpdateRequestDTO vendedorDTO) {

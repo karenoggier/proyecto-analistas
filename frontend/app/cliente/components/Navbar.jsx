@@ -7,7 +7,7 @@ import Image from "next/image"
 import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
 
-export default function Navbar({ showSearchBar = false }) {
+export default function Navbar({ showSearchBar = false, profile }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [addressOpen, setAddressOpen] = useState(false);
@@ -17,6 +17,11 @@ export default function Navbar({ showSearchBar = false }) {
   const notifRef = useRef(null);
   const userRef = useRef(null);
   const addressRef = useRef(null);
+
+  const handleLogout = () => {
+    sessionStorage.clear()
+    window.location.href = "/login"
+  }
 
   useEffect(() => {
     function handleClickOutside(e) {

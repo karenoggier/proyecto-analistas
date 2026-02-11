@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class VendedorController {
     private final VendedorService vendedorService;
-    private final VendedorMapper vendedorMapper;
 
     @PostMapping("/actualizar")
     public ResponseEntity<VendedorRegistradoEvent> actualizarVendedor(@RequestBody VendedorRegistradoEvent vendedorDTO) {

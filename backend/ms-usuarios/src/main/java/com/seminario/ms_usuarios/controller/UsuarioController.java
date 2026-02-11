@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 public class UsuarioController {
     private final UsuarioService usuarioService;
     
+    //BORRAR ESTE CONTROLLER
+
+
    /*  @PostMapping("/actualizarVendedor")
     public ResponseEntity<VendedorResponseDTO> actualizarVendedor(@RequestBody VendedorUpdateRequestDTO vendedorDTO) {
         return ResponseEntity.ok(usuarioService.actualizarVendedor(vendedorDTO));

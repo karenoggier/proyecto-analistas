@@ -10,7 +10,6 @@ import com.seminario.ms_usuarios.dto.DireccionRequestDTO;
 import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.NominatimResponseDTO;
 import com.seminario.ms_usuarios.dto.eventos_ms_catalogo.DireccionCatDTO;
-import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.DireccionRequestEvent;
 import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.DireccionResponseEvent;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.DireccionMapper;
@@ -78,6 +77,39 @@ public class DireccionService {
  
     }
 
+    public DireccionResponseEvent registrarDireccionParaPedido(DireccionRequestDTO dto, Usuario usuario) {
+        if (usuario == null) {
+            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "El usuario no puede ser nulo");
+        }
+
+        Provincia provinciaEntidad = provinciaRepository.findById(dto.getProvincia())
+                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Provincia no encontrada con ID: " + dto.getProvincia()));
+
+        Localidad localidadEntidad = localidadRepository.findById(dto.getLocalidad())
+                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Localidad no encontrada con ID: " + dto.getLocalidad()));
+
+        NominatimResponseDTO coordenadas = geocodingService.obtenerCoordenadas(
+                dto.getCalle(), 
+                dto.getNumero(), 
+                localidadEntidad.getNombre(), 
+                provinciaEntidad.getNombre()
+        );
+
+        if (coordenadas == null) {
+            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "No se pudieron obtener las coordenadas para la dirección proporcionada");
+        }
+
+        Direccion direccion = direccionMapper.toEntity(dto, coordenadas.getLatitud(), coordenadas.getLongitud());
+        direccion.setUsuario(usuario);
+        direccion.setProvincia(provinciaEntidad); 
+        direccion.setLocalidad(localidadEntidad);
+        
+        Direccion guardada = direccionRepository.save(direccion);
+
+        return direccionMapper.toPedidoResponse(guardada);
+ 
+    }
+
     public ResponseEntity<ArrayList<DireccionResponseDTO>> buscarDireccionesPorUsuario(Usuario usuario) {
         
         ArrayList<Direccion> direcciones = direccionRepository.findByUsuario(usuario);
@@ -90,9 +122,9 @@ public class DireccionService {
         return ResponseEntity.ok(direccionesDTO);   
     }
 
-    public ArrayList<Direccion> getDireccionesByLocalidadYProvincia(String localidad, String provincia) {
+    /*public ArrayList<Direccion> getDireccionesByLocalidadYProvincia(String localidad, String provincia) {
         return direccionRepository.findByLocalidadAndProvincia(localidad, provincia);
-    }
+    }*/
 
     public DireccionCatDTO actualizarDireccion(DireccionCatDTO dto, String idUsuario) {
         Direccion direccion = direccionRepository.findByUsuarioId(idUsuario);

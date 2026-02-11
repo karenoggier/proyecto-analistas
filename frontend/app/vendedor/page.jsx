@@ -1,9 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image"
 import styles from "./vendedor.module.css"
-import Link from "next/link"
 import VendedorNavbar from "./components/vendedor-navbar"
 
 export default function VendedorPage() {
@@ -52,7 +50,7 @@ export default function VendedorPage() {
             } else {
                 setVendedorProfile(dataPerfil);
             }
-            setIsProfileComplete(dataPerfil.estado === "ACTIVO");
+            setIsProfileComplete(dataPerfil.estado === "ACTIVO");
           
         } else {
             console.error("Error al obtener perfil del vendedor");
@@ -84,8 +82,8 @@ export default function VendedorPage() {
 
     const hasOverflow = el.scrollWidth > el.clientWidth;
 
-  setCanScrollLeft(hasOverflow && el.scrollLeft > 0);
-  setCanScrollRight(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth);
+    setCanScrollLeft(hasOverflow && el.scrollLeft > 0);
+    setCanScrollRight(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth);
   };
 
   useEffect(() => {

@@ -41,9 +41,6 @@ public class ClienteController {
         return ResponseEntity.ok(responseDTO);
     }
 
-
-
-
     public Cliente obtenerPerfil(Authentication authentication) {
        String usuarioIdentity = authentication.getName();
        System.out.println("Obteniendo perfil para usuario: " + usuarioIdentity);

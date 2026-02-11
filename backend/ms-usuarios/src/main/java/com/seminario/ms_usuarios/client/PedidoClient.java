@@ -42,7 +42,7 @@ public class PedidoClient {
 
         } catch (Exception e) {
             log.error("FALLO REAL AL LLAMAR A PEDIDO: " + e.getMessage());
-            // e.printStackTrace(); // Descomenta si necesitas ver todo
+            // e.printStackTrace(); 
             throw new RequestException("PED", 500, HttpStatus.INTERNAL_SERVER_ERROR,
                     "Error al sincronizar con ms-pedido: " + e.getMessage());
         }
@@ -50,7 +50,7 @@ public class PedidoClient {
     
     //Fallback method cuando el circuit breaker está abierto
     public ResponseEntity<Void> registrarClienteFallback(ClienteRegistradoEvent evento, Exception exception) {
-        System.out.println(">>> ERROR REAL OCULTO EN PEDIDO: " + exception.getMessage());
+        //System.out.println(">>> ERROR REAL OCULTO EN PEDIDO: " + exception.getMessage());
         exception.printStackTrace();
 
         throw new RequestException("PED", 503, HttpStatus.SERVICE_UNAVAILABLE,

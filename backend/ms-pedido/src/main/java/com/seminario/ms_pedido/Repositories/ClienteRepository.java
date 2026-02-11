@@ -9,6 +9,6 @@ import com.seminario.ms_pedido.model.Cliente;
 
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, String> {
-    Optional<Cliente> findByEmail(String usuarioIdentity);
+    Optional<Cliente> findByEmail(String email);
 
 }

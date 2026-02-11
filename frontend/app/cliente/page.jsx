@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -27,6 +27,72 @@ const stores = [
 
 export default function ClienteHome() {
   const scrollRef = useRef(null);
+  const [clientProfile, setClientProfile] = useState(null);
+
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+  useEffect(() => {
+      const token = sessionStorage.getItem("token")
+      const rol = sessionStorage.getItem("rol")
+  
+      if (!token || rol !== "CLIENTE") {
+        window.location.href = "/login"
+        return
+      }
+  
+     const fetchPerfil = async () => {
+        try {
+          const headers = {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          };
+  
+          const [perfilRes] = await Promise.all([
+              fetch('/pedidoMs/clientes/perfil', { method: 'GET', headers }),
+          ]);
+  
+          if (perfilRes.status === 401 || perfilRes.status === 403) {
+              sessionStorage.clear(); 
+              window.location.href = "/login?expired=true"; 
+              return;
+          }
+  
+          if (perfilRes.ok) {
+              const dataPerfil = await perfilRes.json();
+              setClientProfile(dataPerfil);
+          } else {
+              console.error("Error al obtener perfil del cliente");
+          }
+  
+        } catch (error) {
+          console.error("Error de red:", error);
+        } 
+      }
+  
+      fetchPerfil();
+  
+    }, [])
+  
+    const handleLogout = () => {
+      sessionStorage.clear()
+      window.location.href = "/login"
+    }
+  
+    const handleNavigate = (path) => {
+      window.location.href = path
+    }
+  /*
+    // FUNCION PARA CARRUSSEL DE LOCALES
+    const checkScroll = () => {
+      const el = productsRef.current;
+      if (!el) return;
+  
+      const hasOverflow = el.scrollWidth > el.clientWidth;
+  
+      setCanScrollLeft(hasOverflow && el.scrollLeft > 0);
+      setCanScrollRight(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth);
+    };*/
 
   const scrollLeft = () => {
     if (scrollRef.current) {
@@ -42,7 +108,7 @@ export default function ClienteHome() {
 
   return (
     <div className={styles.page}>
-      <Navbar showSearchBar />
+      <Navbar showSearchBar profile={clientProfile} />
 
       <main className={styles.main}>
         {/* Hero Section */}

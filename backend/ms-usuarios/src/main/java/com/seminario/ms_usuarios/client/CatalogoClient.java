@@ -45,7 +45,7 @@ public class CatalogoClient {
             
         } catch (Exception e) {
             log.error("FALLO REAL AL LLAMAR A CATALOGO: " + e.getMessage()); 
-            // e.printStackTrace(); // Descomenta si necesitas ver todo
+            // e.printStackTrace();
             throw new RequestException("CAT", 500, HttpStatus.INTERNAL_SERVER_ERROR, 
                 "Error al sincronizar con ms-catalogo: " + e.getMessage());
         }
@@ -53,7 +53,7 @@ public class CatalogoClient {
 
     //Fallback method cuando el circuit breaker está abierto
     public ResponseEntity<Void> registrarVendedorFallback(VendedorRegistradoEvent evento, Exception exception) {
-        System.out.println(">>> ERROR REAL OCULTO: " + exception.getMessage());
+        //System.out.println(">>> ERROR REAL OCULTO: " + exception.getMessage());
         exception.printStackTrace();
         
         throw new RequestException("CAT", 503, HttpStatus.SERVICE_UNAVAILABLE, 

@@ -3,14 +3,16 @@ package com.seminario.ms_pedido.DTOs;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class DireccionRequestDTO {
     @NotBlank(message = "La provincia es obligatoria")
-    private String id_provincia;
+    private String provincia;
     @NotBlank(message = "La localidad es obligatoria")
-    private String id_localidad;
+    private String localidad;
     @NotBlank(message = "La calle es obligatoria")
     private String calle;
     @NotBlank(message = "El número es obligatorio")
