@@ -230,10 +230,12 @@
 .formRow {
   display: flex;
   gap: 16px;
+  width: 100%;
 }
 
 .formRow .formGroup {
   flex: 1;
+  min-width: 0;
 }
 
 .formGroup {
@@ -259,6 +261,8 @@
   outline: none;
   transition: border-color 0.2s;
   font-family: inherit;
+  width: 100%; 
+  box-sizing: border-box;
 }
 
 .input:focus,

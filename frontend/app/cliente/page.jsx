@@ -29,8 +29,8 @@ export default function ClienteHome() {
   const scrollRef = useRef(null);
   const [clientProfile, setClientProfile] = useState(null);
 
-    const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [canScrollRight, setCanScrollRight] = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
       const token = sessionStorage.getItem("token")

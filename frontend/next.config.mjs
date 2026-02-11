@@ -19,6 +19,11 @@ const nextConfig = {
         source: '/catalogoMs/:path*',
         destination: 'http://127.0.0.1:8090/catalogoMs/:path*', 
       },
+      {
+        // 3. Todo lo que sea de PEDIDO -> Al Gateway (8090)
+        source: '/pedidoMs/:path*',
+        destination: 'http://127.0.0.1:8090/pedidoMs/:path*', 
+      },
     ]
   },
 }

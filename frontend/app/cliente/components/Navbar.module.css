@@ -28,9 +28,10 @@
 .navLeft {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 15px;
   flex: 1;
   min-width: 0;
+  flex-shrink: 0;
 }
 
 .logo {
@@ -64,6 +65,8 @@
   padding: 4px 8px;
   border-radius: 8px;
   transition: background 0.2s;
+  white-space: nowrap;
+  min-width: max-content;
 }
 
 .addressBtn:hover {
@@ -93,7 +96,7 @@
   background: #f3f4f6;
   border-radius: 25px;
   overflow: hidden;
-  margin: 0 20px;
+  margin: 0 5px 0 5px;
 }
 
 .searchInput {

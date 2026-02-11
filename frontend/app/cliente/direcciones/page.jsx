@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import styles from './direcciones.module.css';
+import NewAddressModal from '../components/NewAddressModal';
 
 const provincias = [
   'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Cordoba',
@@ -62,6 +63,16 @@ export default function MisDireccionesPage() {
     setAddresses([...addresses, newAddress]);
     setForm({ provincia: '', localidad: '', calle: '', numero: '', cp: '', notas: '' });
     setShowModal(false);
+  };
+
+  const handleAddNewAddress = (formData) => {
+    const newAddress = {
+      id: Date.now(),
+      ...formData
+    };
+    setAddresses([...addresses, newAddress]);
+    setShowModal(false);
+    // Aquí podrías agregar el fetch para guardar en el backend (ms-pedido / puerto 5433)
   };
 
   const handleDelete = (id) => {
@@ -134,107 +145,16 @@ export default function MisDireccionesPage() {
       <Footer />
 
       {/* New Address Modal */}
-      {showModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>Nueva direccion</h2>
-              <button className={styles.modalClose} onClick={() => setShowModal(false)}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
+      <NewAddressModal 
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleAddNewAddress}
+        provincias={provincias}
+        localidades={localidades}
+      />
 
-            <form className={styles.form} onSubmit={handleSubmit}>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Provincia</label>
-                  <select
-                    name="provincia"
-                    value={form.provincia}
-                    onChange={handleChange}
-                    className={styles.select}
-                  >
-                    <option value="">Seleccione</option>
-                    {provincias.map((p) => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Localidad</label>
-                  <select
-                    name="localidad"
-                    value={form.localidad}
-                    onChange={handleChange}
-                    className={styles.select}
-                  >
-                    <option value="">Seleccione</option>
-                    {localidades.map((l) => (
-                      <option key={l} value={l}>{l}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Calle</label>
-                <input
-                  type="text"
-                  name="calle"
-                  placeholder="Avenida Corrientes"
-                  value={form.calle}
-                  onChange={handleChange}
-                  className={styles.input}
-                />
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Numero</label>
-                  <input
-                    type="text"
-                    name="numero"
-                    placeholder="1234"
-                    value={form.numero}
-                    onChange={handleChange}
-                    className={styles.input}
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Codigo Postal</label>
-                  <input
-                    type="text"
-                    name="cp"
-                    placeholder="1425"
-                    value={form.cp}
-                    onChange={handleChange}
-                    className={styles.input}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Notas Adicionales</label>
-                <textarea
-                  name="notas"
-                  placeholder="Piso, departamento, codigo de acceso, etc."
-                  value={form.notas}
-                  onChange={handleChange}
-                  className={styles.textarea}
-                  rows={3}
-                />
-              </div>
-
-              <button type="submit" className={styles.submitBtn}>
-                Guardar
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

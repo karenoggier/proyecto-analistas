@@ -6,11 +6,14 @@ import Link from 'next/link';
 import Image from "next/image"
 import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
+import AddressModal from './AddressModal';
+import NewAddressModal from './NewAddressModal';
 
 export default function Navbar({ showSearchBar = false, profile }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [addressOpen, setAddressOpen] = useState(false);
+  const [newAddressOpen, setNewAddressOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
 
@@ -23,6 +26,11 @@ export default function Navbar({ showSearchBar = false, profile }) {
     window.location.href = "/login"
   }
 
+  const handleSuccessSave = () => {
+    setNewAddressOpen(false); 
+    setAddressOpen(true);    
+  };
+
   useEffect(() => {
     function handleClickOutside(e) {
       if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
@@ -32,6 +40,15 @@ export default function Navbar({ showSearchBar = false, profile }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+    const getDireccionTexto = () => {
+      if (!profile || !profile.direcciones || profile.direcciones.length === 0) {
+        return "Mi dirección";
+      }
+      const primeraDireccion = profile.direcciones[0];
+      const { calle, numero, localidad } = primeraDireccion;
+      return `${calle} ${numero}, ${localidad}`;
+    };
 
   return (
    <>
@@ -56,41 +73,30 @@ export default function Navbar({ showSearchBar = false, profile }) {
             <Image src="/pin-de-ubicacion.png" alt="Pin de ubicación" width={30} height={40} />
             <span className={styles.addressLabel}>
               <small className={styles.addressSmall}>Enviar a</small>
-              Mi direccion
+              {getDireccionTexto()}
             </span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M6 9l6 6 6-6" />
             </svg>
           </button>
 
-          {/*
-          {addressOpen && (
-            <div className={styles.popoverAddress}>
-              <div className={styles.popoverHeader}>
-                <h3>Direcciones</h3>
-                <button className={styles.popoverClose} onClick={() => setAddressOpen(false)}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M18 6L6 18M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <p className={styles.popoverSubtext}>Elija una direccion...</p>
-              <div className={styles.addressList}>
-                <label className={styles.addressItem}>
-                  <input type="radio" name="address" defaultChecked className={styles.addressRadio} />
-                  <div>
-                    <strong>Santos Vianni 1032</strong>
-                    <span>CP: 3081 - Humboldt, Santa Fe</span>
-                  </div>
-                </label>
-              </div>
-              <Link href="/cliente/direcciones" className={styles.addAddressLink} onClick={() => setAddressOpen(false)}>
-                + Agregar direccion
-              </Link>
-            </div>
-          )} */}
+          <AddressModal 
+            isOpen={addressOpen} 
+            onClose={() => setAddressOpen(false)} 
+            direcciones={profile?.direcciones} 
+            onOpenNewAddress={() => {
+              setAddressOpen(false); 
+              setNewAddressOpen(true);
+            }}
+          />
 
-          {addressOpen && (
+          <NewAddressModal 
+            isOpen={newAddressOpen}
+            onClose={handleSuccessSave}
+            onSuccess={handleSuccessSave}
+          />
+
+          {/*{addressOpen && (
             <div className={styles.modalOverlay} onClick={() => setAddressOpen(false)}>
               <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.popoverHeader}>
@@ -112,7 +118,7 @@ export default function Navbar({ showSearchBar = false, profile }) {
                         <span>CP: 3081 - Humboldt, Santa Fe</span>
                       </div>
                     </label>
-                    {/* Aquí podrías mapear más direcciones */}
+                    {/* Aquí podrías mapear más direcciones 
                   </div>
 
                   <Link href="/cliente/direcciones" className={styles.addAddressLink} onClick={() => setAddressOpen(false)}>
@@ -121,7 +127,7 @@ export default function Navbar({ showSearchBar = false, profile }) {
                 </div>
               </div>
             </div>
-          )}
+          )}*/}
         </div>
 
         {showSearchBar && (
@@ -186,7 +192,7 @@ export default function Navbar({ showSearchBar = false, profile }) {
               </svg>*/}
               <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
             </div>
-            <span className={styles.userName}>Nombre</span>
+            <span className={styles.userName}>{profile?.nombre}</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M6 9l6 6 6-6" />
             </svg>
@@ -198,7 +204,7 @@ export default function Navbar({ showSearchBar = false, profile }) {
                 <div className={styles.avatar}>
                   <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
                 </div>
-                <span>Nombre y Apellido</span>
+                <span>{profile ? `${profile.nombre} ${profile.apellido}` : "Cargando..."}</span>
               </div>
               <ul className={styles.userMenuList}>
                 <li>
