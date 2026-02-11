@@ -31,7 +31,7 @@ public class ClienteMapper {
 
     public ClienteResponseDTO toResponseDTO(Cliente cliente) {
         ClienteResponseDTO responseDTO = new ClienteResponseDTO();
-        responseDTO.setId(cliente.getId());
+        //responseDTO.setId(cliente.getId());
         responseDTO.setNombre(cliente.getNombre());
         responseDTO.setApellido(cliente.getApellido());
         responseDTO.setEmail(cliente.getEmail());
