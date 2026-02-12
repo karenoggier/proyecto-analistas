@@ -35,4 +35,9 @@ public class ClienteService {
         return clienteMapper.toResponseDTO(cliente);
     }
 
+    public Cliente obtenerClientePorEmail(String email) {
+        return clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new RequestException("PE", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+    }
+
 }

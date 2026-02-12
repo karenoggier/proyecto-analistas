@@ -14,6 +14,7 @@ import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.DireccionResponseEvent;
 import com.seminario.ms_usuarios.exception.RequestException;
 import com.seminario.ms_usuarios.mapper.DireccionMapper;
 import com.seminario.ms_usuarios.model.Direccion;
+import com.seminario.ms_usuarios.model.EstadoDireccion;
 import com.seminario.ms_usuarios.model.Localidad;
 import com.seminario.ms_usuarios.model.Provincia;
 import com.seminario.ms_usuarios.model.Usuario;
@@ -70,7 +71,7 @@ public class DireccionService {
         direccion.setUsuario(usuario);
         direccion.setProvincia(provinciaEntidad); 
         direccion.setLocalidad(localidadEntidad);
-        direccion.setEstado("ACTIVO");
+        direccion.setEstado(EstadoDireccion.ACTIVO);
         direccion.setObservaciones(dto.getObservaciones());
          
         Direccion guardada = direccionRepository.save(direccion);
@@ -105,7 +106,7 @@ public class DireccionService {
         direccion.setUsuario(usuario);
         direccion.setProvincia(provinciaEntidad); 
         direccion.setLocalidad(localidadEntidad);
-        direccion.setEstado("ACTIVO");
+        direccion.setEstado(EstadoDireccion.ACTIVO);
 
         Direccion guardada = direccionRepository.save(direccion);
 
@@ -171,7 +172,7 @@ public class DireccionService {
         Direccion direccion = direccionRepository.findById(idDireccion)
                 .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Dirección no encontrada con ID: " + idDireccion));
         
-        direccion.setEstado("INACTIVO");
+        direccion.setEstado(EstadoDireccion.INACTIVO);
         direccionRepository.save(direccion);
     }
 

@@ -12,6 +12,7 @@ import com.seminario.ms_pedido.client.UsuarioClient;
 import com.seminario.ms_pedido.exception.RequestException;
 import com.seminario.ms_pedido.model.Cliente;
 import com.seminario.ms_pedido.model.Direccion;
+import com.seminario.ms_pedido.model.EstadoDireccion;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +26,11 @@ public class DireccionService {
     private final ClienteRepository clienteRepository;
     private final UsuarioClient usuarioClient;
     private final DireccionMapper direccionMapper;
+    private final ClienteService clienteService;
 
     @Transactional
     public DireccionResponseDTO agregarDireccion(String email, DireccionRequestDTO dto) {
-       Cliente cliente = clienteRepository.findByEmail(email)
-                .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado con email: " + email));
+       Cliente cliente = clienteService.obtenerClientePorEmail(email);
        
         String clienteId = cliente.getId();
 
@@ -48,9 +49,10 @@ public class DireccionService {
     public void eliminarDireccion(String idDireccion, String email) {
         // Buscar la dirección y verificar que pertenezca al usuario con ese email
         // Si no pertenece, lanzar una RequestException con 403 Forbidden
+        Cliente cliente = clienteService.obtenerClientePorEmail(email);
         
-        Direccion direccion = direccionRepository.findById(idDireccion)
-                .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Dirección no encontrada con ID: " + idDireccion));
+        Direccion direccion = direccionRepository.findByIdAndCliente(idDireccion, cliente)
+                .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Dirección no encontrada"));
         
         if (!direccion.getCliente().getEmail().equals(email)) {
             throw new RequestException("PED", 403, HttpStatus.FORBIDDEN, "No tenés permiso para eliminar esta dirección");
@@ -58,7 +60,7 @@ public class DireccionService {
 
         try{
             usuarioClient.eliminarDireccion(idDireccion);
-            direccion.setEstado("INACTIVO");
+            direccion.setEstado(EstadoDireccion.INACTIVO);
             direccionRepository.save(direccion);
 
         } catch(Exception e) {

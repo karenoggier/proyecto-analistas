@@ -54,5 +54,5 @@ public class Direccion {
     private Double longitud;
 
     @Column(name = "estado")
-    private String estado;
+    private EstadoDireccion estado;
 }
