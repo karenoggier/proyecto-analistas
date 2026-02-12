@@ -1,96 +1,160 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { useRouter } from "next/navigation"
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import styles from './direcciones.module.css';
 import NewAddressModal from '../components/NewAddressModal';
 
-const provincias = [
-  'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Cordoba',
-  'Corrientes', 'Entre Rios', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
-  'Mendoza', 'Misiones', 'Neuquen', 'Rio Negro', 'Salta', 'San Juan',
-  'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
-  'Tierra del Fuego', 'Tucuman',
-];
-
-const localidades = [
-  'Humboldt', 'Esperanza', 'Rafaela', 'Santa Fe', 'Rosario',
-  'Reconquista', 'Venado Tuerto',
-];
-
 export default function MisDireccionesPage() {
+  const router = useRouter()
   const [showModal, setShowModal] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      calle: 'Santos Vianni',
-      numero: '1032',
-      cp: '3081',
-      localidad: 'Humboldt',
-      provincia: 'Santa Fe',
-      notas: '',
-    },
-  ]);
+  const [clientProfile, setClientProfile] = useState(null);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
 
-  const [form, setForm] = useState({
-    provincia: '',
-    localidad: '',
-    calle: '',
-    numero: '',
-    cp: '',
-    notas: '',
-  });
+  useEffect(() => {
+    fetchPerfil();
+    const savedId = sessionStorage.getItem("selectedAddressId"); 
+    if (savedId) {
+      setSelectedId(savedId);
+    }
+  }, [])
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  useEffect(() => {
+        const savedId = sessionStorage.getItem("selectedAddressId");
+        if (!savedId && clientProfile?.direcciones?.length > 0) {
+          const firstId = clientProfile.direcciones[0].id;
+          setSelectedId(firstId);
+          sessionStorage.setItem("selectedAddressId", firstId);
+        }
+  }, [clientProfile]);
+
+  const handleSelectChange = (id) => {
+    setSelectedId(id);
+    sessionStorage.setItem("selectedAddressId", id);
+
+    window.dispatchEvent(new Event("storage"));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.calle || !form.numero) return;
-    const newAddress = {
-      id: Date.now(),
-      calle: form.calle,
-      numero: form.numero,
-      cp: form.cp,
-      localidad: form.localidad,
-      provincia: form.provincia,
-      notas: form.notas,
-    };
-    setAddresses([...addresses, newAddress]);
-    setForm({ provincia: '', localidad: '', calle: '', numero: '', cp: '', notas: '' });
+  const handleRefreshProfile = () => {
+      fetchPerfil();
+  };
+
+  const handleDelete = async (id) => {
+    if (!id) {
+        alert("Por favor, selecciona una dirección para eliminar.");
+        return;
+    }
+
+    if (!confirm("¿Estás seguro de que querés eliminar esta dirección?")) return;
+
+    const token = sessionStorage.getItem("token");
+    
+    try {
+        const res = await fetch(`/pedidoMs/direcciones/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (res.ok) {
+            alert("Dirección eliminada con éxito");
+            setSelectedId(null);
+            fetchPerfil(); 
+            if (id === selectedId) {
+              sessionStorage.removeItem("selectedAddressId"); // Borramos la persistencia
+            }
+        } else {
+            const errorData = await res.json().catch(() => ({}));
+            alert(errorData.mensaje || "No se pudo eliminar la dirección");
+        }
+    } catch (error) {
+        console.error("Error de red al eliminar:", error);
+    }
+  };
+
+  const fetchPerfil = async () => {
+    const token = sessionStorage.getItem("token")
+    const rol = sessionStorage.getItem("rol")
+  
+      if (!token || rol !== "CLIENTE") {
+        window.location.href = "/login"
+        return
+      }
+        try {
+          const headers = {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          };
+  
+          const [perfilRes] = await Promise.all([
+              fetch('/pedidoMs/clientes/perfil', { method: 'GET', headers }),
+          ]);
+  
+          if (perfilRes.status === 401 || perfilRes.status === 403) {
+              sessionStorage.clear(); 
+              window.location.href = "/login?expired=true"; 
+              return;
+          }
+  
+          if (perfilRes.ok) {
+              const dataPerfil = await perfilRes.json();
+              setClientProfile(dataPerfil);
+              setAddresses(dataPerfil.direcciones || []);
+          } else {
+              console.error("Error al obtener perfil del cliente");
+          }
+  
+        } catch (error) {
+          console.error("Error de red:", error);
+        } 
+      }
+
+  const handleNewAddressSuccess = () => {
     setShowModal(false);
+    fetchPerfil(); 
   };
 
-  const handleAddNewAddress = (formData) => {
-    const newAddress = {
-      id: Date.now(),
-      ...formData
-    };
-    setAddresses([...addresses, newAddress]);
-    setShowModal(false);
-    // Aquí podrías agregar el fetch para guardar en el backend (ms-pedido / puerto 5433)
-  };
 
-  const handleDelete = (id) => {
-    setAddresses(addresses.filter((a) => a.id !== id));
-  };
+  useEffect(() => {
+      const token = sessionStorage.getItem("token")
+      const rol = sessionStorage.getItem("rol")
+  
+      if (!token || rol !== "CLIENTE") {
+        router.push("/login")
+      }
+    }, [router])
+
+useEffect(() => {
+  const handleExternalStorageChange = () => {
+    const savedId = sessionStorage.getItem("selectedAddressId");
+    if (savedId) {
+      setSelectedId(savedId);
+    }
+};
+
+  // Escuchamos el evento personalizado que dispara el AddressModal
+  window.addEventListener("storage", handleExternalStorageChange);
+  
+  return () => window.removeEventListener("storage", handleExternalStorageChange);
+}, []);
 
   return (
     <div className={styles.page}>
-      <Navbar />
+      <Navbar showSearchBar profile={clientProfile} onAddressUpdate={handleRefreshProfile}/>
 
       <main className={styles.main}>
         <div className={styles.header}>
-          <Link href="/cliente" className={styles.backBtn}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="11" fill="#fef0f2" stroke="#e84c6a" strokeWidth="1.5" />
-              <path d="M14 8l-4 4 4 4" stroke="#e84c6a" strokeWidth="2" />
+          <button className={styles.backBtn} onClick={() => router.back()}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+               <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>
-          </Link>
+          </button>
           <h1 className={styles.title}>MIS DIRECCIONES</h1>
         </div>
 
@@ -102,9 +166,10 @@ export default function MisDireccionesPage() {
             </svg>
             Agregar direccion
           </button>
+
           <button
             className={styles.deleteBtn}
-            onClick={() => setDeleteMode(!deleteMode)}
+            onClick={() => handleDelete(selectedId)}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
               <polyline points="3 6 5 6 21 6" />
@@ -116,26 +181,26 @@ export default function MisDireccionesPage() {
 
         <div className={styles.addressList}>
           {addresses.map((addr) => (
-            <div key={addr.id} className={styles.addressCard}>
+            <div key={addr.id} className={`${styles.addressCard} ${selectedId === addr.id ? styles.addressCardSelected : ''}`}>
               <div className={styles.addressRadioWrapper}>
-                {deleteMode ? (
-                  <button
-                    className={styles.deleteItemBtn}
-                    onClick={() => handleDelete(addr.id)}
-                    aria-label="Eliminar direccion"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  </button>
-                ) : (
-                  <div className={styles.radioChecked} />
-                )}
+                
+                  <input
+                    type="radio"
+                    name="selectedAddress"
+                    className={styles.addressRadio}
+                    checked={selectedId === addr.id}
+                    onChange={() => handleSelectChange(addr.id)}
+                  />
               </div>
+
               <div className={styles.addressDetails}>
                 <strong>{addr.calle} {addr.numero}</strong>
-                <span>CP: {addr.cp} - {addr.localidad}, {addr.provincia}</span>
+                <span>CP: {addr.codigoPostal} - {addr.localidad}, {addr.provincia}</span>
+                <span>
+                  Observaciones: {addr.observaciones && addr.observaciones.trim() !== "" 
+                  ? addr.observaciones 
+                  : "—"}
+                </span>
               </div>
             </div>
           ))}
@@ -148,9 +213,7 @@ export default function MisDireccionesPage() {
       <NewAddressModal 
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        onSubmit={handleAddNewAddress}
-        provincias={provincias}
-        localidades={localidades}
+        onSuccess={handleNewAddressSuccess}
       />
 
 

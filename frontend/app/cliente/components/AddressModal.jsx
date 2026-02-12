@@ -1,7 +1,31 @@
-import Link from 'next/link';
 import styles from './Navbar.module.css';
+import { useState, useEffect } from 'react';
 
 export default function AddressModal({ isOpen, onClose, direcciones, onOpenNewAddress }) {
+  const [selectedId, setSelectedId] = useState(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      const savedId = sessionStorage.getItem("selectedAddressId");
+      if (savedId) {
+        const existe = direcciones?.some(d => d.id === savedId);
+        setSelectedId(existe ? savedId : (direcciones?.[0]?.id || null));
+      } else if (direcciones && direcciones.length > 0) {
+        setSelectedId(direcciones[0].id);
+      }
+    }
+  }, [isOpen, direcciones]);
+
+  const handleSelectAddress = (id) => {
+    setSelectedId(id);
+    sessionStorage.setItem("selectedAddressId", id);
+
+    window.dispatchEvent(new Event("storage"));
+    
+    //setTimeout(() => onClose(), 300);
+  };
+  
+  
   if (!isOpen) return null;
 
   return (
@@ -28,7 +52,8 @@ export default function AddressModal({ isOpen, onClose, direcciones, onOpenNewAd
                   <input 
                     type="radio" 
                     name="address" 
-                    defaultChecked={index === 0} 
+                    checked={selectedId === dir.id}
+                    onChange={() => handleSelectAddress(dir.id)}
                     className={styles.addressRadio} 
                   />
                   <div className={styles.addressText}>

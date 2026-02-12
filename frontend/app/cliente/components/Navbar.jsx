@@ -9,12 +9,13 @@ import styles from './Navbar.module.css';
 import AddressModal from './AddressModal';
 import NewAddressModal from './NewAddressModal';
 
-export default function Navbar({ showSearchBar = false, profile }) {
+export default function Navbar({ showSearchBar = false, profile, onAddressUpdate }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [addressOpen, setAddressOpen] = useState(false);
   const [newAddressOpen, setNewAddressOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
   const pathname = usePathname();
 
   const notifRef = useRef(null);
@@ -26,8 +27,13 @@ export default function Navbar({ showSearchBar = false, profile }) {
     window.location.href = "/login"
   }
 
-  const handleSuccessSave = () => {
-    setNewAddressOpen(false); 
+  const handleSuccessSave = async () => {
+    setNewAddressOpen(false);
+
+    if (onAddressUpdate) {
+        await onAddressUpdate(); 
+    }
+
     setAddressOpen(true);    
   };
 
@@ -41,14 +47,32 @@ export default function Navbar({ showSearchBar = false, profile }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-    const getDireccionTexto = () => {
-      if (!profile || !profile.direcciones || profile.direcciones.length === 0) {
-        return "Mi dirección";
-      }
-      const primeraDireccion = profile.direcciones[0];
-      const { calle, numero, localidad } = primeraDireccion;
-      return `${calle} ${numero}, ${localidad}`;
+  useEffect(() => {
+    const savedId = sessionStorage.getItem("selectedAddressId");
+    if (savedId) {
+      setSelectedAddressId(savedId);
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setSelectedAddressId(sessionStorage.getItem("selectedAddressId"));
     };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const getDireccionTexto = () => {
+    if (!profile || !profile.direcciones || profile.direcciones.length === 0) {
+      return "Mi dirección";
+    }
+    const direccionSeleccionada = profile.direcciones.find(d => d.id === selectedAddressId);
+    const direccionAMostrar = direccionSeleccionada || profile.direcciones[0];
+    const { calle, numero, localidad } = direccionAMostrar;
+
+    return `${calle} ${numero}, ${localidad}`;
+  };
 
   return (
    <>

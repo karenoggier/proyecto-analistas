@@ -33,6 +33,11 @@ export default function ClienteHome() {
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
+      fetchPerfil();
+  
+    }, [])
+
+    const fetchPerfil = async () => {
       const token = sessionStorage.getItem("token")
       const rol = sessionStorage.getItem("rol")
   
@@ -40,8 +45,6 @@ export default function ClienteHome() {
         window.location.href = "/login"
         return
       }
-  
-     const fetchPerfil = async () => {
         try {
           const headers = {
               'Authorization': `Bearer ${token}`,
@@ -70,10 +73,6 @@ export default function ClienteHome() {
         } 
       }
   
-      fetchPerfil();
-  
-    }, [])
-  
     const handleLogout = () => {
       sessionStorage.clear()
       window.location.href = "/login"
@@ -82,6 +81,10 @@ export default function ClienteHome() {
     const handleNavigate = (path) => {
       window.location.href = path
     }
+
+    const handleRefreshProfile = () => {
+      fetchPerfil();
+    };
   /*
     // FUNCION PARA CARRUSSEL DE LOCALES
     const checkScroll = () => {
@@ -108,7 +111,7 @@ export default function ClienteHome() {
 
   return (
     <div className={styles.page}>
-      <Navbar showSearchBar profile={clientProfile} />
+      <Navbar showSearchBar profile={clientProfile} onAddressUpdate={handleRefreshProfile}/>
 
       <main className={styles.main}>
         {/* Hero Section */}

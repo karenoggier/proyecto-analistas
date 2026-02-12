@@ -324,6 +324,12 @@
 
 .addressList {
   border-bottom: 1px solid #eee;
+  max-height: 300px; 
+  overflow-y: auto;  
+  padding-right: 8px; 
+ 
+  scrollbar-width: thin;
+  scrollbar-color: #ff4b7e #f0f0f0;
 }
 
 

@@ -19,7 +19,7 @@ public class DireccionRequestDTO {
     private String numero;
     @NotBlank(message = "El código postal es obligatorio")
     private String codigoPostal;
-    @NotBlank(message = "Las observaciones son obligatorias")
+   
     private String observaciones;
 
 }
