@@ -118,24 +118,24 @@ export default function ClienteHome() {
         <section className={styles.hero}>
           <div className={styles.heroInner}>
             <div className={styles.heroCardComida}>
-              <span className={styles.heroLabel}>COMIDA</span>
+              <span className={styles.heroLabelComida}>COMIDA</span>
               <Image
-                src="/images/hero-comida.jpg"
+                src="/comida.png"
                 alt="Comida"
                 width={160}
                 height={120}
-                className={styles.heroImg}
+                className={styles.heroImgComida}
               />
             </div>
             <div className={styles.heroCardBebida}>
               <Image
-                src="/images/hero-bebida.jpg"
+                src="/bebida.png"
                 alt="Bebida"
                 width={140}
                 height={120}
-                className={styles.heroImg}
+                className={styles.heroImgBebida}
               />
-              <span className={styles.heroLabel}>BEBIDA</span>
+              <span className={styles.heroLabelBebida}>BEBIDA</span>
             </div>
           </div>
         </section>

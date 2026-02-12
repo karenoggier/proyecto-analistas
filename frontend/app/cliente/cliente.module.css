@@ -14,7 +14,7 @@
 .hero {
   width: 100vw;
   background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%); 
-  padding: 40px 32px;
+  padding: 60px 20px;
   display: flex;
   justify-content: center;
   min-height: 300px;
@@ -23,10 +23,10 @@
 
 .heroInner {
   display: flex;
+  flex-direction: column; 
   align-items: center;
-  justify-content: center;
-  gap: 24px;
-  max-width: 700px;
+  gap: 10px;
+  max-width: 800px;
   width: 100%;
 }
 
@@ -34,34 +34,57 @@
 .heroCardBebida {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: space-between;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 60px;
-  padding: 12px 32px;
+  border-radius: 80px;
+  padding: 10px 40px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  width: 380px;
+  overflow: hidden;
+  height: 120px;
 }
 
 .heroCardComida {
-  padding-right: 12px;
+  align-self: flex-start;
+  margin-right: 15%;
 }
 
 .heroCardBebida {
-  padding-left: 12px;
-  margin-top: 40px;
+  align-self: flex-end;
+  margin-right: 15%;
 }
 
-.heroLabel {
-  font-size: 28px;
+.heroLabelComida {
+  font-size: 32px;
   font-weight: 800;
   color: #222;
   letter-spacing: 2px;
+  margin-left: 50px;
 }
 
-.heroImg {
+.heroLabelBebida {
+  font-size: 32px;
+  font-weight: 800;
+  color: #222;
+  letter-spacing: 2px;
+  margin-right: 50px;
+}
+
+.heroImgComida {
   border-radius: 50%;
   object-fit: cover;
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
+  margin-left: 24px;
+}
+
+.heroImgBebida {
+  border-radius: 50%;
+  object-fit: cover;
+  width: 120px;
+  height: 120px;
+  margin-left: -35px;
+  
 }
 
 /* Categories */
