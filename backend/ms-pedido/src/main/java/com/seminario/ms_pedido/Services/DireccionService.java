@@ -1,6 +1,4 @@
 package com.seminario.ms_pedido.Services;
-import java.util.ArrayList;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +42,16 @@ public class DireccionService {
         direccionRepository.save(nuevaDireccion);
 
         return direccionValidada;
+    }
+
+    @Transactional
+    public void eliminarDireccion(String idDireccion) {
+        Direccion direccion = direccionRepository.findById(idDireccion)
+                .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Dirección no encontrada con ID: " + idDireccion));
+        
+        usuarioClient.eliminarDireccion(idDireccion);
+        direccion.setEstado("INACTIVO");
+        direccionRepository.save(direccion);
     }
     
     /* 

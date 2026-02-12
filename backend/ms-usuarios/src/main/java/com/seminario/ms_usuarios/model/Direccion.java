@@ -52,4 +52,7 @@ public class Direccion {
 
     @Column(name = "longitud")
     private Double longitud;
+
+    @Column(name = "estado")
+    private String estado;
 }

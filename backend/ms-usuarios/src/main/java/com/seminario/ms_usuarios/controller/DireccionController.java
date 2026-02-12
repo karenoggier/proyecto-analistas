@@ -1,9 +1,8 @@
 package com.seminario.ms_usuarios.controller;
 
-import java.util.ArrayList;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,10 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_usuarios.dto.DireccionRequestDTO;
-import com.seminario.ms_usuarios.dto.DireccionResponseDTO;
 import com.seminario.ms_usuarios.dto.eventos_ms_pedidio.DireccionResponseEvent;
 import com.seminario.ms_usuarios.exception.RequestException;
-import com.seminario.ms_usuarios.mapper.DireccionMapper;
 import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.service.DireccionService;
 import com.seminario.ms_usuarios.service.UsuarioService;
@@ -41,6 +38,12 @@ public class DireccionController {
         
         return ResponseEntity.ok(direccionService.registrarDireccionParaPedido(dto, usuario));
         
+    }
+    @DeleteMapping("/{direccionId}")
+    @Operation(summary = "Elimina una dirección por su ID. Llamado internamente por ms-pedido")
+    public ResponseEntity<Void> eliminarDireccion(@PathVariable("direccionId") String direccionId) {
+        direccionService.eliminarDireccion(direccionId);
+        return ResponseEntity.noContent().build();
     }
 
 

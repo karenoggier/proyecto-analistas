@@ -26,9 +26,12 @@ public class ClienteService {
 
     public ClienteResponseDTO obtenerPerfilPorEmail(String email) {
 
+    // Busca el cliente por email y las direcciones que no estén eliminadas lógicamente
         Cliente cliente = clienteRepository.findByEmail(email)
-            .orElseThrow(() -> new RequestException("US", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado"));
-            
+        .orElseThrow(() -> new RequestException("PE", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+        // Filtra la lista en una sola línea de forma segura
+        cliente.getDireccion().removeIf(direccion -> "INACTIVO".equals(direccion.getEstado()));
+        
         return clienteMapper.toResponseDTO(cliente);
     }
 

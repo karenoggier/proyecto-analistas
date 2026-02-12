@@ -70,6 +70,8 @@ public class DireccionService {
         direccion.setUsuario(usuario);
         direccion.setProvincia(provinciaEntidad); 
         direccion.setLocalidad(localidadEntidad);
+        direccion.setEstado("ACTIVO");
+        direccion.setObservaciones(dto.getObservaciones());
          
         Direccion guardada = direccionRepository.save(direccion);
 
@@ -103,7 +105,8 @@ public class DireccionService {
         direccion.setUsuario(usuario);
         direccion.setProvincia(provinciaEntidad); 
         direccion.setLocalidad(localidadEntidad);
-        
+        direccion.setEstado("ACTIVO");
+
         Direccion guardada = direccionRepository.save(direccion);
 
         return direccionMapper.toPedidoResponse(guardada);
@@ -162,6 +165,14 @@ public class DireccionService {
             throw new RequestException("US", 2, HttpStatus.NOT_FOUND, "Dirección no encontrada para el usuario con ID: " + id);
         }
         return direccionMapper.toResponse(direccion);
+    }
+
+    public void eliminarDireccion(String idDireccion){
+        Direccion direccion = direccionRepository.findById(idDireccion)
+                .orElseThrow(() -> new RequestException("US", 2, HttpStatus.NOT_FOUND, "Dirección no encontrada con ID: " + idDireccion));
+        
+        direccion.setEstado("INACTIVO");
+        direccionRepository.save(direccion);
     }
 
     
