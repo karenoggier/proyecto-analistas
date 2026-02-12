@@ -23,12 +23,12 @@ import com.seminario.ms_catalogo.exception.ValidationException;
 import com.seminario.ms_catalogo.mapper.DireccionMapper;
 import com.seminario.ms_catalogo.mapper.ProductoMapper;
 import com.seminario.ms_catalogo.mapper.VendedorMapper;
+import com.seminario.ms_catalogo.model.Categoria;
+import com.seminario.ms_catalogo.model.Estado;
 import com.seminario.ms_catalogo.model.Producto;
 import com.seminario.ms_catalogo.model.Subcategoria;
 import com.seminario.ms_catalogo.model.Vendedor;
 import com.seminario.ms_catalogo.repository.VendedorRepository;
-import com.seminario.ms_catalogo.model.Categoria;
-import com.seminario.ms_catalogo.model.Estado;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -304,11 +304,12 @@ public class VendedorService {
         vendedorRepository.save(vendedor);
     }
 
-    /* 
-    public ArrayList<Vendedor> obtenerVendedoresPorUbicacion(String provincia, String ciudad) {
-        ArrayList<Vendedor> vendedores = new ArrayList<Vendedor>();
+
+    
+    public List<Vendedor> obtenerVendedoresPorUbicacion(String provincia, String ciudad) {
+        List<Vendedor> vendedores = new ArrayList<>();
         if(provincia != null && ciudad != null){
-            vendedores = vendedorRepository.findByDireccion_ProvinciaAndDireccion_Localidad(provincia, ciudad);
+            vendedores = vendedorRepository.findByEstadoAndDireccion_ProvinciaAndDireccion_Localidad(Estado.ACTIVO, provincia, ciudad);
         } else if(provincia == null && ciudad != null){
             throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La provincia no puede ser nula");
         } else if(ciudad == null && provincia != null){
@@ -316,8 +317,30 @@ public class VendedorService {
         } else {
             throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La provincia y la localidad no pueden ser nulas");    
         }
+        //se filtra los vendedores que no tienen productos y se eliminan
+        vendedores = vendedores.stream()
+                .filter(v -> v.getProductos() != null && !v.getProductos().isEmpty())
+                .collect(Collectors.toList());
+
+        //se filtran los productos inactivos de cada vendedor 
+        for (Vendedor v: vendedores) {
+            // Si el vendedor tiene productos, filtramos los inactivos. Si no tiene productos, lo dejamos pasar (puede ser un nuevo vendedor sin productos aún)
+            if (v.getProductos() != null) {
+                v.getProductos().removeIf(p -> Estado.INACTIVO.equals(p.getEstado()));
+            }
+        }
+
         return vendedores;
-    }*/
+    }
+
+
+    public List<VendedorResponseDTO> obtenerDiezVendedoresPorUbicacion(String provincia, String ciudad) {
+        List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, ciudad);
+        return vendedores.stream()
+                .limit(10)
+                .map(v -> vendedorMapper.toDTO(v))
+                .collect(Collectors.toList());
+    }
 
 }
 

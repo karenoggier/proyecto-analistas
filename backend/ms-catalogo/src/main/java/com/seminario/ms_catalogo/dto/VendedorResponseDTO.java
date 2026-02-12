@@ -1,7 +1,5 @@
 package com.seminario.ms_catalogo.dto;
 
-import java.util.ArrayList;
-
 import lombok.Data;
 
 @Data
@@ -20,5 +18,4 @@ public class VendedorResponseDTO {
     private String banner;
     private String estado;
     private DireccionDTO direccion;
-    //private ArrayList<ProductoResponseDTO> productos;
 }

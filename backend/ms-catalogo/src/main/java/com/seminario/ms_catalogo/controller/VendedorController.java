@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,8 +20,6 @@ import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.service.VendedorService;
-
-import org.springframework.security.core.Authentication;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -111,5 +110,14 @@ public class VendedorController {
         vendedorService.eliminarProducto(email, id);
         
         return ResponseEntity.noContent().build();
+    }
+
+
+    @GetMapping("/{provincia}/{localidad}")
+    @Operation(summary = "Obtiene los primeros 10 vendedores por provincia y localidad")
+    public ResponseEntity<List<VendedorResponseDTO>> obtenerVendedoresPorUbicacion(
+            @PathVariable String provincia,
+            @PathVariable String localidad) {
+        return ResponseEntity.ok(vendedorService.obtenerDiezVendedoresPorUbicacion(provincia, localidad));
     }
 }
