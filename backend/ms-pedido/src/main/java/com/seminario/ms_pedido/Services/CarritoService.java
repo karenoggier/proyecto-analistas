@@ -9,7 +9,9 @@ import com.seminario.ms_pedido.DTOs.ProductoResumidoDTO;
 import com.seminario.ms_pedido.Repositories.CarritoRepository;
 import com.seminario.ms_pedido.client.WebClient;
 import com.seminario.ms_pedido.exception.RequestException;
-import com.seminario.ms_pedido.model.*;
+import com.seminario.ms_pedido.model.Carrito;
+import com.seminario.ms_pedido.model.ClienteCarrito;
+import com.seminario.ms_pedido.model.DetalleCarrito;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +31,7 @@ public class CarritoService {
     }
 
     public Carrito getCarritoByClienteAndVendedorId(String clienteEmail, String vendedorId) {
-        return carritoRepository.findByClienteEmailAndVendedorId(clienteEmail, vendedorId).orElse(null);
+        return carritoRepository.findByClienteEmailAndVendedorId(clienteEmail, vendedorId);
     }
 
     public Carrito modificarItem(String clienteEmail, String vendedorId, String productoId, Double cantidad) {
@@ -81,15 +83,21 @@ public class CarritoService {
         return carrito;
     }
 
-    public void deleteItem(String clienteId, String vendedorId, String productoId) {
-        Carrito carrito = getCarritoByClienteAndVendedorId(clienteId, vendedorId);
+    public void deleteItem(String clienteEmail, String vendedorId, String productoId) {
+        ClienteCarrito clienteCarrito = carritoRepository.findByClienteEmail(clienteEmail).get();
+        if (clienteCarrito == null) {
+            throw new RequestException(vendedorId, 400, HttpStatus.BAD_REQUEST, "El producto no está en el carrito");
+        }
+
+        Carrito carrito = clienteCarrito.encontrarCarritoPorVendedor(vendedorId);
         if (carrito == null || !carrito.getDetallesCarrito().stream().anyMatch(detalle -> detalle.getProductoId().equals(productoId))) {
             throw new RequestException(vendedorId, 400, HttpStatus.BAD_REQUEST, "El producto no está en el carrito");
         }
-        else{
-            carrito.getDetallesCarrito().removeIf(detalle -> detalle.getProductoId().equals(productoId));
-            carrito.calcularMontosTotales();
-            carritoRepository.save(carrito);
-        }
+        
+        carrito.getDetallesCarrito().removeIf(detalle -> detalle.getProductoId().equals(productoId));
+        carrito.calcularMontosTotales();
+
+        carritoRepository.save(clienteCarrito);
+        
     }
 }

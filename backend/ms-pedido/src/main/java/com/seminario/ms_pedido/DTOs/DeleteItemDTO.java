@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class DeleteItemDTO {
-    private String clienteId;
     private String vendedorId;
     private String productoId;
 }

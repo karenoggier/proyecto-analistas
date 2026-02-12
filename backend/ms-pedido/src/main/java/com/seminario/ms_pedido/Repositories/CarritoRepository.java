@@ -12,5 +12,12 @@ import com.seminario.ms_pedido.model.ClienteCarrito;
 public interface CarritoRepository extends MongoRepository<ClienteCarrito, String> {
     public Optional<ClienteCarrito> findByClienteEmail(String clienteEmail);
 
-    public Optional<Carrito> findByClienteEmailAndVendedorId(String clienteEmail, String vendedorId);
+    public default Carrito findByClienteEmailAndVendedorId(String clienteEmail, String vendedorId){
+        ClienteCarrito cliente = findByClienteEmail(clienteEmail).get();
+        Carrito carrito = null;
+        if(cliente != null){
+            carrito = cliente.encontrarCarritoPorVendedor(vendedorId);
+        }
+        return carrito;
+    }
 }

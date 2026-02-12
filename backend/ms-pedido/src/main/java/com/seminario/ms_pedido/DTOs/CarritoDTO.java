@@ -7,7 +7,6 @@ import lombok.Data;
 @Data
 public class CarritoDTO {
     private String vendedorId;
-    private String clienteEmail;
     private Double montoTotal;
     private Double montoTotalProductos;
     private ArrayList<DetalleCarritoDTO> detallesCarrito;

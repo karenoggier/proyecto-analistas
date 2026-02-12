@@ -49,7 +49,7 @@ public class CarritoController {
 
     @PostMapping("/eliminarItem")
     public ResponseEntity<Void> eliminarItem(@RequestBody DeleteItemDTO dto, Authentication authentication) {
-        carritoService.deleteItem(dto.getClienteId(), dto.getVendedorId(), dto.getProductoId());
+        carritoService.deleteItem(authentication.getName(), dto.getVendedorId(), dto.getProductoId());
         return ResponseEntity.ok().build();
     }
 }

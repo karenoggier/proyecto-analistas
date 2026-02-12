@@ -27,7 +27,7 @@ public class PedidoService {
         Pedido pedido = new Pedido();
         
         //datos del pedido
-        pedido.setClienteId(carrito.getClienteId());
+        //pedido.setClienteId(carrito.getClienteId());
         pedido.setVendedorId(carrito.getVendedorId());
         pedido.setFechaCreacion(LocalDateTime.now());
         pedido.setEstado(EstadoPedido.PENDIENTE);
