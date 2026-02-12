@@ -40,7 +40,7 @@ public class DireccionController {
         
     }
     @DeleteMapping("/{direccionId}")
-    @Operation(summary = "Elimina una dirección por su ID. Llamado internamente por ms-pedido")
+    @Operation(summary = "Elimina una dirección por su ID (baja lógica). Llamado internamente por ms-pedido")
     public ResponseEntity<Void> eliminarDireccion(@PathVariable("direccionId") String direccionId) {
         direccionService.eliminarDireccion(direccionId);
         return ResponseEntity.noContent().build();

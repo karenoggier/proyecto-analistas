@@ -45,13 +45,26 @@ public class DireccionService {
     }
 
     @Transactional
-    public void eliminarDireccion(String idDireccion) {
+    public void eliminarDireccion(String idDireccion, String email) {
+        // Buscar la dirección y verificar que pertenezca al usuario con ese email
+        // Si no pertenece, lanzar una RequestException con 403 Forbidden
+        
         Direccion direccion = direccionRepository.findById(idDireccion)
                 .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Dirección no encontrada con ID: " + idDireccion));
         
-        usuarioClient.eliminarDireccion(idDireccion);
-        direccion.setEstado("INACTIVO");
-        direccionRepository.save(direccion);
+        if (!direccion.getCliente().getEmail().equals(email)) {
+            throw new RequestException("PED", 403, HttpStatus.FORBIDDEN, "No tenés permiso para eliminar esta dirección");
+        }
+
+        try{
+            usuarioClient.eliminarDireccion(idDireccion);
+            direccion.setEstado("INACTIVO");
+            direccionRepository.save(direccion);
+
+        } catch(Exception e) {
+            throw new RequestException("PED", 500, HttpStatus.INTERNAL_SERVER_ERROR, "Error al sincronizar la eliminación con el servicio de usuarios");
+        }
+        
     }
     
     /* 

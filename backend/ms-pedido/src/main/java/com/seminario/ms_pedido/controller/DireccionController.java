@@ -3,6 +3,7 @@ package com.seminario.ms_pedido.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,15 +42,15 @@ public class DireccionController {
     }
 
 
-    @DeleteMapping("/eliminar")
-    @Operation(summary = "Elimina una dirección para un cliente logueado")
+    @DeleteMapping("/{idDireccion}")
+    @Operation(summary = "Elimina una dirección para un cliente logueado (baja lógica)")
     public ResponseEntity<Void> eliminarDireccion( 
-        @PathParam("idDireccion") String idDireccion, 
+        @PathVariable("idDireccion") String idDireccion, 
         Authentication authentication) {
 
         String email = authentication.getName();
         
-        direccionService.eliminarDireccion(idDireccion);
+        direccionService.eliminarDireccion(idDireccion, email);
         return ResponseEntity.noContent().build();
     }
 
