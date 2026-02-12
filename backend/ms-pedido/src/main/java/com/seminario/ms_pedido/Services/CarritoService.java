@@ -9,8 +9,7 @@ import com.seminario.ms_pedido.DTOs.ProductoResumidoDTO;
 import com.seminario.ms_pedido.Repositories.CarritoRepository;
 import com.seminario.ms_pedido.client.WebClient;
 import com.seminario.ms_pedido.exception.RequestException;
-import com.seminario.ms_pedido.model.Carrito;
-import com.seminario.ms_pedido.model.DetalleCarrito;
+import com.seminario.ms_pedido.model.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,49 +20,65 @@ public class CarritoService {
 
     private final WebClient webClient;
 
-    public ArrayList<Carrito> getCarritoByClienteId(String clienteId) {
-        return carritoRepository.findByClienteId(clienteId).orElse(null);
+    public ArrayList<Carrito> getCarritoByClienteEmail(String clienteEmail) {
+        ClienteCarrito clienteCarrito = carritoRepository.findByClienteEmail(clienteEmail).orElse(null);
+        if (clienteCarrito != null) {
+            return (ArrayList<Carrito>)clienteCarrito.getCarritos();
+        }
+        return null;
     }
 
-    public Carrito getCarritoByClienteAndVendedorId(String clienteId, String vendedorId) {
-        return carritoRepository.findByClienteIdAndVendedorId(clienteId, vendedorId).orElse(null);
+    public Carrito getCarritoByClienteAndVendedorId(String clienteEmail, String vendedorId) {
+        return carritoRepository.findByClienteEmailAndVendedorId(clienteEmail, vendedorId).orElse(null);
     }
 
-    public Carrito modificarItem(String clienteId, String vendedorId, String productoId, Double cantidad) {
+    public Carrito modificarItem(String clienteEmail, String vendedorId, String productoId, Double cantidad) {
         //buscar producto en ms catalogo
         ProductoResumidoDTO productoDTO = webClient.buscarProducto(productoId, vendedorId).getBody();
         
         // Lógica para agregar un producto al carrito
-        Carrito carrito = getCarritoByClienteAndVendedorId(clienteId, vendedorId);
-        if (carrito == null) {         //si no hay productos de ese vendedor en ningun carrito de ese cliente, crear uno nuevo
+        ClienteCarrito clienteCarrito = carritoRepository.findByClienteEmail(clienteEmail).orElse(null);
+        Carrito carrito = null;
+
+        if (clienteCarrito == null) {         //si no hay un cliente con carrito, crear uno nuevo
+            clienteCarrito = new ClienteCarrito();
+            clienteCarrito.setClienteEmail(clienteEmail);
+
             carrito = new Carrito();
-            carrito.setClienteId(clienteId);
             carrito.setVendedorId(vendedorId);
-            carrito.setMontoTotal(0.0);
-            carrito.setMontoTotalProductos(0.0);
-            carrito.setDetallesCarrito(new ArrayList<>());
+
             carrito.addDetalle(new DetalleCarrito(productoId, cantidad, productoDTO.getMontoUnitario(), productoDTO.getObservaciones()));
             carrito.calcularMontosTotales();
 
+            clienteCarrito.addCarrito(carrito);
         }
-        else {
-            boolean productoExiste = false;
-            for (DetalleCarrito detalle : carrito.getDetallesCarrito()) {     //ver si el producto ya existe en el carrito
-                if (detalle.getProductoId().equals(productoId)) {
-                    //modificar cantidad
-                    detalle.setCantidad(cantidad);
-                    carrito.calcularMontosTotales();
-                    productoExiste = true;
-                    break;
-                }
-            }
-            if (!productoExiste) {
+        else {  //si hay un cliente con carrito
+            carrito = clienteCarrito.encontrarCarritoPorVendedor(vendedorId);
+
+            if (carrito == null) {  //si el cliente no tiene un carrito para ese vendedor
+                carrito = new Carrito();
+                carrito.setVendedorId(vendedorId);
                 carrito.addDetalle(new DetalleCarrito(productoId, cantidad, productoDTO.getMontoUnitario(), productoDTO.getObservaciones()));
                 carrito.calcularMontosTotales();
+                clienteCarrito.addCarrito(carrito);
+            }
+            else{
+                DetalleCarrito detalleExistente = carrito.encontrarProducto(productoId);
+
+                if (detalleExistente == null){  //si el cliente ya tiene un carrito para ese vendedor pero NO tiene ese producto
+                    carrito.addDetalle(new DetalleCarrito(productoId, cantidad, productoDTO.getMontoUnitario(), productoDTO.getObservaciones()));
+                    carrito.calcularMontosTotales();
+                }
+                else{   //si el cliente ya tiene un carrito para ese vendedor y ya tiene ese producto, actualizar cantidad y monto unitario
+                    
+                    detalleExistente.setCantidad(cantidad);
+                    carrito.calcularMontosTotales();          
+                }
             }
         }      
+        carritoRepository.save(clienteCarrito);
 
-        return carritoRepository.save(carrito);
+        return carrito;
     }
 
     public void deleteItem(String clienteId, String vendedorId, String productoId) {

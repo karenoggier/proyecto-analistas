@@ -2,18 +2,11 @@ package com.seminario.ms_pedido.model;
 
 import java.util.ArrayList;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import lombok.Data;
 
 @Data
-@Document(collection = "carritos")
 public class Carrito {
-    @Id
-    private String id;
     private String vendedorId;
-    private String clienteId;
     private Double montoTotal;
     private Double montoTotalProductos;
     private ArrayList<DetalleCarrito> detallesCarrito;
@@ -34,5 +27,16 @@ public class Carrito {
         }
         // lógica para calcular descuentos, impuestos, etc.
         this.montoTotal = this.montoTotalProductos; // Por simplicidad, sin descuentos ni impuestos
+    }
+
+    public DetalleCarrito encontrarProducto(String productoId) {
+        if (this.detallesCarrito != null & !this.detallesCarrito.isEmpty()) {
+            for (DetalleCarrito detalle : this.detallesCarrito) {
+                if (detalle.getProductoId().equals(productoId)) {
+                    return detalle;
+                }
+            }
+        }
+        return null;
     }
 }

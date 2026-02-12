@@ -1,13 +1,13 @@
 package com.seminario.ms_pedido.DTOs;
 
-import lombok.Data;
 import java.util.ArrayList;
+
+import lombok.Data;
 
 @Data
 public class CarritoDTO {
-    private String id;
     private String vendedorId;
-    private String clienteId;
+    private String clienteEmail;
     private Double montoTotal;
     private Double montoTotalProductos;
     private ArrayList<DetalleCarritoDTO> detallesCarrito;

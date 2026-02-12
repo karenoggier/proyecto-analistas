@@ -1,16 +1,16 @@
 package com.seminario.ms_pedido.Repositories;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import com.seminario.ms_pedido.model.Carrito;
+import com.seminario.ms_pedido.model.ClienteCarrito;
 
 @Repository
-public interface CarritoRepository extends MongoRepository<Carrito, String> {
-    public Optional<ArrayList<Carrito>> findByClienteId(String clienteId);
+public interface CarritoRepository extends MongoRepository<ClienteCarrito, String> {
+    public Optional<ClienteCarrito> findByClienteEmail(String clienteEmail);
 
-    public Optional<Carrito> findByClienteIdAndVendedorId(String clienteId, String vendedorId);
+    public Optional<Carrito> findByClienteEmailAndVendedorId(String clienteEmail, String vendedorId);
 }
