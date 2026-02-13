@@ -79,11 +79,11 @@
 }
 
 .heroImgBebida {
-  border-radius: 50%;
+  border-radius: 40%;
   object-fit: cover;
   width: 120px;
   height: 120px;
-  margin-left: -35px;
+  margin-left: -30px;
   
 }
 
@@ -177,7 +177,7 @@
   height: 36px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #f7797d, #e84c6a);
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%); 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -226,7 +226,7 @@
   height: 64px;
   border-radius: 50%;
   overflow: hidden;
-  background: #e84c6a;
+  background: #ff4b7e;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,40 +262,51 @@
 
 /* Footer Banner */
 .footerBanner {
-  background: linear-gradient(135deg, #f7797d 0%, #e84c6a 100%);
+  background: #ff4b7e;
   display: flex;
   align-items: center;
-  padding: 40px 60px;
-  gap: 40px;
-  margin-top: 20px;
-  border-radius: 20px 20px 0 0;
+  justify-content: center;
+  padding: 60px 0;
+  gap: 100px;
+  width: 80vw;
+  max-height: 300px;
+  border-radius: 20px;
+  position:relative;
+  margin: 100px auto 50px auto;
 }
 
 .bannerLeft {
-  flex-shrink: 0;
+  position: relative;
+  align-self: flex-end;
 }
 
 .bannerImg {
-  border-radius: 16px;
+  width: auto; 
+  height: 380px;    
+  margin-bottom: -64px;
   object-fit: cover;
+  margin-left: 100px;
+  
 }
 
 .bannerRight {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  width: 50vw;
+  margin-right: 100px;
 }
 
 .bannerBlock {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
 }
 
 .bannerIcon {
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 80px;
+  height: 80px;
+  background: rgb(255, 255, 255);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -305,14 +316,14 @@
 
 .bannerBlock h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #fff;
 }
 
 .bannerBlock p {
-  margin: 4px 0 0;
-  font-size: 13px;
+  margin: 0px 0 0;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.5;
 }

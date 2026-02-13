@@ -120,7 +120,7 @@ export default function ClienteHome() {
             <div className={styles.heroCardComida}>
               <span className={styles.heroLabelComida}>COMIDA</span>
               <Image
-                src="/comida.png"
+                src="/cliente/comida.png"
                 alt="Comida"
                 width={160}
                 height={120}
@@ -129,7 +129,7 @@ export default function ClienteHome() {
             </div>
             <div className={styles.heroCardBebida}>
               <Image
-                src="/bebida.png"
+                src="/cliente/bebida.png"
                 alt="Bebida"
                 width={140}
                 height={120}
@@ -202,7 +202,7 @@ export default function ClienteHome() {
         <section className={styles.footerBanner}>
           <div className={styles.bannerLeft}>
             <Image
-              src="/images/footer-girl.jpg"
+              src="/cliente/chica-pizza.png"
               alt="Girl eating pizza"
               width={200}
               height={250}
@@ -212,19 +212,19 @@ export default function ClienteHome() {
           <div className={styles.bannerRight}>
             <div className={styles.bannerBlock}>
               <div className={styles.bannerIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
               </div>
               <div>
                 <h3>Top Ciudades</h3>
-                <p>Santa Fe, Buenos Aires, Cordoba, La Plata, San Miguel de Tucuman, Rosita, San Miguel, Mar del Plata.</p>
+                <p>Santa Fe, Buenos Aires, Cordoba, La Plata, San Miguel de Tucuman, Rosario, Mar del Plata.</p>
               </div>
             </div>
             <div className={styles.bannerBlock}>
               <div className={styles.bannerIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
                   <path d="M18 8h1a4 4 0 010 8h-1" />
                   <path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />
                   <line x1="6" y1="1" x2="6" y2="4" />
