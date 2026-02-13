@@ -129,7 +129,7 @@ public class VendedorController {
     }
 
 
-    @GetMapping("/buscar/vendedores/{provincia}/{localidad}/{filtro}")
+    @GetMapping("/buscar/vendedores")
     @Operation(summary = "Busca en vendedores segun el campo filtro")
     public ResponseEntity<List<VendedorResponseBusquedaDTO>> buscarVendedores(
             @RequestParam String provincia,
@@ -139,7 +139,7 @@ public class VendedorController {
         String filtroBusqueda = (filtro == null) ? "" : filtro;
         return ResponseEntity.ok(vendedorService.buscarVendedores(provincia, localidad, filtroBusqueda));
     } 
-    @GetMapping("/buscar/productos/{provincia}/{localidad}/{filtro}")
+    @GetMapping("/buscar/productos")
     @Operation(summary = "Busca en productos segun el campo filtro")
     public ResponseEntity<List<ProductoResponseBusquedaDTO>> buscarProductos(
             @RequestParam String provincia,
@@ -150,7 +150,7 @@ public class VendedorController {
         return ResponseEntity.ok(vendedorService.buscarProductos(provincia, localidad, filtroBusqueda));
     }
 
-    @GetMapping("/perfil_publico/{vendedorId}")
+    @GetMapping("/perfil-publico/{vendedorId}")
     @Operation(summary = "Obtiene el perfil público de un vendedor por su ID")
     public ResponseEntity<VendedorResponseBusquedaDTO> obtenerPerfilPublico(@PathVariable String vendedorId) {
         return ResponseEntity.ok(vendedorService.buscarVendedorPorId(vendedorId));
