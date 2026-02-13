@@ -7,13 +7,16 @@ import Footer from './components/Footer';
 import styles from './cliente.module.css';
 
 const categories = [
-  { name: 'Hamburguesa', img: '/images/cat-hamburguesa.jpg' },
-  { name: 'Ensalada', img: '/images/cat-ensalada.jpg' },
-  { name: 'Gaseosa', img: '/images/cat-gaseosa.jpg' },
-  { name: 'Pizza', img: '/images/cat-pizza.jpg' },
-  { name: 'Helado', img: '/images/cat-helado.jpg' },
-  { name: 'Vino', img: '/images/cat-vino.jpg' },
-  { name: 'Cafe', img: '/images/cat-cafe.jpg' },
+  { name: 'Hamburguesa', img: '/cliente/hamburguesa.png' },
+  { name: 'Ensalada', img: '/cliente/ensalada.png' },
+  { name: 'Gaseosa', img: '/cliente/gaseosa.png' },
+  { name: 'Pizza', img: '/cliente/pizza.png' },
+  { name: 'Helado', img: '/cliente/helado.png' },
+  { name: 'Vino', img: '/cliente/vino.png' },
+  { name: 'Cafe', img: '/cliente/cafe.png' },
+  { name: 'Papas', img: '/cliente/papas.png' },
+  { name: 'Pasta', img: '/cliente/pasta.png' },
+  { name: 'Sushi', img: '/cliente/sushi.png' },
 ];
 
 const stores = [
@@ -26,18 +29,40 @@ const stores = [
 ];
 
 export default function ClienteHome() {
-  const scrollRef = useRef(null);
   const [clientProfile, setClientProfile] = useState(null);
-
+  const localesRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  useEffect(() => {
-      fetchPerfil();
-  
-    }, [])
+  const [ubicacionActiva, setUbicacionActiva] = useState("Santa Fe, Santa Fe");
 
-    const fetchPerfil = async () => {
+  useEffect(() => {
+    fetchPerfil();
+  
+  }, [])
+
+  useEffect(() => {
+    const actualizarTextoUbicacion = () => {
+      const selectedId = sessionStorage.getItem("selectedAddressId");
+      
+      if (selectedId && clientProfile?.direcciones) {
+        const dirEncontrada = clientProfile.direcciones.find(d => d.id === selectedId);
+        
+        if (dirEncontrada) {
+          setUbicacionActiva(`${dirEncontrada.localidad}, ${dirEncontrada.provincia}`);
+        }
+      } else {
+        setUbicacionActiva("Santa Fe, Santa Fe");
+      }
+    };
+
+    actualizarTextoUbicacion();
+
+    window.addEventListener('storage', actualizarTextoUbicacion);
+    return () => window.removeEventListener('storage', actualizarTextoUbicacion);
+  }, [clientProfile]);
+
+  const fetchPerfil = async () => {
       const token = sessionStorage.getItem("token")
       const rol = sessionStorage.getItem("rol")
   
@@ -71,43 +96,65 @@ export default function ClienteHome() {
         } catch (error) {
           console.error("Error de red:", error);
         } 
-      }
+  }
   
-    const handleLogout = () => {
-      sessionStorage.clear()
-      window.location.href = "/login"
-    }
+  const handleLogout = () => {
+    sessionStorage.clear()
+    window.location.href = "/login"
+  }
   
-    const handleNavigate = (path) => {
-      window.location.href = path
-    }
+  const handleNavigate = (path) => {
+    window.location.href = path
+  }
 
-    const handleRefreshProfile = () => {
-      fetchPerfil();
+  const handleRefreshProfile = () => {
+    fetchPerfil();
+  };
+
+  // FUNCION PARA CARRUSSEL DE LOCALES
+  const checkScroll = () => {
+    const el = localesRef.current;
+    if (!el) return;
+
+    const hasOverflow = el.scrollWidth > el.clientWidth;
+
+    setCanScrollLeft(hasOverflow && el.scrollLeft > 0);
+    setCanScrollRight(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth);
+  };
+
+  useEffect(() => {
+    const el = localesRef.current;
+    if (!el) return;
+
+    const handleCheck = () => {
+      checkScroll();
     };
-  /*
-    // FUNCION PARA CARRUSSEL DE LOCALES
-    const checkScroll = () => {
-      const el = productsRef.current;
-      if (!el) return;
-  
-      const hasOverflow = el.scrollWidth > el.clientWidth;
-  
-      setCanScrollLeft(hasOverflow && el.scrollLeft > 0);
-      setCanScrollRight(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth);
-    };*/
+
+    const resizeObserver = new ResizeObserver(() => {
+      handleCheck();
+    });
+
+    resizeObserver.observe(el);
+
+    el.addEventListener("scroll", handleCheck);
+    window.addEventListener("resize", handleCheck);
+    requestAnimationFrame(handleCheck);
+
+    return () => {
+      resizeObserver.disconnect();
+      el.removeEventListener("scroll", handleCheck);
+      window.removeEventListener("resize", handleCheck);
+    };
+  }, [clientProfile]);
 
   const scrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -280, behavior: 'smooth' });
-    }
+    localesRef.current.scrollBy({ left: -300, behavior: "smooth" });
   };
 
   const scrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 280, behavior: 'smooth' });
-    }
+    localesRef.current.scrollBy({ left: 300, behavior: "smooth" });
   };
+
 
   return (
     <div className={styles.page}>
@@ -155,27 +202,31 @@ export default function ClienteHome() {
         {/* Discover Section */}
         <section className={styles.discover}>
           <div className={styles.discoverHeader}>
-            <h2 className={styles.discoverTitle}>Descubri estas opciones</h2>
-            <div className={styles.discoverNav}>
-              <button className={styles.navArrow} onClick={scrollLeft} aria-label="Scroll left">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 18l-6-6 6-6" />
+            <h2 className={styles.discoverTitle}>
+              Descubri estas opciones en <span className={styles.locationHighlight}>{ubicacionActiva}</span>
+            </h2>
+            <div className={styles.carouselNav}>
+              <button className={styles.carouselButton} onClick={scrollLeft} disabled={!canScrollLeft}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
                 </svg>
               </button>
-              <button className={styles.navArrowActive} onClick={scrollRight} aria-label="Scroll right">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <path d="M9 18l6-6-6-6" />
+              <button
+                className={styles.carouselButton} onClick={scrollRight} disabled={!canScrollRight}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
                 </svg>
               </button>
             </div>
           </div>
 
-          <div className={styles.storeScroll} ref={scrollRef}>
+          <div className={styles.storeScroll} ref={localesRef}>
             {stores.map((store, i) => (
               <div key={i} className={styles.storeCard}>
                 <div className={styles.storeLogo}>
                   <div className={styles.storeLogoPlaceholder}>M</div>
                 </div>
+                <div className={styles.storeInfo}>
                 <h3 className={styles.storeName}>{store.name}</h3>
                 <div className={styles.storeMeta}>
                   <span className={styles.storeTime}>
@@ -186,13 +237,13 @@ export default function ClienteHome() {
                     {store.time}
                   </span>
                   <span className={styles.storeTravel}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
+                    <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#888">
+                      <path d="M144-624v-192h240v192H144Zm72-72h96v-48h-96v48Zm-13 445q-35-35-35-85H96v-96q0-60 40-102t104-42h144v168h144l144-172v-68H552v-72h120q31 0 51.5 21.15T744-648v94L562-336H408q0 50-35 85t-85 35q-50 0-85-35Zm119-50.8q14-13.8 14-34.2h-96q0 20 14 34t34 14q20 0 34-13.8ZM659-251q-35-35-35-85t35-85q35-35 85-35t85 35q35 35 35 85t-35 85q-35 35-85 35t-85-35Zm119-51q14-14 14-34t-14-34q-14-14-34-14t-34 14q-14 14-14 34t14 34q14 14 34 14t34-14ZM168-408h144v-96h-72.21Q210-504 189-482.85T168-432v24Zm144-288v-48 48Zm0 288Z"/>
                     </svg>
-                    {store.travel}
+                    10-25 min
                   </span>
                 </div>
+              </div>
               </div>
             ))}
           </div>
