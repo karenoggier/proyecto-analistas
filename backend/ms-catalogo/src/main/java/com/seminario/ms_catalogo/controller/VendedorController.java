@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
+import com.seminario.ms_catalogo.dto.ProductoResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
@@ -113,11 +114,29 @@ public class VendedorController {
     }
 
 
-    @GetMapping("/{provincia}/{localidad}")
+    @GetMapping("/buscar/{provincia}/{localidad}")
     @Operation(summary = "Obtiene los primeros 10 vendedores por provincia y localidad")
     public ResponseEntity<List<VendedorResponseDTO>> obtenerVendedoresPorUbicacion(
             @PathVariable String provincia,
             @PathVariable String localidad) {
         return ResponseEntity.ok(vendedorService.obtenerDiezVendedoresPorUbicacion(provincia, localidad));
+    }
+
+
+    @GetMapping("/buscar/vendedores/{provincia}/{localidad}/{filtro}")
+    @Operation(summary = "Busca en vendedores segun el campo filtro")
+    public ResponseEntity<List<VendedorResponseDTO>> buscarVendedores(
+            @PathVariable String provincia,
+            @PathVariable String localidad,
+            @PathVariable String filtro) {
+        return ResponseEntity.ok(vendedorService.buscarVendedores(provincia, localidad, filtro));
+    } 
+    @GetMapping("/buscar/productos/{provincia}/{localidad}/{filtro}")
+    @Operation(summary = "Busca en productos segun el campo filtro")
+    public ResponseEntity<List<ProductoResponseBusquedaDTO>> buscarProductos(
+            @PathVariable String provincia,
+            @PathVariable String localidad,
+            @PathVariable String filtro) {
+        return ResponseEntity.ok(vendedorService.buscarProductos(provincia, localidad, filtro));
     }
 }

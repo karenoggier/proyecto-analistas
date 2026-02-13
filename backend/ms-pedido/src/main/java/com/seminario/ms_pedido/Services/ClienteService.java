@@ -8,6 +8,7 @@ import com.seminario.ms_pedido.Mapper.ClienteMapper;
 import com.seminario.ms_pedido.Repositories.ClienteRepository;
 import com.seminario.ms_pedido.exception.RequestException;
 import com.seminario.ms_pedido.model.Cliente;
+import com.seminario.ms_pedido.model.EstadoDireccion;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +31,14 @@ public class ClienteService {
         Cliente cliente = clienteRepository.findByEmail(email)
         .orElseThrow(() -> new RequestException("PE", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado"));
         // Filtra la lista en una sola línea de forma segura
-        cliente.getDireccion().removeIf(direccion -> "INACTIVO".equals(direccion.getEstado()));
+        cliente.getDireccion().removeIf(direccion -> EstadoDireccion.INACTIVO.equals(direccion.getEstado()));
         
         return clienteMapper.toResponseDTO(cliente);
+    }
+
+    public Cliente obtenerClientePorEmail(String email) {
+        return clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new RequestException("PE", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado"));
     }
 
 }

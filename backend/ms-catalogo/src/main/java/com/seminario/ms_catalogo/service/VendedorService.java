@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.seminario.ms_catalogo.client.UsuarioClient;
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
+import com.seminario.ms_catalogo.dto.ProductoResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
@@ -340,6 +341,75 @@ public class VendedorService {
                 .limit(10)
                 .map(v -> vendedorMapper.toDTO(v))
                 .collect(Collectors.toList());
+    }
+
+    public List<VendedorResponseDTO> buscarVendedores(String provincia, String localidad, String filtro) {
+        List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, localidad);
+         // Convertir filtro a minúsculas para comparación case-insensitive
+        String filtroLower = filtro.toLowerCase();
+        for (Vendedor v : vendedores) {
+            //filtrar por nombre de negocio y eliminar los que no tienen conincidencia con el filtro
+            if (!v.getNombreNegocio().toLowerCase().contains(filtroLower)) {
+                vendedores.remove(v);
+            }
+        }
+        return vendedores.stream()
+                .map(v -> vendedorMapper.toDTO(v))
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductoResponseBusquedaDTO> buscarProductos(String provincia, String localidad, String filtro) {
+        List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, localidad);
+        String filtroLower = filtro.toLowerCase();
+        List<ProductoResponseBusquedaDTO> productosFiltrados = new ArrayList<>();
+        //filtrar por nombre Categoria
+        for (Vendedor v : vendedores) {
+            if (v.getProductos() != null) {
+                for (Producto p : v.getProductos()) {
+                    if (p.getCategoria().name().toLowerCase().contains(filtroLower)){
+                        productosFiltrados.add(productoMapper.toDTO(p,v.getId(),v.getNombreNegocio()));
+                        v.getProductos().remove(p);
+                    }
+                }
+            }
+        }
+        //filtrar por nombre Subcategoria
+        for (Vendedor v : vendedores) {
+            if (v.getProductos() != null) {
+                for (Producto p : v.getProductos()) {
+                    if (p.getSubcategoria().name().toLowerCase().contains(filtroLower)){
+                        productosFiltrados.add(productoMapper.toDTO(p,v.getId(),v.getNombreNegocio()));
+                        v.getProductos().remove(p);
+                    }
+                }
+            }
+        }
+
+        //filtrar por nombre del producto
+        for (Vendedor v : vendedores) {
+            if (v.getProductos() != null) {
+                for (Producto p : v.getProductos()) {
+                    if (p.getNombre().toLowerCase().contains(filtroLower)){
+                        productosFiltrados.add(productoMapper.toDTO(p,v.getId(),v.getNombreNegocio()));
+                        v.getProductos().remove(p);
+                    }
+                }
+            }
+        }
+
+        //filtrar por descripcion del producto
+        for (Vendedor v : vendedores) {
+            if (v.getProductos() != null) {
+                for (Producto p : v.getProductos()) {
+                    if (p.getDescripcion().toLowerCase().contains(filtroLower)){
+                        productosFiltrados.add(productoMapper.toDTO(p,v.getId(),v.getNombreNegocio()));
+                        v.getProductos().remove(p);
+                    }
+                }
+            }
+        }
+        
+        return productosFiltrados;
     }
 
 }

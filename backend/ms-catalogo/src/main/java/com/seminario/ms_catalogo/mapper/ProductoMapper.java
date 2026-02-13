@@ -2,6 +2,7 @@ package com.seminario.ms_catalogo.mapper;
 import org.springframework.stereotype.Component;
 
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
+import com.seminario.ms_catalogo.dto.ProductoResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.consultas_ms_pedido.ProductoResumidoDTO;
 import com.seminario.ms_catalogo.model.Categoria;
@@ -34,6 +35,33 @@ public class ProductoMapper {
         return producto;
 
 }
+    public ProductoResponseBusquedaDTO toDTO(Producto producto, String vendedorId, String nombreVendedor) {
+        if (producto == null) {
+            return null;
+        }
+
+        ProductoResponseBusquedaDTO productoResponseDTO = new ProductoResponseBusquedaDTO();
+
+        productoResponseDTO.setId(producto.getId());
+        productoResponseDTO.setNombre(producto.getNombre());
+        productoResponseDTO.setDescripcion(producto.getDescripcion());
+        productoResponseDTO.setPrecio(producto.getPrecio());
+        productoResponseDTO.setObservaciones(producto.getObservaciones());
+        productoResponseDTO.setImagen(producto.getImagen());
+
+        productoResponseDTO.setDisponible(producto.getDisponible());
+
+        
+        if (producto.getCategoria() != null) productoResponseDTO.setCategoria(producto.getCategoria().name());
+        if (producto.getSubcategoria() != null) productoResponseDTO.setSubcategoria(producto.getSubcategoria().name());
+
+        if (producto.getEstado() != null) productoResponseDTO.setEstado(producto.getEstado().name());
+
+        productoResponseDTO.setIdVendedor(vendedorId);
+        productoResponseDTO.setNombreVendedor(nombreVendedor);
+    
+        return productoResponseDTO;
+    }
     public ProductoResponseDTO toDTO(Producto producto) {
         if (producto == null) {
             return null;

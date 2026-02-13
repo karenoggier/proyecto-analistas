@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.seminario.ms_pedido.DTOs.DireccionResponseDTO;
 import com.seminario.ms_pedido.model.Direccion;
+import com.seminario.ms_pedido.model.EstadoDireccion;
 
 @Component
 public class DireccionMapper {
@@ -38,6 +39,7 @@ public class DireccionMapper {
         direccion.setLatitud(dto.getLatitud());
         direccion.setLongitud(dto.getLongitud());
         direccion.setObservaciones(dto.getObservaciones());
+        direccion.setEstado(EstadoDireccion.ACTIVO); // Establecer estado activo por defecto al crear una nueva dirección
 
         return direccion;
     }
