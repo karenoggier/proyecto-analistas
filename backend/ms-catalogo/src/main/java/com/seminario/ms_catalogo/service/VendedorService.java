@@ -17,6 +17,7 @@ import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
+import com.seminario.ms_catalogo.dto.VendedorResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.exception.RequestException;
@@ -324,6 +325,9 @@ public class VendedorService {
                 .collect(Collectors.toList());
 
         //se filtran los productos inactivos de cada vendedor 
+        if(vendedores.isEmpty()) {
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron vendedores para la ubicación dada");
+        }
         for (Vendedor v: vendedores) {
             // Si el vendedor tiene productos, filtramos los inactivos. Si no tiene productos, lo dejamos pasar (puede ser un nuevo vendedor sin productos aún)
             if (v.getProductos() != null) {
@@ -335,15 +339,19 @@ public class VendedorService {
     }
 
 
-    public List<VendedorResponseDTO> obtenerDiezVendedoresPorUbicacion(String provincia, String ciudad) {
+    public List<VendedorResponseBusquedaDTO> obtenerDiezVendedoresPorUbicacion(String provincia, String ciudad) {
         List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, ciudad);
+        if (vendedores.isEmpty()) {
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron vendedores para: " + provincia + ", " + ciudad);
+
+        }
         return vendedores.stream()
                 .limit(10)
-                .map(v -> vendedorMapper.toDTO(v))
+                .map(v -> vendedorMapper.toBusquedaDTO(v))
                 .collect(Collectors.toList());
     }
 
-    public List<VendedorResponseDTO> buscarVendedores(String provincia, String localidad, String filtro) {
+    public List<VendedorResponseBusquedaDTO> buscarVendedores(String provincia, String localidad, String filtro) {
         List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, localidad);
          // Convertir filtro a minúsculas para comparación case-insensitive
         String filtroLower = filtro.toLowerCase();
@@ -353,8 +361,11 @@ public class VendedorService {
                 vendedores.remove(v);
             }
         }
+        if (vendedores.isEmpty()) {
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron vendedores que coincidan con el filtro");
+        }
         return vendedores.stream()
-                .map(v -> vendedorMapper.toDTO(v))
+                .map(v -> vendedorMapper.toBusquedaDTO(v))
                 .collect(Collectors.toList());
     }
 
@@ -408,8 +419,18 @@ public class VendedorService {
                 }
             }
         }
+        if (productosFiltrados.isEmpty()) {
+            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron productos que coincidan con el filtro");
+        }
         
         return productosFiltrados;
+    }
+
+    public VendedorResponseBusquedaDTO buscarVendedorPorId(String vendedorId) {
+        Vendedor vendedor = vendedorRepository.findById(vendedorId)
+                .orElseThrow(() -> new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado con ID: " + vendedorId));
+        
+        return vendedorMapper.toBusquedaDTO(vendedor);
     }
 
 }

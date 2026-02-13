@@ -3,8 +3,8 @@ package com.seminario.ms_catalogo.mapper;
 import org.springframework.stereotype.Component;
 
 import com.seminario.ms_catalogo.dto.DireccionDTO;
-import com.seminario.ms_catalogo.dto.DireccionRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
+import com.seminario.ms_catalogo.dto.VendedorResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.model.Estado;
@@ -119,6 +119,22 @@ public class VendedorMapper {
             evento.setDireccion(dirEvent);
         }
         return evento;
+    }
+
+    public VendedorResponseBusquedaDTO toBusquedaDTO(Vendedor vendedor) {
+        VendedorResponseBusquedaDTO dto = new VendedorResponseBusquedaDTO();
+        dto.setIdVendedor(vendedor.getId());
+        dto.setNombreNegocio(vendedor.getNombreNegocio());
+        dto.setTelefono(vendedor.getTelefono());
+        dto.setRealizaEnvios(vendedor.getRealizaEnvios());
+        dto.setHorarioApertura(vendedor.getHorarioApertura());
+        dto.setHorarioCierre(vendedor.getHorarioCierre());
+        dto.setTiempoEstimadoEspera(vendedor.getTiempoEstimadoEspera());
+        dto.setLogo(vendedor.getLogo());
+        if (vendedor.getDireccion() != null) {
+            dto.setDireccion(direccionMapper.toDTO(vendedor.getDireccion()));
+        }
+        return dto;
     }
     
 

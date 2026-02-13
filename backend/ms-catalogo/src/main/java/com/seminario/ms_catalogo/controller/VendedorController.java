@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
+import com.seminario.ms_catalogo.dto.VendedorResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.service.VendedorService;
@@ -116,7 +118,7 @@ public class VendedorController {
 
     @GetMapping("/buscar/{provincia}/{localidad}")
     @Operation(summary = "Obtiene los primeros 10 vendedores por provincia y localidad")
-    public ResponseEntity<List<VendedorResponseDTO>> obtenerVendedoresPorUbicacion(
+    public ResponseEntity<List<VendedorResponseBusquedaDTO>> obtenerVendedoresPorUbicacion(
             @PathVariable String provincia,
             @PathVariable String localidad) {
         return ResponseEntity.ok(vendedorService.obtenerDiezVendedoresPorUbicacion(provincia, localidad));
@@ -125,10 +127,10 @@ public class VendedorController {
 
     @GetMapping("/buscar/vendedores/{provincia}/{localidad}/{filtro}")
     @Operation(summary = "Busca en vendedores segun el campo filtro")
-    public ResponseEntity<List<VendedorResponseDTO>> buscarVendedores(
+    public ResponseEntity<List<VendedorResponseBusquedaDTO>> buscarVendedores(
             @PathVariable String provincia,
             @PathVariable String localidad,
-            @PathVariable String filtro) {
+            @RequestParam String filtro) {
         return ResponseEntity.ok(vendedorService.buscarVendedores(provincia, localidad, filtro));
     } 
     @GetMapping("/buscar/productos/{provincia}/{localidad}/{filtro}")
@@ -136,7 +138,13 @@ public class VendedorController {
     public ResponseEntity<List<ProductoResponseBusquedaDTO>> buscarProductos(
             @PathVariable String provincia,
             @PathVariable String localidad,
-            @PathVariable String filtro) {
+            @RequestParam String filtro) {
         return ResponseEntity.ok(vendedorService.buscarProductos(provincia, localidad, filtro));
+    }
+
+    @GetMapping("/perfil_publico/{vendedorId}")
+    @Operation(summary = "Obtiene el perfil público de un vendedor por su ID")
+    public ResponseEntity<VendedorResponseBusquedaDTO> obtenerPerfilPublico(@PathVariable String vendedorId) {
+        return ResponseEntity.ok(vendedorService.buscarVendedorPorId(vendedorId));
     }
 }
