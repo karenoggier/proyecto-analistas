@@ -323,18 +323,6 @@ public class VendedorService {
         vendedores = vendedores.stream()
                 .filter(v -> v.getProductos() != null && !v.getProductos().isEmpty())
                 .collect(Collectors.toList());
-
-        //se filtran los productos inactivos de cada vendedor 
-        if(vendedores.isEmpty()) {
-            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron vendedores para la ubicación dada");
-        }
-        for (Vendedor v: vendedores) {
-            // Si el vendedor tiene productos, filtramos los inactivos. Si no tiene productos, lo dejamos pasar (puede ser un nuevo vendedor sin productos aún)
-            if (v.getProductos() != null) {
-                v.getProductos().removeIf(p -> Estado.INACTIVO.equals(p.getEstado()));
-            }
-        }
-
         return vendedores;
     }
 
@@ -342,7 +330,7 @@ public class VendedorService {
     public List<VendedorResponseBusquedaDTO> obtenerDiezVendedoresPorUbicacion(String provincia, String ciudad) {
         List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, ciudad);
         if (vendedores.isEmpty()) {
-            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron vendedores para: " + provincia + ", " + ciudad);
+            //throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron vendedores para: " + provincia + ", " + ciudad);
 
         }
         return vendedores.stream()
@@ -355,14 +343,14 @@ public class VendedorService {
         List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, localidad);
          // Convertir filtro a minúsculas para comparación case-insensitive
         String filtroLower = filtro.toLowerCase();
-        for (Vendedor v : vendedores) {
-            //filtrar por nombre de negocio y eliminar los que no tienen conincidencia con el filtro
-            if (!v.getNombreNegocio().toLowerCase().contains(filtroLower)) {
-                vendedores.remove(v);
+        if (!vendedores.isEmpty()) {
+            
+            for (Vendedor v : vendedores) {
+                //filtrar por nombre de negocio y eliminar los que no tienen conincidencia con el filtro
+                if (!v.getNombreNegocio().toLowerCase().contains(filtroLower)) {
+                    vendedores.remove(v);
+                }
             }
-        }
-        if (vendedores.isEmpty()) {
-            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron vendedores que coincidan con el filtro");
         }
         return vendedores.stream()
                 .map(v -> vendedorMapper.toBusquedaDTO(v))
