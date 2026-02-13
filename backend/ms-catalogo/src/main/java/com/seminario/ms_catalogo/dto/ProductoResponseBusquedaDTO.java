@@ -1,7 +1,7 @@
 package com.seminario.ms_catalogo.dto;
 import lombok.Data;
 @Data
-public class ProductoResponseDTO {
+public class ProductoResponseBusquedaDTO {
     private String id;
     private String nombre;
     private String descripcion;
@@ -12,6 +12,8 @@ public class ProductoResponseDTO {
     private String categoria;
     private String subcategoria;
     private String imagen;
+    private String idVendedor;
+    private String nombreVendedor;
     
 
 }

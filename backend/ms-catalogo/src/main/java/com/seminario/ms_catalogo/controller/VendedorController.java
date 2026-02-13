@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
+import com.seminario.ms_catalogo.dto.ProductoResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
@@ -132,7 +133,7 @@ public class VendedorController {
     } 
     @GetMapping("/buscar/productos/{provincia}/{localidad}/{filtro}")
     @Operation(summary = "Busca en productos segun el campo filtro")
-    public ResponseEntity<List<ProductoResponseDTO>> buscarProductos(
+    public ResponseEntity<List<ProductoResponseBusquedaDTO>> buscarProductos(
             @PathVariable String provincia,
             @PathVariable String localidad,
             @PathVariable String filtro) {

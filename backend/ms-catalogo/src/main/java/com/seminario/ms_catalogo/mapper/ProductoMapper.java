@@ -2,6 +2,7 @@ package com.seminario.ms_catalogo.mapper;
 import org.springframework.stereotype.Component;
 
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
+import com.seminario.ms_catalogo.dto.ProductoResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.model.Categoria;
 import com.seminario.ms_catalogo.model.Estado;
@@ -33,12 +34,12 @@ public class ProductoMapper {
         return producto;
 
 }
-    public ProductoResponseDTO toDTO(Producto producto, String vendedorId, String nombreVendedor) {
+    public ProductoResponseBusquedaDTO toDTO(Producto producto, String vendedorId, String nombreVendedor) {
         if (producto == null) {
             return null;
         }
 
-        ProductoResponseDTO productoResponseDTO = new ProductoResponseDTO();
+        ProductoResponseBusquedaDTO productoResponseDTO = new ProductoResponseBusquedaDTO();
 
         productoResponseDTO.setId(producto.getId());
         productoResponseDTO.setNombre(producto.getNombre());

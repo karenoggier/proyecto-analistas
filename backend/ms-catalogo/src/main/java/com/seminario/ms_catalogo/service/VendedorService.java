@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.seminario.ms_catalogo.client.UsuarioClient;
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
+import com.seminario.ms_catalogo.dto.ProductoResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
@@ -357,10 +358,10 @@ public class VendedorService {
                 .collect(Collectors.toList());
     }
 
-    public List<ProductoResponseDTO> buscarProductos(String provincia, String localidad, String filtro) {
+    public List<ProductoResponseBusquedaDTO> buscarProductos(String provincia, String localidad, String filtro) {
         List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, localidad);
         String filtroLower = filtro.toLowerCase();
-        List<ProductoResponseDTO> productosFiltrados = new ArrayList<>();
+        List<ProductoResponseBusquedaDTO> productosFiltrados = new ArrayList<>();
         //filtrar por nombre Categoria
         for (Vendedor v : vendedores) {
             if (v.getProductos() != null) {
