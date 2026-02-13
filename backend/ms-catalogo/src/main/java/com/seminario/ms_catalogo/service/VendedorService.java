@@ -73,7 +73,7 @@ public class VendedorService {
             
     }
 
-    /* 
+    
     public Vendedor usuarioExistente(String usuarioId) {
         Vendedor vendedor = vendedorRepository.findByUsuarioId(usuarioId).orElse(null);
         if (vendedor == null) {
@@ -81,7 +81,7 @@ public class VendedorService {
             throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado");
         }
         return vendedor;
-    }*/
+    }
 
     /* 
     public ResponseEntity<VendedorResponseDTO> obtenerVendedorPorUsuarioId(String usuarioId) {
