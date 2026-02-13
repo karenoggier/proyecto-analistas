@@ -130,16 +130,20 @@ public class VendedorController {
     public ResponseEntity<List<VendedorResponseBusquedaDTO>> buscarVendedores(
             @PathVariable String provincia,
             @PathVariable String localidad,
-            @RequestParam String filtro) {
-        return ResponseEntity.ok(vendedorService.buscarVendedores(provincia, localidad, filtro));
+            @RequestParam(required = false) String filtro) {
+        // Si filtro es null, le pasamos un String vacío para que tu Service no explote
+        String filtroBusqueda = (filtro == null) ? "" : filtro;
+        return ResponseEntity.ok(vendedorService.buscarVendedores(provincia, localidad, filtroBusqueda));
     } 
     @GetMapping("/buscar/productos/{provincia}/{localidad}/{filtro}")
     @Operation(summary = "Busca en productos segun el campo filtro")
     public ResponseEntity<List<ProductoResponseBusquedaDTO>> buscarProductos(
             @PathVariable String provincia,
             @PathVariable String localidad,
-            @RequestParam String filtro) {
-        return ResponseEntity.ok(vendedorService.buscarProductos(provincia, localidad, filtro));
+            @RequestParam(required = false) String filtro) {
+        // Si filtro es null, le pasamos un String vacío para que tu Service no explote
+        String filtroBusqueda = (filtro == null) ? "" : filtro;
+        return ResponseEntity.ok(vendedorService.buscarProductos(provincia, localidad, filtroBusqueda));
     }
 
     @GetMapping("/perfil_publico/{vendedorId}")

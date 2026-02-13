@@ -2,8 +2,10 @@ package com.seminario.ms_catalogo.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -308,31 +310,38 @@ public class VendedorService {
 
 
     
-    public List<Vendedor> obtenerVendedoresPorUbicacion(String provincia, String ciudad) {
-        List<Vendedor> vendedores = new ArrayList<>();
-        if(provincia != null && ciudad != null){
-            vendedores = vendedorRepository.findByEstadoAndDireccion_ProvinciaAndDireccion_Localidad(Estado.ACTIVO, provincia, ciudad);
-        } else if(provincia == null && ciudad != null){
-            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La provincia no puede ser nula");
-        } else if(ciudad == null && provincia != null){
-            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La localidad no puede ser nula");
-        } else {
-            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "La provincia y la localidad no pueden ser nulas");    
-        }
-        //se filtra los vendedores que no tienen productos y se eliminan
-        vendedores = vendedores.stream()
-                .filter(v -> v.getProductos() != null && !v.getProductos().isEmpty())
-                .collect(Collectors.toList());
-        return vendedores;
+   public List<Vendedor> obtenerVendedoresPorUbicacion(String provincia, String ciudad) {
+    List<Vendedor> vendedores;
+    
+    // 1. Validaciones de ubicación
+    if (provincia != null && ciudad != null) {
+        vendedores = vendedorRepository.findByEstadoAndDireccion_ProvinciaAndDireccion_Localidad(Estado.ACTIVO, provincia, ciudad);
+    } else {
+        // Podrías cambiar estos throws por return new ArrayList<>() si prefieres no dar error 400
+        String mensaje = (provincia == null && ciudad == null) ? "La provincia y localidad no pueden ser nulas" :
+                         (provincia == null) ? "La provincia no puede ser nula" : "La localidad no puede ser nula";
+        throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, mensaje);
     }
 
+    // 2. Filtrado de Productos Activos y Vendedores con stock
+    return vendedores.stream()
+            .filter(v-> v.getProductos() != null && !v.getProductos().isEmpty() && Estado.ACTIVO.equals(v.getEstado())) // Solo vendedores con productos
+            .peek(v -> {
+                if (v.getProductos() != null) {
+                    // Filtramos y convertimos explícitamente a ArrayList para evitar el error de la imagen
+                    ArrayList<Producto> activos = v.getProductos().stream()
+                            .filter(p -> Estado.ACTIVO.equals(p.getEstado()))
+                            .collect(Collectors.toCollection(ArrayList::new));
+                    v.setProductos(activos); 
+                }
+            })
+            .filter(v -> v.getProductos() != null && !v.getProductos().isEmpty() && Estado.ACTIVO.equals(v.getEstado()))
+            .collect(Collectors.toList());
+}
 
     public List<VendedorResponseBusquedaDTO> obtenerDiezVendedoresPorUbicacion(String provincia, String ciudad) {
         List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, ciudad);
-        if (vendedores.isEmpty()) {
-            //throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron vendedores para: " + provincia + ", " + ciudad);
-
-        }
+       
         return vendedores.stream()
                 .limit(10)
                 .map(v -> vendedorMapper.toBusquedaDTO(v))
@@ -341,78 +350,74 @@ public class VendedorService {
 
     public List<VendedorResponseBusquedaDTO> buscarVendedores(String provincia, String localidad, String filtro) {
         List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, localidad);
+        if (filtro == null || filtro.trim().isEmpty()) {
+            return vendedores.stream()
+                             .limit(10)
+                             .map(vendedorMapper::toBusquedaDTO)
+                             .collect(Collectors.toList());
+        }
          // Convertir filtro a minúsculas para comparación case-insensitive
         String filtroLower = filtro.toLowerCase();
-        if (!vendedores.isEmpty()) {
-            
-            for (Vendedor v : vendedores) {
-                //filtrar por nombre de negocio y eliminar los que no tienen conincidencia con el filtro
-                if (!v.getNombreNegocio().toLowerCase().contains(filtroLower)) {
-                    vendedores.remove(v);
-                }
-            }
-        }
         return vendedores.stream()
-                .map(v -> vendedorMapper.toBusquedaDTO(v))
-                .collect(Collectors.toList());
+            .filter(v -> v.getNombreNegocio().toLowerCase().contains(filtroLower))
+            .map(v -> vendedorMapper.toBusquedaDTO(v))
+            .collect(Collectors.toList());
     }
 
     public List<ProductoResponseBusquedaDTO> buscarProductos(String provincia, String localidad, String filtro) {
-        List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, localidad);
-        String filtroLower = filtro.toLowerCase();
-        List<ProductoResponseBusquedaDTO> productosFiltrados = new ArrayList<>();
-        //filtrar por nombre Categoria
-        for (Vendedor v : vendedores) {
-            if (v.getProductos() != null) {
-                for (Producto p : v.getProductos()) {
-                    if (p.getCategoria().name().toLowerCase().contains(filtroLower)){
-                        productosFiltrados.add(productoMapper.toDTO(p,v.getId(),v.getNombreNegocio()));
-                        v.getProductos().remove(p);
-                    }
-                }
-            }
-        }
-        //filtrar por nombre Subcategoria
-        for (Vendedor v : vendedores) {
-            if (v.getProductos() != null) {
-                for (Producto p : v.getProductos()) {
-                    if (p.getSubcategoria().name().toLowerCase().contains(filtroLower)){
-                        productosFiltrados.add(productoMapper.toDTO(p,v.getId(),v.getNombreNegocio()));
-                        v.getProductos().remove(p);
-                    }
-                }
-            }
-        }
-
-        //filtrar por nombre del producto
-        for (Vendedor v : vendedores) {
-            if (v.getProductos() != null) {
-                for (Producto p : v.getProductos()) {
-                    if (p.getNombre().toLowerCase().contains(filtroLower)){
-                        productosFiltrados.add(productoMapper.toDTO(p,v.getId(),v.getNombreNegocio()));
-                        v.getProductos().remove(p);
-                    }
-                }
-            }
-        }
-
-        //filtrar por descripcion del producto
-        for (Vendedor v : vendedores) {
-            if (v.getProductos() != null) {
-                for (Producto p : v.getProductos()) {
-                    if (p.getDescripcion().toLowerCase().contains(filtroLower)){
-                        productosFiltrados.add(productoMapper.toDTO(p,v.getId(),v.getNombreNegocio()));
-                        v.getProductos().remove(p);
-                    }
-                }
-            }
-        }
-        if (productosFiltrados.isEmpty()) {
-            throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "No se encontraron productos que coincidan con el filtro");
-        }
-        
-        return productosFiltrados;
+    List<Vendedor> vendedores = obtenerVendedoresPorUbicacion(provincia, localidad);
+    if (filtro == null || filtro.trim().isEmpty()) {
+        return vendedores.stream()
+                .flatMap(v -> v.getProductos().stream()
+                    .filter(p -> !Estado.INACTIVO.equals(p.getEstado()))
+                    .limit(5) // Por ejemplo, 5 productos por cada vendedor
+                    .map(p -> productoMapper.toDTO(p, v.getId(), v.getNombreNegocio())))
+                .limit(20) // Máximo 20 productos en total si no hay búsqueda
+                .collect(Collectors.toList());
     }
+
+    String filtroLower = filtro.toLowerCase();
+    
+    // Usamos LinkedHashSet para mantener el orden de inserción y evitar duplicados
+    Set<ProductoResponseBusquedaDTO> productosOrdenados = new LinkedHashSet<>();
+
+    // 1. Prioridad: Categoría
+    agregarProductosPorCriterio(vendedores, productosOrdenados, filtroLower, "CATEGORIA");
+    // 2. Prioridad: Subcategoría
+    agregarProductosPorCriterio(vendedores, productosOrdenados, filtroLower, "SUBCATEGORIA");
+    // 3. Prioridad: Nombre
+    agregarProductosPorCriterio(vendedores, productosOrdenados, filtroLower, "NOMBRE");
+    // 4. Prioridad: Descripción
+    agregarProductosPorCriterio(vendedores, productosOrdenados, filtroLower, "DESCRIPCION");
+
+    // Retorna la lista (estará vacía [] si no hubo coincidencias, sin lanzar error)
+    return new ArrayList<>(productosOrdenados);
+}
+
+    // Método auxiliar para evitar repetir código y mantener la limpieza
+    private void agregarProductosPorCriterio(List<Vendedor> vendedores, Set<ProductoResponseBusquedaDTO> set, String filtro, String criterio) {
+        for (Vendedor v : vendedores) {
+            if (v.getProductos() == null) continue;
+
+            for (Producto p : v.getProductos()) {
+                // 1. Validamos que no esté INACTIVO primero (sin borrarlo de la lista)
+                if (Estado.INACTIVO.equals(p.getEstado())) continue;
+
+                boolean coincide = false;
+                switch (criterio) {
+                    case "CATEGORIA": coincide = p.getCategoria().name().toLowerCase().contains(filtro); break;
+                    case "SUBCATEGORIA": coincide = p.getSubcategoria().name().toLowerCase().contains(filtro); break;
+                    case "NOMBRE": coincide = p.getNombre().toLowerCase().contains(filtro); break;
+                    case "DESCRIPCION": coincide = p.getDescripcion().toLowerCase().contains(filtro); break;
+                }
+
+                if (coincide) {
+                    set.add(productoMapper.toDTO(p, v.getId(), v.getNombreNegocio()));
+                }
+            }
+        }
+    }
+
 
     public VendedorResponseBusquedaDTO buscarVendedorPorId(String vendedorId) {
         Vendedor vendedor = vendedorRepository.findById(vendedorId)
