@@ -116,12 +116,16 @@ public class VendedorController {
     }
 
 
-    @GetMapping("/buscar/{provincia}/{localidad}")
+    @GetMapping("/buscar/10-vendedores")
     @Operation(summary = "Obtiene los primeros 10 vendedores por provincia y localidad")
     public ResponseEntity<List<VendedorResponseBusquedaDTO>> obtenerVendedoresPorUbicacion(
             @RequestParam String provincia,
             @RequestParam String localidad) {
-        return ResponseEntity.ok(vendedorService.obtenerDiezVendedoresPorUbicacion(provincia, localidad));
+
+        String provinciaDecodificada = java.net.URLDecoder.decode(provincia, java.nio.charset.StandardCharsets.UTF_8);
+        String localidadDecodificada = java.net.URLDecoder.decode(localidad, java.nio.charset.StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok(vendedorService.obtenerDiezVendedoresPorUbicacion(provinciaDecodificada, localidadDecodificada));
     }
 
 
