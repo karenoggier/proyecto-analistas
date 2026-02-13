@@ -19,48 +19,84 @@ const categories = [
   { name: 'Sushi', img: '/cliente/sushi.png' },
 ];
 
-const stores = [
-  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
-  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
-  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
-  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
-  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
-  { name: "McDonald's Shopping", time: '10-30 min', travel: '5-20 min' },
-];
-
 export default function ClienteHome() {
   const [clientProfile, setClientProfile] = useState(null);
+  const [stores, setStores] = useState([]);
   const localesRef = useRef(null);
+  const [loadingStores, setLoadingStores] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const [ubicacionActiva, setUbicacionActiva] = useState("Santa Fe, Santa Fe");
+  //const [ubicacionActiva, setUbicacionActiva] = useState("Santa Fe, Santa Fe");
+  const [ubicacionData, setUbicacionData] = useState({
+    localidad: "Santa Fe",
+    provincia: "Santa Fe"
+  });
 
   useEffect(() => {
     fetchPerfil();
-  
   }, [])
 
   useEffect(() => {
-    const actualizarTextoUbicacion = () => {
+    const actualizarUbicacion = () => {
       const selectedId = sessionStorage.getItem("selectedAddressId");
       
       if (selectedId && clientProfile?.direcciones) {
-        const dirEncontrada = clientProfile.direcciones.find(d => d.id === selectedId);
-        
-        if (dirEncontrada) {
-          setUbicacionActiva(`${dirEncontrada.localidad}, ${dirEncontrada.provincia}`);
+        const dir = clientProfile.direcciones.find(d => String(d.id) === String(selectedId));
+        if (dir) {
+          setUbicacionData({ localidad: dir.localidad, provincia: dir.provincia });
+          return;
         }
+      } 
+    
+      if (clientProfile?.direcciones?.length > 0) {
+        const principal = clientProfile.direcciones[0]; // Tomamos la primera como principal
+        setUbicacionData({ localidad: principal.localidad, provincia: principal.provincia });
       } else {
-        setUbicacionActiva("Santa Fe, Santa Fe");
+        setUbicacionData({ localidad: "Santa Fe", provincia: "Santa Fe" });
       }
     };
 
-    actualizarTextoUbicacion();
+    actualizarUbicacion();
+    //window.addEventListener('addressChanged', actualizarUbicacion);
+    window.addEventListener('storage', actualizarUbicacion);
+    return () => {
+      //window.removeEventListener('addressChanged', actualizarUbicacion);
+      window.removeEventListener('storage', actualizarUbicacion);
+    };
 
-    window.addEventListener('storage', actualizarTextoUbicacion);
-    return () => window.removeEventListener('storage', actualizarTextoUbicacion);
   }, [clientProfile]);
+
+  useEffect(() => {
+    const fetchStores = async () => {
+      setLoadingStores(true);
+      try {
+        const token = sessionStorage.getItem("token");
+        const response = await fetch(`/catalogoMs/api/vendedores/buscar/10-vendedores?provincia=${ubicacionData.provincia}&localidad=${ubicacionData.localidad}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Tiendas recibidas del backend:", data);
+          setStores(data);
+        } else {
+          setStores([]);
+        }
+      } catch (error) {
+        console.error("Error cargando locales:", error);
+        setStores([]);
+      } finally {
+        setLoadingStores(false);
+      }
+    };
+
+    fetchStores();
+  }, [ubicacionData]);
 
   const fetchPerfil = async () => {
       const token = sessionStorage.getItem("token")
@@ -203,8 +239,9 @@ export default function ClienteHome() {
         <section className={styles.discover}>
           <div className={styles.discoverHeader}>
             <h2 className={styles.discoverTitle}>
-              Descubri estas opciones en <span className={styles.locationHighlight}>{ubicacionActiva}</span>
+              Descubri estas opciones en <span className={styles.locationHighlight}>{ubicacionData.localidad}, {ubicacionData.provincia}</span>
             </h2>
+            {stores.length > 0 && (
             <div className={styles.carouselNav}>
               <button className={styles.carouselButton} onClick={scrollLeft} disabled={!canScrollLeft}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -218,34 +255,52 @@ export default function ClienteHome() {
                 </svg>
               </button>
             </div>
+            )}
           </div>
 
-          <div className={styles.storeScroll} ref={localesRef}>
-            {stores.map((store, i) => (
+          <div className={styles.storeScroll} ref={localesRef} onScroll={checkScroll}>
+            {loadingStores ? (
+              <p className={styles.noStoresLabel}>Cargando locales...</p>
+            ) : stores.length > 0 ? (
+            stores.map((store, i) => (
               <div key={i} className={styles.storeCard}>
                 <div className={styles.storeLogo}>
-                  <div className={styles.storeLogoPlaceholder}>M</div>
+                {store.logo ? (
+                      <Image src={store.logo} alt={store.nombreNegocio} width={64} height={64} />
+                    ) : (
+                  <div className={styles.storeLogoPlaceholder}>
+                    {store.nombreNegocio?.charAt(0)}
+                  </div>
+                  )}
                 </div>
                 <div className={styles.storeInfo}>
-                <h3 className={styles.storeName}>{store.name}</h3>
+                <h3 className={styles.storeName}>{store.nombreNegocio}</h3>
                 <div className={styles.storeMeta}>
                   <span className={styles.storeTime}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
-                    {store.time}
+                    {store.tiempoEstimadoEspera}
                   </span>
                   <span className={styles.storeTravel}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#888">
                       <path d="M144-624v-192h240v192H144Zm72-72h96v-48h-96v48Zm-13 445q-35-35-35-85H96v-96q0-60 40-102t104-42h144v168h144l144-172v-68H552v-72h120q31 0 51.5 21.15T744-648v94L562-336H408q0 50-35 85t-85 35q-50 0-85-35Zm119-50.8q14-13.8 14-34.2h-96q0 20 14 34t34 14q20 0 34-13.8ZM659-251q-35-35-35-85t35-85q35-35 85-35t85 35q35 35 35 85t-35 85q-35 35-85 35t-85-35Zm119-51q14-14 14-34t-14-34q-14-14-34-14t-34 14q-14 14-14 34t14 34q14 14 34 14t34-14ZM168-408h144v-96h-72.21Q210-504 189-482.85T168-432v24Zm144-288v-48 48Zm0 288Z"/>
                     </svg>
-                    10-25 min
+                    {store.realizaEnvios ? '10-25 min' : 'Retiro en local'}
                   </span>
                 </div>
               </div>
               </div>
-            ))}
+            ))
+            ) : (
+              <div className={styles.noStoresContainer}>
+                <p className={styles.noStoresLabel}>
+                  Lo sentimos, no hay locales registrados en la zona de <strong>{ubicacionData.localidad}</strong>.
+                </p>
+              </div>
+            )}
+            
           </div>
         </section>
 
