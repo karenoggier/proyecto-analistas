@@ -44,7 +44,7 @@ public class ProductoService {
         throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado");  
     }
 */
-/* 
+ 
     public Producto getProductoByIdAndVendedorId(String productoId, String vendedorId) {
         Vendedor vendedor = vendedorService.usuarioExistente(vendedorId);
         
@@ -55,7 +55,7 @@ public class ProductoService {
         }
         throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado");  
     }
-*/
+
 
     
 

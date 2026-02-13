@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.seminario.ms_pedido.DTOs.ProductoResumidoDTO;
 import com.seminario.ms_pedido.Repositories.CarritoRepository;
-import com.seminario.ms_pedido.client.WebClient;
+import com.seminario.ms_pedido.client.CatalogoClient;
 import com.seminario.ms_pedido.exception.RequestException;
 import com.seminario.ms_pedido.model.Carrito;
 import com.seminario.ms_pedido.model.ClienteCarrito;
@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class CarritoService {
     private final CarritoRepository carritoRepository;
 
-    private final WebClient webClient;
+    private final CatalogoClient catalogoClient;
 
     public ArrayList<Carrito> getCarritoByClienteEmail(String clienteEmail) {
         ClienteCarrito clienteCarrito = carritoRepository.findByClienteEmail(clienteEmail).orElse(null);
@@ -36,8 +36,9 @@ public class CarritoService {
 
     public Carrito modificarItem(String clienteEmail, String vendedorId, String productoId, Double cantidad) {
         //buscar producto en ms catalogo
-        ProductoResumidoDTO productoDTO = webClient.buscarProducto(productoId, vendedorId).getBody();
-        
+        System.out.println("antes");
+        ProductoResumidoDTO productoDTO = catalogoClient.buscarProducto(productoId, vendedorId).getBody();
+        System.out.println("paso?");
         // Lógica para agregar un producto al carrito
         ClienteCarrito clienteCarrito = carritoRepository.findByClienteEmail(clienteEmail).orElse(null);
         Carrito carrito = null;

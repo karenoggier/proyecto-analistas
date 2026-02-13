@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,12 +42,16 @@ public class CarritoController {
         return ResponseEntity.ok(carritoDTOs);
     }
 
-    @PostMapping("/modificarItem")
+    @PutMapping("/modificarItem")
     public ResponseEntity<CarritoDTO> modificarItem(@RequestBody ModificarItemCarritoDTO dto, Authentication authentication) {
+        System.out.println(((JwtAuthenticationToken) authentication)
+                    .getToken()
+                    .getTokenValue()); 
+
         return ResponseEntity.ok(CarritoMapper.toDTO(carritoService.modificarItem(authentication.getName(), dto.getVendedorId(), dto.getProductoId(), dto.getCantidad())));
     }
 
-    @PostMapping("/eliminarItem")
+    @DeleteMapping("/eliminarItem")
     public ResponseEntity<Void> eliminarItem(@RequestBody DeleteItemDTO dto, Authentication authentication) {
         carritoService.deleteItem(authentication.getName(), dto.getVendedorId(), dto.getProductoId());
         return ResponseEntity.ok().build();
