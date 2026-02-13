@@ -120,4 +120,22 @@ public class VendedorController {
             @PathVariable String localidad) {
         return ResponseEntity.ok(vendedorService.obtenerDiezVendedoresPorUbicacion(provincia, localidad));
     }
+
+
+    @GetMapping("/buscar/vendedores/{provincia}/{localidad}/{filtro}")
+    @Operation(summary = "Busca en vendedores segun el campo filtro")
+    public ResponseEntity<List<VendedorResponseDTO>> buscarVendedores(
+            @PathVariable String provincia,
+            @PathVariable String localidad,
+            @PathVariable String filtro) {
+        return ResponseEntity.ok(vendedorService.buscarVendedores(provincia, localidad, filtro));
+    } 
+    @GetMapping("/buscar/productos/{provincia}/{localidad}/{filtro}")
+    @Operation(summary = "Busca en productos segun el campo filtro")
+    public ResponseEntity<List<ProductoResponseDTO>> buscarProductos(
+            @PathVariable String provincia,
+            @PathVariable String localidad,
+            @PathVariable String filtro) {
+        return ResponseEntity.ok(vendedorService.buscarProductos(provincia, localidad, filtro));
+    }
 }

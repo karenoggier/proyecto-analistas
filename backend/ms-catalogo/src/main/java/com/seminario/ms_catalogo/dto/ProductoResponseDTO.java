@@ -12,6 +12,8 @@ public class ProductoResponseDTO {
     private String categoria;
     private String subcategoria;
     private String imagen;
+    private String idVendedor;
+    private String nombreVendedor;
     
 
 }
