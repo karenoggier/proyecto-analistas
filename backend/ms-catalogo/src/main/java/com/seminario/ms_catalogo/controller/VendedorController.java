@@ -114,7 +114,7 @@ public class VendedorController {
     }
 
 
-    @GetMapping("/{provincia}/{localidad}")
+    @GetMapping("/buscar/{provincia}/{localidad}")
     @Operation(summary = "Obtiene los primeros 10 vendedores por provincia y localidad")
     public ResponseEntity<List<VendedorResponseDTO>> obtenerVendedoresPorUbicacion(
             @PathVariable String provincia,
