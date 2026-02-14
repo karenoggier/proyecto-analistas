@@ -359,9 +359,24 @@ public class VendedorService {
          // Convertir filtro a minúsculas para comparación case-insensitive
         String filtroLower = filtro.toLowerCase();
         return vendedores.stream()
-            .filter(v -> v.getNombreNegocio().toLowerCase().contains(filtroLower))
-            .map(v -> vendedorMapper.toBusquedaDTO(v))
-            .collect(Collectors.toList());
+        .filter(v -> {
+            // A. Coincidencia en el nombre del negocio (Vendedor)
+            boolean coincideVendedor = v.getNombreNegocio().toLowerCase().contains(filtroLower);
+            
+            // B. Coincidencia en cualquier atributo de sus productos
+            boolean coincideProducto = v.getProductos().stream()
+                .anyMatch(p -> 
+                    p.getNombre().toLowerCase().contains(filtroLower) ||
+                    p.getDescripcion().toLowerCase().contains(filtroLower) ||
+                    p.getCategoria().name().toLowerCase().contains(filtroLower) ||
+                    p.getSubcategoria().name().toLowerCase().contains(filtroLower)
+                );
+
+            // Si coincide cualquiera de las dos, el vendedor se incluye en el resultado
+            return coincideVendedor || coincideProducto;
+        })
+        .map(vendedorMapper::toBusquedaDTO)
+        .collect(Collectors.toList());
     }
 
     public List<ProductoResponseBusquedaDTO> buscarProductos(String provincia, String localidad, String filtro) {
