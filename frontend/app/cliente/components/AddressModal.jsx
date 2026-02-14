@@ -21,6 +21,7 @@ export default function AddressModal({ isOpen, onClose, direcciones, onOpenNewAd
     sessionStorage.setItem("selectedAddressId", id);
 
     window.dispatchEvent(new Event("storage"));
+    window.dispatchEvent(new Event("addressChanged"));
     
     //setTimeout(() => onClose(), 300);
   };

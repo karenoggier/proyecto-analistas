@@ -1,56 +1,140 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef} from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import styles from './buscar.module.css';
 
-const locales = [
-  { name: 'Big Pons - Corrientes', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'Mi Barrio Hamburgueseria - Barrio Norte', delivery: 'Listo en 10-30 min', travel: 'Retiro en sucursal' },
-  { name: 'Dean Dennys - Av. Corrientes', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: '4090 Burger And Fries - Balvanera', delivery: 'Listo en 10-30 min', travel: 'Retiro en sucursal' },
-  { name: 'Mostaza Pellegrini', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'Burger King Obelisco', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'Hamburguesas Extremas - Florida', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: "McDonald's Lav", delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'La Birra Bar - San Telmo', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'Club De La Birra - Recoleta.', delivery: 'Listo en 10-30 min', travel: 'Retiro en sucursal' },
-  { name: 'Angus Brother', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'Deltoro Burgers - Irigoyen', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'Big Pons - Corrientes', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'Mi Barrio Hamburgueseria - Barrio Norte', delivery: 'Listo en 10-30 min', travel: 'Retiro en sucursal' },
-  { name: 'Dean Dennys - Av. Corrientes', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: '4090 Burger And Fries - Balvanera', delivery: 'Listo en 10-30 min', travel: 'Retiro en sucursal' },
-  { name: 'Mostaza Pellegrini', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'Burger King Obelisco', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: 'Hamburguesas Extremas - Florida', delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-  { name: "McDonald's Lav", delivery: 'Recibes en 10-30 min', travel: '5-20 min de viaje' },
-];
-
-const productos = Array.from({ length: 16 }, (_, i) => ({
-  id: i,
-  name: 'Doble carne Doble queso + Papas medianas',
-  price: '$10000',
-  store: "Local: McDonald's",
-}));
-
 export default function BuscarPage() {
+  const [clientProfile, setClientProfile] = useState(null);
   const [activeTab, setActiveTab] = useState('locales');
   const [searchQuery, setSearchQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
+  const busquedaInicialRealizada = useRef(false);
+
+  useEffect(() => {
+    fetchPerfil();
+  }, [])
+
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const q = urlParams.get('q');
+
+    if (q && clientProfile && !busquedaInicialRealizada.current) {
+      setSearchQuery(q);
+      ejecutarBusqueda(q, activeTab);
+      busquedaInicialRealizada.current = true;
+    }
+  }, [clientProfile]); 
+
+  useEffect(() => {
+    if (busquedaInicialRealizada.current && searchQuery) {
+      ejecutarBusqueda(searchQuery, activeTab);
+    }
+  }, [activeTab]);
+
+
+
+  useEffect(() => {
+    const refrescarBusquedaAlCambiarDireccion = () => {
+      if (searchQuery) {
+        ejecutarBusqueda(searchQuery, activeTab);
+      }
+    };
+    window.addEventListener('storage', refrescarBusquedaAlCambiarDireccion);
+    
+    return () => {
+      window.removeEventListener('storage', refrescarBusquedaAlCambiarDireccion);
+    };
+  }, [searchQuery, activeTab, clientProfile]);
+
+  const ejecutarBusqueda = async (query, tab) => {
+    if (!query) return;
+  
+    setLoading(true);
+    setResults([]);
+    try {
+      const selectedId = sessionStorage.getItem("selectedAddressId");
+
+      if (!clientProfile) {
+        console.log("Esperando perfil para obtener datos de la dirección...");
+        return; 
+      }
+
+      const direccion = clientProfile?.direcciones?.find(d => String(d.id) === selectedId);
+    
+
+      const endpoint = tab === 'locales' 
+        ? `/catalogoMs/api/vendedores/buscar/vendedores` 
+        : `/catalogoMs/api/vendedores/buscar/productos`;
+
+      const resp = await fetch(`${endpoint}?provincia=${direccion.provincia}&localidad=${direccion.localidad}&filtro=${query}`);
+      
+      if (resp.ok) {
+        const data = await resp.json();
+        setResults(data);
+      }
+    } catch (error) {
+      console.error("Error en la búsqueda:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPerfil = async () => {
+      const token = sessionStorage.getItem("token")
+      const rol = sessionStorage.getItem("rol")
+  
+      if (!token || rol !== "CLIENTE") {
+        window.location.href = "/login"
+        return
+      }
+        try {
+          const headers = {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          };
+  
+          const [perfilRes] = await Promise.all([
+              fetch('/pedidoMs/clientes/perfil', { method: 'GET', headers }),
+          ]);
+  
+          if (perfilRes.status === 401 || perfilRes.status === 403) {
+              sessionStorage.clear(); 
+              window.location.href = "/login?expired=true"; 
+              return;
+          }
+  
+          if (perfilRes.ok) {
+              const dataPerfil = await perfilRes.json();
+              setClientProfile(dataPerfil);
+          } else {
+              console.error("Error al obtener perfil del cliente");
+          }
+  
+        } catch (error) {
+          console.error("Error de red:", error);
+        } 
+  }
+
+  const handleRefreshProfile = () => {
+    fetchPerfil();
+  };
 
   return (
     <div className={styles.page}>
-      <Navbar />
+      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile}/>
 
       <main className={styles.main}>
         <div className={styles.header}>
           <Link href="/cliente" className={styles.backBtn}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" fill="#fef0f2" stroke="#e84c6a" />
-              <path d="M14 8l-4 4 4 4" stroke="#e84c6a" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+               <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>
           </Link>
           <h1 className={styles.title}>BUSCAR</h1>
@@ -63,11 +147,15 @@ export default function BuscarPage() {
             placeholder="Buscar..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {if (e.key === 'Enter') ejecutarBusqueda(searchQuery, activeTab);}}
           />
-          <button className={styles.searchBtn} aria-label="Buscar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
+          <button 
+            className={styles.searchBtn} 
+            aria-label="Buscar"
+            onClick={() => ejecutarBusqueda(searchQuery, activeTab)}
+            >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+              <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
             </svg>
           </button>
         </div>
@@ -87,64 +175,96 @@ export default function BuscarPage() {
           </button>
         </div>
 
-        <h2 className={styles.resultsTitle}>Resultados para tu busqueda</h2>
+        <h2 className={styles.resultsTitle}>
+          {loading ? "Buscando..." : `Resultados para "${searchQuery}"`}
+        </h2>
 
-        {activeTab === 'locales' && (
-          <div className={styles.localesGrid}>
-            {locales.map((local, i) => (
-              <div key={i} className={styles.localCard}>
-                <div className={styles.localLogo}>
-                  <div className={styles.localLogoInner}>
-                    {local.name.charAt(0)}
-                  </div>
-                </div>
-                <div className={styles.localInfo}>
-                  <h3 className={styles.localName}>{local.name}</h3>
-                  <div className={styles.localMeta}>
-                    <span className={styles.localDelivery}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                      </svg>
-                      {local.delivery}
-                    </span>
-                  </div>
-                  <div className={styles.localMeta}>
-                    <span className={styles.localTravel}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                      </svg>
-                      {local.travel}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner}></div>
+            <p>Estamos encontrando las mejores opciones para vos...</p>
           </div>
-        )}
+        ) : (
+          <>
+            {results.length > 0 ? (
+              <>
+                {/* VISTA DE LOCALES */}
+                {activeTab === 'locales' && (
+                  <div className={styles.localesGrid}>
+                    {results.map((local) => (
+                      <div key={local.idVendedor} className={styles.localCard}>
+                        <div className={styles.logoInner}>
+                          {local.logo ? (
+                          <img 
+                            src={local.logo} 
+                            alt={local.nombreNegocio} 
+                            className={styles.logoImg} 
+                          />
+                        ) : (
+                          <span className={styles.initialLetter}>
+                            {local.nombreNegocio?.charAt(0)}
+                          </span>
+                        )}
+                        </div>
+                        <div className={styles.localInfo}>
+                          <h3 className={styles.localName}>{local.nombreNegocio}</h3>
+                          <div className={styles.localMeta}>
+                            <span className={styles.localDelivery}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                              </svg>
+                              {`Recibes en ${local.tiempoEstimadoEspera}`}
+                            </span>
+                          </div>
+                          <div className={styles.localMeta}>
+                            <span className={styles.localTravel}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                              </svg>
+                              {local.realizaEnvios ? '10-25 min de viaje' : 'Retiro en local'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-        {activeTab === 'productos' && (
-          <div className={styles.productosGrid}>
-            {productos.map((prod) => (
-              <div key={prod.id} className={styles.productCard}>
-                <div className={styles.productImg}>
-                  <Image
-                    src="/images/producto-burger.jpg"
-                    alt={prod.name}
-                    width={80}
-                    height={80}
-                    className={styles.productImage}
-                  />
-                </div>
-                <div className={styles.productInfo}>
-                  <h3 className={styles.productName}>{prod.name}</h3>
-                  <p className={styles.productPrice}>{prod.price}</p>
-                  <p className={styles.productStore}>{prod.store}</p>
-                </div>
+                {/* VISTA DE PRODUCTOS */}
+                {activeTab === 'productos' && (
+                  <div className={styles.productosGrid}>
+                    {results.map((prod) => (
+                      <div key={prod.id} className={styles.productCard}>
+                        <div className={styles.logoInner}>
+                          {prod.imagen ? (
+                          <img 
+                            src={prod.imagen} 
+                            className={styles.logoImg} 
+                          />
+                        ) : (
+                          <div className={styles.initialLetter}>
+                            {prod.nombre?.charAt(0)}
+                          </div>
+                        )}
+                        </div>
+                        <div className={styles.productInfo}>
+                          <h3 className={styles.productName}>{prod.nombre}</h3>
+                          <p className={styles.productPrice}>${prod.precio}</p>
+                          <p className={styles.productStore}>Local: {prod.nombreVendedor}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className={styles.noResults}>
+                <p>No encontramos {activeTab} que coincidan con tu búsqueda.</p>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </main>
 

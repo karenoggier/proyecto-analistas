@@ -50,7 +50,7 @@ export default function ClienteHome() {
       } 
     
       if (clientProfile?.direcciones?.length > 0) {
-        const principal = clientProfile.direcciones[0]; // Tomamos la primera como principal
+        const principal = clientProfile.direcciones[0]; 
         setUbicacionData({ localidad: principal.localidad, provincia: principal.provincia });
       } else {
         setUbicacionData({ localidad: "Santa Fe", provincia: "Santa Fe" });
@@ -58,10 +58,8 @@ export default function ClienteHome() {
     };
 
     actualizarUbicacion();
-    //window.addEventListener('addressChanged', actualizarUbicacion);
     window.addEventListener('storage', actualizarUbicacion);
     return () => {
-      //window.removeEventListener('addressChanged', actualizarUbicacion);
       window.removeEventListener('storage', actualizarUbicacion);
     };
 
@@ -191,6 +189,40 @@ export default function ClienteHome() {
     localesRef.current.scrollBy({ left: 300, behavior: "smooth" });
   };
 
+  const handleCategoryClick = (categoryName) => {
+    let selectedAddressId = sessionStorage.getItem("selectedAddressId");
+
+    if (!selectedAddressId && clientProfile?.direcciones?.length > 0) {
+      selectedAddressId = clientProfile.direcciones[0].id;
+      sessionStorage.setItem("selectedAddressId", selectedAddressId);
+      window.dispatchEvent(new Event('addressChanged'));
+    }
+
+    if (!selectedAddressId) {
+      alert("Por favor, selecciona una dirección antes de buscar por categoría.");
+      return;
+    }
+
+    window.location.href = `/cliente/buscar?q=${encodeURIComponent(categoryName)}`;
+  };
+
+  useEffect(() => {
+    // Si el perfil cargó y no hay una dirección marcada en la sesión
+    if (clientProfile?.direcciones?.length > 0) {
+      const currentId = sessionStorage.getItem("selectedAddressId");
+      if (!currentId) {
+        const idPrincipal = clientProfile.direcciones[0].id;
+        sessionStorage.setItem("selectedAddressId", idPrincipal);
+        
+        // Actualizamos el estado visual para que coincida
+        setUbicacionData({
+          localidad: clientProfile.direcciones[0].localidad,
+          provincia: clientProfile.direcciones[0].provincia
+        });
+      }
+    }
+  }, [clientProfile]);
+
 
   return (
     <div className={styles.page}>
@@ -226,7 +258,12 @@ export default function ClienteHome() {
         {/* Categories */}
         <section className={styles.categories}>
           {categories.map((cat) => (
-            <div key={cat.name} className={styles.categoryItem}>
+            <div 
+              key={cat.name} 
+              className={styles.categoryItem}
+              onClick={() => handleCategoryClick(cat.name)} 
+              style={{ cursor: 'pointer' }}
+              >
               <div className={styles.categoryCircle}>
                 <Image src={cat.img || "/placeholder.svg"} alt={cat.name} width={80} height={80} className={styles.categoryImg} />
               </div>

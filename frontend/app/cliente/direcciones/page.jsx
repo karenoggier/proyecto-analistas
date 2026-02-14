@@ -146,7 +146,7 @@ useEffect(() => {
 
   return (
     <div className={styles.page}>
-      <Navbar showSearchBar profile={clientProfile} onAddressUpdate={handleRefreshProfile}/>
+      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile}/>
 
       <main className={styles.main}>
         <div className={styles.header}>

@@ -93,8 +93,8 @@
   align-items: flex-start;
   justify-content: center;
   gap: 24px;
-   position:relative;
-  margin: 80px auto 50px auto;
+  position:relative;
+  margin: 90px auto 50px auto;
   flex-wrap: wrap;
 }
 
@@ -223,7 +223,7 @@
 }
 
 .storeCard:hover {
-  box-shadow: 0 2px 15px #5858585c;
+  /*box-shadow: 0 2px 15px #5858585c;*/
   border: 1px solid #ff4b7e91;
 }
 

@@ -74,6 +74,17 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
     return `${calle} ${numero}, ${localidad}`;
   };
 
+  const handleSearchRedirection = (e) => {
+    e.preventDefault();
+    const selectedAddressId = sessionStorage.getItem("selectedAddressId");
+    if (!selectedAddressId) {
+      alert("Por favor, selecciona una dirección antes de buscar.");
+      return;
+    }
+
+    window.location.href = `/cliente/buscar?q=${encodeURIComponent(searchQuery)}`;
+  };
+
   return (
    <>
     {/* ========== NAVBAR ========== */}
@@ -162,12 +173,13 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
               placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchRedirection(e)}
             />
-            <Link href={`/cliente/buscar?q=${encodeURIComponent(searchQuery)}`} className={styles.searchBtn}>
+            <button onClick={handleSearchRedirection} className={styles.searchBtn}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
                   <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
               </svg>
-            </Link>
+            </button>
           </div>
         )}
       </div>
@@ -257,7 +269,7 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
                   </Link>
                 </li>
                 <li>
-                  <Link href="/" className={styles.logoutLink} onClick={() => setUserOpen(false)}>
+                  <Link href="/" className={styles.logoutLink} onClick={handleLogout}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
                     Salir
                   </Link>
