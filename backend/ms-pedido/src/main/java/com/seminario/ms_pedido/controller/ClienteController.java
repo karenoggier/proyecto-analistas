@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.seminario.ms_pedido.DTOs.ClienteResponseDTO;
-import com.seminario.ms_pedido.DTOs.eventos_ms_usuarios.ClienteRegistradoEvent;
-import com.seminario.ms_pedido.Mapper.ClienteMapper;
-import com.seminario.ms_pedido.Services.ClienteService;
+import com.seminario.ms_pedido.dto.ClienteResponseDTO;
+import com.seminario.ms_pedido.dto.eventos_ms_usuarios.ClienteRegistradoEvent;
+import com.seminario.ms_pedido.mapper.ClienteMapper;
 import com.seminario.ms_pedido.model.Cliente;
+import com.seminario.ms_pedido.service.ClienteService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;

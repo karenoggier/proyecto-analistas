@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.seminario.ms_pedido.DTOs.ProductoResumidoDTO;
+import com.seminario.ms_pedido.dto.ProductoResumidoDTO;
 import com.seminario.ms_pedido.exception.RequestException;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;

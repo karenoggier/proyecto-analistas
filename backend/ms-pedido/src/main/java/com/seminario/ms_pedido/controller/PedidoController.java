@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.seminario.ms_pedido.DTOs.CrearPedidoDTO;
-import com.seminario.ms_pedido.Services.PedidoService;
+import com.seminario.ms_pedido.dto.CrearPedidoDTO;
+import com.seminario.ms_pedido.service.PedidoService;
 
 import lombok.RequiredArgsConstructor;
 

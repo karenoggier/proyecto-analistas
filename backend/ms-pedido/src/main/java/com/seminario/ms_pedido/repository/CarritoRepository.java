@@ -1,4 +1,4 @@
-package com.seminario.ms_pedido.Repositories;
+package com.seminario.ms_pedido.repository;
 
 import java.util.Optional;
 

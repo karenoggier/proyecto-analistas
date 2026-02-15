@@ -1,19 +1,19 @@
-package com.seminario.ms_pedido.Services;
+package com.seminario.ms_pedido.service;
 
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-import com.seminario.ms_pedido.DTOs.CarritoDTO;
-import com.seminario.ms_pedido.DTOs.DetalleCarritoDTO;
-import com.seminario.ms_pedido.DTOs.EnvioSeleccionDTO;
-import com.seminario.ms_pedido.DTOs.PagoSeleccionDTO;
-import com.seminario.ms_pedido.Repositories.PedidoRepository;
+import com.seminario.ms_pedido.dto.CarritoDTO;
+import com.seminario.ms_pedido.dto.DetalleCarritoDTO;
+import com.seminario.ms_pedido.dto.EnvioSeleccionDTO;
+import com.seminario.ms_pedido.dto.PagoSeleccionDTO;
 import com.seminario.ms_pedido.model.DetalleEnvio;
 import com.seminario.ms_pedido.model.DetallePedido;
 import com.seminario.ms_pedido.model.EstadoPedido;
 import com.seminario.ms_pedido.model.Pedido;
 import com.seminario.ms_pedido.model.TipoEnvio;
+import com.seminario.ms_pedido.repository.PedidoRepository;
 
 import lombok.RequiredArgsConstructor;
 

@@ -11,8 +11,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.seminario.ms_pedido.DTOs.DireccionRequestDTO;
-import com.seminario.ms_pedido.DTOs.DireccionResponseDTO;
+import com.seminario.ms_pedido.dto.DireccionRequestDTO;
+import com.seminario.ms_pedido.dto.DireccionResponseDTO;
 import com.seminario.ms_pedido.exception.RequestException;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;

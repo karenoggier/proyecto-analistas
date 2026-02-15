@@ -1,4 +1,4 @@
-package com.seminario.ms_pedido.DTOs;
+package com.seminario.ms_pedido.dto;
 
 import java.util.ArrayList;
 

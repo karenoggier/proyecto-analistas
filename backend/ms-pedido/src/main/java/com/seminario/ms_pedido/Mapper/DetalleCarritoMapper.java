@@ -1,7 +1,7 @@
-package com.seminario.ms_pedido.Mapper;
+package com.seminario.ms_pedido.mapper;
 
+import com.seminario.ms_pedido.dto.DetalleCarritoDTO;
 import com.seminario.ms_pedido.model.DetalleCarrito;
-import com.seminario.ms_pedido.DTOs.DetalleCarritoDTO;
 
 public class DetalleCarritoMapper {
     public static DetalleCarritoDTO toDTO(DetalleCarrito detalleCarrito) {

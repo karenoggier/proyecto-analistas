@@ -1,13 +1,13 @@
-package com.seminario.ms_pedido.Mapper;
+package com.seminario.ms_pedido.mapper;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.seminario.ms_pedido.DTOs.ClienteResponseDTO;
-import com.seminario.ms_pedido.DTOs.DireccionResponseDTO;
-import com.seminario.ms_pedido.DTOs.eventos_ms_usuarios.ClienteRegistradoEvent;
+import com.seminario.ms_pedido.dto.ClienteResponseDTO;
+import com.seminario.ms_pedido.dto.DireccionResponseDTO;
+import com.seminario.ms_pedido.dto.eventos_ms_usuarios.ClienteRegistradoEvent;
 import com.seminario.ms_pedido.model.Cliente;
 
 import lombok.AllArgsConstructor;

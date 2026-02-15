@@ -1,14 +1,14 @@
-package com.seminario.ms_pedido.Services;
+package com.seminario.ms_pedido.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.seminario.ms_pedido.DTOs.ClienteResponseDTO;
-import com.seminario.ms_pedido.DTOs.eventos_ms_usuarios.ClienteRegistradoEvent;
-import com.seminario.ms_pedido.Mapper.ClienteMapper;
-import com.seminario.ms_pedido.Repositories.ClienteRepository;
+import com.seminario.ms_pedido.dto.ClienteResponseDTO;
+import com.seminario.ms_pedido.dto.eventos_ms_usuarios.ClienteRegistradoEvent;
 import com.seminario.ms_pedido.exception.RequestException;
+import com.seminario.ms_pedido.mapper.ClienteMapper;
 import com.seminario.ms_pedido.model.Cliente;
 import com.seminario.ms_pedido.model.EstadoDireccion;
+import com.seminario.ms_pedido.repository.ClienteRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.seminario.ms_pedido.DTOs.CarritoDTO;
-import com.seminario.ms_pedido.DTOs.DeleteItemDTO;
-import com.seminario.ms_pedido.DTOs.ModificarItemCarritoDTO;
-import com.seminario.ms_pedido.Mapper.CarritoMapper;
-import com.seminario.ms_pedido.Services.CarritoService;
+import com.seminario.ms_pedido.dto.CarritoDTO;
+import com.seminario.ms_pedido.dto.DeleteItemDTO;
+import com.seminario.ms_pedido.dto.ModificarItemCarritoDTO;
+import com.seminario.ms_pedido.mapper.CarritoMapper;
 import com.seminario.ms_pedido.model.Carrito;
+import com.seminario.ms_pedido.service.CarritoService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,9 +1,9 @@
-package com.seminario.ms_pedido.Mapper;
+package com.seminario.ms_pedido.mapper;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import com.seminario.ms_pedido.DTOs.CarritoDTO;
+import com.seminario.ms_pedido.dto.CarritoDTO;
 import com.seminario.ms_pedido.model.Carrito;
 
 public class CarritoMapper {

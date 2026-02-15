@@ -1,4 +1,4 @@
-package com.seminario.ms_pedido.DTOs.eventos_ms_usuarios;
+package com.seminario.ms_pedido.dto.eventos_ms_usuarios;
 
 import java.time.LocalDate;
 

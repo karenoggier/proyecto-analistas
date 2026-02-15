@@ -1,17 +1,17 @@
-package com.seminario.ms_pedido.Services;
+package com.seminario.ms_pedido.service;
 
 import java.util.ArrayList;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.seminario.ms_pedido.DTOs.ProductoResumidoDTO;
-import com.seminario.ms_pedido.Repositories.CarritoRepository;
 import com.seminario.ms_pedido.client.CatalogoClient;
+import com.seminario.ms_pedido.dto.ProductoResumidoDTO;
 import com.seminario.ms_pedido.exception.RequestException;
 import com.seminario.ms_pedido.model.Carrito;
 import com.seminario.ms_pedido.model.ClienteCarrito;
 import com.seminario.ms_pedido.model.DetalleCarrito;
+import com.seminario.ms_pedido.repository.CarritoRepository;
 
 import lombok.RequiredArgsConstructor;
 

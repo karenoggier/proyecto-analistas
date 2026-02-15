@@ -1,8 +1,8 @@
-package com.seminario.ms_pedido.Mapper;
+package com.seminario.ms_pedido.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.seminario.ms_pedido.DTOs.DireccionResponseDTO;
+import com.seminario.ms_pedido.dto.DireccionResponseDTO;
 import com.seminario.ms_pedido.model.Direccion;
 import com.seminario.ms_pedido.model.EstadoDireccion;
 
