@@ -21,6 +21,7 @@ import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
+import com.seminario.ms_catalogo.dto.VendedorResponsePublicDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.exception.RequestException;
 import com.seminario.ms_catalogo.exception.ValidationException;
@@ -434,11 +435,11 @@ public class VendedorService {
     }
 
 
-    public VendedorResponseBusquedaDTO buscarVendedorPorId(String vendedorId) {
+    public VendedorResponsePublicDTO buscarVendedorPorId(String vendedorId) {
         Vendedor vendedor = vendedorRepository.findById(vendedorId)
                 .orElseThrow(() -> new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado con ID: " + vendedorId));
         
-        return vendedorMapper.toBusquedaDTO(vendedor);
+        return vendedorMapper.toPublicDTO(vendedor);
     }
 
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import com.seminario.ms_catalogo.dto.ProductoRequestDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
+import com.seminario.ms_catalogo.dto.ProductoResponsePublicDTO;
 import com.seminario.ms_catalogo.dto.consultas_ms_pedido.ProductoResumidoDTO;
 import com.seminario.ms_catalogo.model.Categoria;
 import com.seminario.ms_catalogo.model.Estado;
@@ -125,6 +126,18 @@ public class ProductoMapper {
         productoResumidoDTO.setMontoUnitario(producto.getPrecio());
         productoResumidoDTO.setObservaciones(producto.getObservaciones());
         return productoResumidoDTO;
+    }
+    public ProductoResponsePublicDTO toPublicDTO(Producto producto) {
+        if (producto == null) {
+            return null;
+        }
+        ProductoResponsePublicDTO productoResponseDTO = new ProductoResponsePublicDTO();
+        productoResponseDTO.setId(producto.getId());
+        productoResponseDTO.setNombre(producto.getNombre());
+        productoResponseDTO.setDescripcion(producto.getDescripcion());
+        productoResponseDTO.setPrecio(producto.getPrecio());
+        productoResponseDTO.setImagen(producto.getImagen());
+        return productoResponseDTO;
     }
 
 }

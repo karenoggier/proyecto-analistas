@@ -21,6 +21,7 @@ import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
+import com.seminario.ms_catalogo.dto.VendedorResponsePublicDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.service.VendedorService;
 
@@ -152,7 +153,7 @@ public class VendedorController {
 
     @GetMapping("/perfil-publico/{vendedorId}")
     @Operation(summary = "Obtiene el perfil público de un vendedor por su ID")
-    public ResponseEntity<VendedorResponseBusquedaDTO> obtenerPerfilPublico(@PathVariable String vendedorId) {
+    public ResponseEntity<VendedorResponsePublicDTO> obtenerPerfilPublico(@PathVariable String vendedorId) {
         return ResponseEntity.ok(vendedorService.buscarVendedorPorId(vendedorId));
     }
 }
