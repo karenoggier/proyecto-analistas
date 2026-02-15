@@ -171,7 +171,15 @@ export default function LocalPage() {
 
   const fetchVendorProfile = async () => {
     try {
-      const res = await fetch(`/catalogoMs/api/vendedores/perfil-publico/${idVendedor}`);
+      const token = sessionStorage.getItem("token");
+      const res = await fetch(`/catalogoMs/api/vendedores/perfil-publico/${idVendedor}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/json'
+      }
+    });
+
       if (res.ok) {
         const data = await res.json();
         setVendorProfile(data);

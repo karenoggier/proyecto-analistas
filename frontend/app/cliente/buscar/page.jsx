@@ -67,12 +67,19 @@ export default function BuscarPage() {
 
       const direccion = clientProfile?.direcciones?.find(d => String(d.id) === selectedId);
     
+      const token = sessionStorage.getItem("token")
 
       const endpoint = tab === 'locales' 
         ? `/catalogoMs/api/vendedores/buscar/vendedores` 
         : `/catalogoMs/api/vendedores/buscar/productos`;
 
-      const resp = await fetch(`${endpoint}?provincia=${direccion.provincia}&localidad=${direccion.localidad}&filtro=${query}`);
+      const resp = await fetch(`${endpoint}?provincia=${direccion.provincia}&localidad=${direccion.localidad}&filtro=${query}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`, 
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (resp.ok) {
         const data = await resp.json();
