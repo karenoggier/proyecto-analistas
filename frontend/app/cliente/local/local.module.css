@@ -8,6 +8,9 @@
 .main {
   flex: 1;
   padding: 24px 32px;
+  max-width: 82vw;
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* Store Header */
@@ -20,12 +23,21 @@
 }
 
 .backBtn {
-  position: absolute;
-  left: -16px;
-  top: 50%;
-  transform: translateY(-50%);
-  text-decoration: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #ff8e4f 0%, #ff4b7e 100%);
+  color: white;
   display: flex;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  align-items: center;
+  justify-content: center;
+}
+
+.backBtn:hover {
+  opacity: 0.5;
 }
 
 .storeLogo {
@@ -75,55 +87,46 @@
   display: flex;
   align-items: center;
   flex: 1;
-  position: relative;
-}
-
-.searchInput {
-  width: 100%;
-  padding: 10px 16px;
-  padding-right: 44px;
-  border: none;
-  border-radius: 24px;
-  background: #f5f5f5;
-  font-size: 14px;
-  outline: none;
-}
-
-.searchInput:focus {
+  overflow: hidden;
+  border-radius: 25px;
   background: #eee;
 }
 
+.searchInput {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.875rem;
+  outline: none;
+}
+
 .searchBtn {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  background: linear-gradient(135deg, #f7797d, #e84c6a);
-  border: none;
-  border-radius: 0 24px 24px 0;
   cursor: pointer;
+  margin-right: 4px;
 }
 
 .filterBtn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fee2e2;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  flex-shrink: 0;
 }
 
-.filterBtn:hover {
-  background: #f9f9f9;
-}
 
 /* Content layout */
 .content {
@@ -228,7 +231,7 @@
 
 .cartEditLink {
   font-size: 13px;
-  color: #e84c6a;
+  color: #ff4b7e;
   text-decoration: none;
   font-weight: 600;
 }
@@ -279,7 +282,7 @@
   display: block;
   text-align: center;
   padding: 10px;
-  background: linear-gradient(135deg, #f7797d, #e84c6a);
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
   color: #fff;
   border-radius: 24px;
   text-decoration: none;
@@ -403,7 +406,7 @@
   border: none;
   cursor: pointer;
   font-size: 18px;
-  color: #e84c6a;
+  color: #ff4b7e;
   font-weight: 600;
 }
 
@@ -439,13 +442,13 @@
 }
 
 .modalTextarea:focus {
-  border-color: #e84c6a;
+  border-color: #ff4b7e;
 }
 
 .addToCartBtn {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #f7a0a0, #e84c6a);
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
   color: #fff;
   border: none;
   border-radius: 24px;
@@ -505,12 +508,6 @@
   margin: 0;
 }
 
-.filterMinus {
-  font-size: 20px;
-  color: #888;
-  font-weight: 600;
-}
-
 .filterCheckboxes {
   display: flex;
   flex-direction: column;
@@ -533,7 +530,7 @@
 }
 
 .checkbox {
-  accent-color: #e84c6a;
+  accent-color: #ff4b7e;
 }
 
 .filterActions {
@@ -544,7 +541,7 @@
 
 .filterApplyBtn {
   padding: 10px 24px;
-  background: linear-gradient(135deg, #f7797d, #e84c6a);
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
   color: #fff;
   border: none;
   border-radius: 24px;
@@ -559,7 +556,7 @@
 
 .filterClearBtn {
   padding: 10px 24px;
-  background: linear-gradient(135deg, #f7a0a0, #f7797d);
+  background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%);
   color: #fff;
   border: none;
   border-radius: 24px;

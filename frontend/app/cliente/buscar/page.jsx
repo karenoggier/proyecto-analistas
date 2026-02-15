@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef} from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import styles from './buscar.module.css';
@@ -192,7 +191,11 @@ export default function BuscarPage() {
                 {activeTab === 'locales' && (
                   <div className={styles.localesGrid}>
                     {results.map((local) => (
-                      <div key={local.idVendedor} className={styles.localCard}>
+                      <Link 
+                        key={local.idVendedor} 
+                        href={`/cliente/local/${local.idVendedor}`} 
+                        className={styles.localCard}
+                      >
                         <div className={styles.logoInner}>
                           {local.logo ? (
                           <img 
@@ -227,7 +230,7 @@ export default function BuscarPage() {
                             </span>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}
@@ -235,8 +238,8 @@ export default function BuscarPage() {
                 {/* VISTA DE PRODUCTOS */}
                 {activeTab === 'productos' && (
                   <div className={styles.productosGrid}>
-                    {results.map((prod) => (
-                      <div key={prod.id} className={styles.productCard}>
+                    {results.map((prod, index) => (
+                      <div key={prod.id || `prod-idx-${index}`} className={styles.productCard}>
                         <div className={styles.logoInner}>
                           {prod.imagen ? (
                           <img 

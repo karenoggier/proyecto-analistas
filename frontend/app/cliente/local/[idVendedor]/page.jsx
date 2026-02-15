@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import styles from './local.module.css';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+import styles from '../local.module.css';
 
 const allProducts = [
   {
@@ -108,6 +109,10 @@ const subcategorias = [
 ];
 
 export default function LocalPage() {
+  const params = useParams();
+  const { idVendedor } = params;
+  const [vendorProfile, setVendorProfile] = useState(null);
+  const [clientProfile, setClientProfile] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -154,30 +159,121 @@ export default function LocalPage() {
 
   const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
+  useEffect(() => {
+      fetchPerfil();
+    }, [])
+
+  useEffect(() => {
+    if (idVendedor) {
+      fetchVendorProfile();
+    }
+  }, [idVendedor]);
+
+  const fetchVendorProfile = async () => {
+    try {
+      const res = await fetch(`/catalogoMs/api/vendedores/perfil-publico/${idVendedor}`);
+      if (res.ok) {
+        const data = await res.json();
+        setVendorProfile(data);
+      }
+    } catch (error) {
+      console.error("Error al cargar perfil del vendedor:", error);
+    }
+  };
+
+  const fetchPerfil = async () => {
+      const token = sessionStorage.getItem("token")
+      const rol = sessionStorage.getItem("rol")
+  
+      if (!token || rol !== "CLIENTE") {
+        window.location.href = "/login"
+        return
+      }
+        try {
+          const headers = {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          };
+  
+          const [perfilRes] = await Promise.all([
+              fetch('/pedidoMs/clientes/perfil', { method: 'GET', headers }),
+          ]);
+  
+          if (perfilRes.status === 401 || perfilRes.status === 403) {
+              sessionStorage.clear(); 
+              window.location.href = "/login?expired=true"; 
+              return;
+          }
+  
+          if (perfilRes.ok) {
+              const dataPerfil = await perfilRes.json();
+              setClientProfile(dataPerfil);
+          } else {
+              console.error("Error al obtener perfil del cliente");
+          }
+  
+        } catch (error) {
+          console.error("Error de red:", error);
+        } 
+  }
+
+  const handleRefreshProfile = () => {
+    fetchPerfil();
+  };
+
+
+
   return (
     <div className={styles.page}>
-      <Navbar />
+      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile}/>
 
       <main className={styles.main}>
         {/* Store Header */}
         <div className={styles.storeHeader}>
           <Link href="/cliente/buscar" className={styles.backBtn}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="11" fill="#fef0f2" stroke="#e84c6a" strokeWidth="1.5" />
-              <path d="M14 8l-4 4 4 4" stroke="#e84c6a" strokeWidth="2" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+               <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>
           </Link>
           <div className={styles.storeLogo}>
-            <Image src="/images/burger-king-logo.jpg" alt="Burger King" width={100} height={100} className={styles.storeLogoImg} />
+            {vendorProfile?.logo ? (
+              <img src={vendorProfile.logo} alt={vendorProfile.nombreNegocio} className={styles.storeLogoImg} />
+            ) : (
+              <div className={styles.storeLogoImg} style={{backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                 <span style={{fontSize: '2rem', color: '#888'}}>{vendorProfile?.nombreNegocio?.charAt(0)}</span>
+              </div>
+            )}
           </div>
           <div className={styles.storeInfo}>
-            <h1 className={styles.storeName}>Burger King Obelisco</h1>
+            <h1 className={styles.storeName}>{vendorProfile?.nombreNegocio || 'Cargando...'}</h1>
             <div className={styles.storeDetails}>
-              <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg> Direccion del local</p>
-              <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg> Abre: 08:00 hs</p>
-              <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg> Cierra: 21:00 hs</p>
-              <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg> Tiempo estimado de espera: 10-20 min</p>
-              <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg> Realiza envios a domicilio</p>
+              <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg> 
+                {vendorProfile?.direccion ? `${vendorProfile.direccion.calle} ${vendorProfile.direccion.numero}, ${vendorProfile.direccion.localidad}` : 'Dirección no disponible'}
+              </p>
+              <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg> 
+                Abre: {vendorProfile?.horarioApertura || '--:--'} hs
+              </p>
+              <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg> 
+                Cierra: {vendorProfile?.horarioCierre || '--:--'} hs
+              </p>
+              <p>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
+                  <path d="M5 22h14" />
+                  <path d="M5 2h14" />
+                  <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+                  <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
+                </svg> 
+                Tiempo estimado de espera: {vendorProfile?.tiempoEstimadoEspera || '--'}
+              </p>
+              <p>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg> 
+                Teléfono: {vendorProfile?.telefono || '--'}
+              </p>
+              <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg> 
+                {vendorProfile?.realizaEnvios ? 'Realiza envíos a domicilio' : 'Solo retiro en local'}
+              </p>
             </div>
           </div>
         </div>
@@ -188,25 +284,19 @@ export default function LocalPage() {
             <input
               className={styles.searchInput}
               type="text"
-              placeholder="Buscar productos..."
+              placeholder="Buscar producto..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <button className={styles.searchBtn} aria-label="Buscar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
+            <button className={styles.searchBtn}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
               </svg>
             </button>
           </div>
-          <button className={styles.filterBtn} onClick={() => setShowFilters(true)} aria-label="Filtros">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
-              <line x1="4" y1="6" x2="20" y2="6" />
-              <line x1="4" y1="12" x2="20" y2="12" />
-              <line x1="4" y1="18" x2="20" y2="18" />
-              <circle cx="8" cy="6" r="2" fill="#666" />
-              <circle cx="16" cy="12" r="2" fill="#666" />
-              <circle cx="10" cy="18" r="2" fill="#666" />
+          <button className={styles.filterBtn} onClick={() => setShowFilters(true)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#ff4b7e">
+              <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
             </svg>
           </button>
         </div>
@@ -334,7 +424,6 @@ export default function LocalPage() {
             <div className={styles.filterSection}>
               <div className={styles.filterSectionHeader}>
                 <h3>Categorias</h3>
-                <span className={styles.filterMinus}>-</span>
               </div>
               <div className={styles.filterCheckboxes}>
                 {categorias.map((cat) => (
@@ -354,7 +443,6 @@ export default function LocalPage() {
             <div className={styles.filterSection}>
               <div className={styles.filterSectionHeader}>
                 <h3>Subcategorias</h3>
-                <span className={styles.filterMinus}>-</span>
               </div>
               <div className={styles.filterSubGrid}>
                 {subcategorias.map((sub) => (
