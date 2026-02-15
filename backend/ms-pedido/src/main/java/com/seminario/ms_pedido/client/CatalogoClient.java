@@ -36,39 +36,14 @@ public class CatalogoClient {
         
             String url = catalogoBaseUrl + "/catalogoMs/api/productos/getProductoByIdAndVendedorId?productoId={productoId}&vendedorId={vendedorId}";
                 
-            //Extraer token
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String token = ((JwtAuthenticationToken) authentication)
-                    .getToken()
-                    .getTokenValue();
-
-            System.out.println(token);
-
-            //Crear headers
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(token);
-
-            HttpEntity<?> entity = new HttpEntity<>(headers);
-
-            //Enviar request con headers
-            ResponseEntity<ProductoResumidoDTO> response =
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        entity,
-                        ProductoResumidoDTO.class,
-                        productoId,
-                        vendedorId
-                );
-            
-            /*//si devuelve un error personalizado del microservicio de catálogo
-            if(response.getBody().getClass() != ProductoResumidoDTO.class) {
-                Map<String, Object> error = (Map<String, Object>) response.getBody();
-                throw new RequestException(error.get("ms_code").toString(),
-                                           (int) error.get("ly_code"),
-                                           HttpStatus.valueOf((int) error.get("status")),
-                                           error.get("mensaje").toString());
-            }*/
+            ResponseEntity<ProductoResumidoDTO> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null, // El interceptor agregará el header Authorization automáticamente
+                ProductoResumidoDTO.class,
+                productoId,
+                vendedorId
+            );
 
             return response;
     }

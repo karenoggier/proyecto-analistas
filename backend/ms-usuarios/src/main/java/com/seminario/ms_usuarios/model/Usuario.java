@@ -26,7 +26,7 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Column(name = "telefono")
@@ -44,6 +44,6 @@ public class Usuario {
     private RolUsuario rol;
    
     //Relation 1 a N with Direcciones (One user have many directions)
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Direccion> direcciones;
 }

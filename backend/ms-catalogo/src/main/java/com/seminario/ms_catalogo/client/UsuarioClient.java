@@ -3,6 +3,7 @@ package com.seminario.ms_catalogo.client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,13 +38,18 @@ public class UsuarioClient {
         try {
             String url = usuariosBaseUrl + "/usuariosMs/vendedores/actualizar";
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            //HttpHeaders headers = new HttpHeaders();
+            //headers.setContentType(MediaType.APPLICATION_JSON);
             
-            HttpEntity<VendedorRegistradoEvent> request = new HttpEntity<>(vendedorRegistradoEvent, headers);
+            //HttpEntity<VendedorRegistradoEvent> request = new HttpEntity<>(vendedorRegistradoEvent, headers);
+            HttpEntity<VendedorRegistradoEvent> request = new HttpEntity<>(vendedorRegistradoEvent);
                         
             //envío de mensaje HTTP
-            ResponseEntity<VendedorRegistradoEvent> response = restTemplate.postForEntity(url, request, VendedorRegistradoEvent.class);
+            ResponseEntity<VendedorRegistradoEvent> response = restTemplate.exchange(
+                url, 
+                HttpMethod.PUT, 
+                request, 
+                VendedorRegistradoEvent.class);
             
             return response;
             

@@ -1,6 +1,8 @@
 package com.seminario.ms_pedido.client;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -32,13 +34,19 @@ public class UsuarioClient {
     @CircuitBreaker(name = "usuarioClient", fallbackMethod = "buscarDatosDireccionFallback")
     @Retry(name = "usuarioClient")
     public DireccionResponseDTO buscarDatosDireccion(DireccionRequestDTO event, String clienteId) {
-        // Agregamos el clienteId a la URL si es un PathVariable
+
         String url = usuariosBaseUrl + "/usuariosMs/direcciones/{usuarioId}";
         
         try {
-            ResponseEntity<DireccionResponseDTO> response = restTemplate.postForEntity(
-                url, event, DireccionResponseDTO.class, clienteId);
+            ResponseEntity<DireccionResponseDTO> response = restTemplate.exchange(
+                url, 
+                HttpMethod.POST, 
+                new HttpEntity<>(event), 
+                DireccionResponseDTO.class, 
+                clienteId
+            );
             return response.getBody();
+
         } catch (HttpStatusCodeException e) {
             log.error("Error HTTP desde ms-usuarios: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
             
@@ -77,7 +85,14 @@ public class UsuarioClient {
         String url = usuariosBaseUrl + "/usuariosMs/direcciones/{idDireccion}";
         
         try {
-            restTemplate.delete(url, idDireccion);
+            restTemplate.exchange(
+                url, 
+                HttpMethod.DELETE, 
+                null, 
+                Void.class, 
+                idDireccion
+            );
+
         } catch (HttpStatusCodeException e) {
             log.error("Error HTTP desde ms-usuarios: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
             
