@@ -331,7 +331,7 @@ public class VendedorService {
                 if (v.getProductos() != null) {
                     // Filtramos y convertimos explícitamente a ArrayList para evitar el error de la imagen
                     ArrayList<Producto> activos = v.getProductos().stream()
-                            .filter(p -> Estado.ACTIVO.equals(p.getEstado()))
+                            .filter(p -> Estado.ACTIVO.equals(p.getEstado()) && p.getDisponible()) // Solo productos activos y disponibles
                             .collect(Collectors.toCollection(ArrayList::new));
                     v.setProductos(activos); 
                 }
@@ -417,7 +417,7 @@ public class VendedorService {
 
             for (Producto p : v.getProductos()) {
                 // 1. Validamos que no esté INACTIVO primero (sin borrarlo de la lista)
-                if (Estado.INACTIVO.equals(p.getEstado())) continue;
+                if (Estado.INACTIVO.equals(p.getEstado()) && !p.getDisponible()) continue;
 
                 boolean coincide = false;
                 switch (criterio) {

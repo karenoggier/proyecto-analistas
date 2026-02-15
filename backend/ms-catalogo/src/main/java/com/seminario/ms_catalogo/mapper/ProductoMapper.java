@@ -137,6 +137,8 @@ public class ProductoMapper {
         productoResponseDTO.setDescripcion(producto.getDescripcion());
         productoResponseDTO.setPrecio(producto.getPrecio());
         productoResponseDTO.setImagen(producto.getImagen());
+        productoResponseDTO.setCategoria(producto.getCategoria().name());
+        productoResponseDTO.setSubcategoria(producto.getSubcategoria().name());
         return productoResponseDTO;
     }
 

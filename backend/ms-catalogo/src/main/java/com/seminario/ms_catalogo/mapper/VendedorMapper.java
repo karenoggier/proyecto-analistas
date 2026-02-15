@@ -153,6 +153,7 @@ public class VendedorMapper {
         }
         if (vendedor.getProductos() != null) {
             dto.setProductos(vendedor.getProductos().stream()
+                .filter(p -> p.getEstado() == Estado.ACTIVO && p.getDisponible()==true)    
                 .map(productoMapper::toPublicDTO)
                 .toList());
         }

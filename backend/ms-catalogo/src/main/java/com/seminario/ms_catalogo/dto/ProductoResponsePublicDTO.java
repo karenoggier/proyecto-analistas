@@ -7,6 +7,9 @@ public class ProductoResponsePublicDTO {
     private String descripcion;
     private double precio;
     private String imagen;
+    private String categoria;
+    private String subcategoria;
+    
 
 
 }
