@@ -122,6 +122,8 @@ public class ProductoMapper {
         }
         ProductoResumidoDTO productoResumidoDTO = new ProductoResumidoDTO();
         productoResumidoDTO.setProductoId(producto.getId());
+        productoResumidoDTO.setNombre(producto.getNombre());
+        productoResumidoDTO.setImagenUrl(producto.getImagen());
         productoResumidoDTO.setVendedorId(vendedorId);
         productoResumidoDTO.setMontoUnitario(producto.getPrecio());
         productoResumidoDTO.setObservaciones(producto.getObservaciones());

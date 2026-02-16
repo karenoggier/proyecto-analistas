@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_catalogo.dto.consultas_ms_pedido.ProductoResumidoDTO;
-import com.seminario.ms_catalogo.mapper.ProductoMapper;
 import com.seminario.ms_catalogo.service.ProductoService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -44,11 +44,13 @@ public class ProductoController {
 
     }*/
 
-    @GetMapping("/getProductoByIdAndVendedorId")
-    public ResponseEntity<ProductoResumidoDTO> getProductoByIdAndVendedorId(@RequestParam String productoId,
-            @RequestParam String vendedorId) {
-        System.out.println("get recibido");
-        return ResponseEntity.ok(ProductoMapper.toResumenDTO(productoService.getProductoByIdAndVendedorId(productoId, vendedorId), vendedorId));
+    @GetMapping("/resumen")
+    @Operation(summary = "Obtiene un resumen de un producto")
+    public ResponseEntity<ProductoResumidoDTO> getProductoResumido(
+        @RequestParam String productoId,
+        @RequestParam String vendedorId) {
+
+        return ResponseEntity.ok(productoService.getProductoResumido(productoId, vendedorId));
     }
         
 

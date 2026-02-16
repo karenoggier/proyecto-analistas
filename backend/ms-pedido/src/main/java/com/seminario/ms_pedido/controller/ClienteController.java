@@ -25,10 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ClienteController {
     private final ClienteService clienteService;
-    private final ClienteMapper clienteMapper;
    
     @PostMapping("/registrar")
-     @Operation(summary = "Registra un nuevo cliente. Llamado internamente por ms-usuarios")
+    @Operation(summary = "Registra un nuevo cliente. Llamado internamente por ms-usuarios")
     public ResponseEntity<Void> registrarCliente(@RequestBody ClienteRegistradoEvent cliente){
         clienteService.registrarCliente(cliente);
         return ResponseEntity.status(HttpStatus.CREATED).build();

@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-import com.seminario.ms_pedido.dto.CarritoDTO;
-import com.seminario.ms_pedido.dto.DetalleCarritoDTO;
+//import com.seminario.ms_pedido.dto.CarritoDTO;
+//import com.seminario.ms_pedido.dto.DetalleCarritoDTO;
 import com.seminario.ms_pedido.dto.EnvioSeleccionDTO;
-import com.seminario.ms_pedido.dto.PagoSeleccionDTO;
+//import com.seminario.ms_pedido.dto.PagoSeleccionDTO;
 import com.seminario.ms_pedido.model.DetalleEnvio;
 import com.seminario.ms_pedido.model.DetallePedido;
 import com.seminario.ms_pedido.model.EstadoPedido;
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class PedidoService {
     private final PedidoRepository pedidoRepository;
 
-    public void crearPedido(CarritoDTO carrito, EnvioSeleccionDTO envioSeleccionDTO, PagoSeleccionDTO pagoSeleccionDTO) {
+    /*public void crearPedido(CarritoDTO carrito, EnvioSeleccionDTO envioSeleccionDTO, PagoSeleccionDTO pagoSeleccionDTO) {
         Pedido pedido = new Pedido();
         
         //datos del pedido
@@ -63,5 +63,5 @@ public class PedidoService {
         //pago
 
         pedidoRepository.save(pedido);
-    }
+    }*/
 }

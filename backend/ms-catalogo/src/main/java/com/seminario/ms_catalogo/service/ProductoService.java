@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
+import com.seminario.ms_catalogo.dto.consultas_ms_pedido.ProductoResumidoDTO;
 import com.seminario.ms_catalogo.exception.RequestException;
 import com.seminario.ms_catalogo.mapper.ProductoMapper;
 import com.seminario.ms_catalogo.model.Categoria;
@@ -45,15 +46,14 @@ public class ProductoService {
     }
 */
  
-    public Producto getProductoByIdAndVendedorId(String productoId, String vendedorId) {
+    public ProductoResumidoDTO getProductoResumido(String productoId, String vendedorId) {
         Vendedor vendedor = vendedorService.usuarioExistente(vendedorId);
         
-        for (Producto producto : vendedor.getProductos()) {
-            if (producto.getId().equals(productoId)) {
-                return producto;
-            }
-        }
-        throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado");  
+        return vendedor.getProductos().stream()
+        .filter(p -> p.getId().equals(productoId))
+        .findFirst()
+        .map(p -> ProductoMapper.toResumenDTO(p, vendedorId))
+        .orElseThrow(() -> new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado"));
     }
 
 

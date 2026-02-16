@@ -1,4 +1,4 @@
-package com.seminario.ms_pedido.dto;
+/*package com.seminario.ms_pedido.dto;
 
 import lombok.Data;
 
@@ -8,3 +8,4 @@ public class ModificarItemCarritoDTO {
     private String productoId;
     private Double cantidad;
 }
+*/

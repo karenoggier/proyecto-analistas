@@ -1,6 +1,8 @@
 package com.seminario.ms_pedido.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -8,21 +10,112 @@ import org.springframework.stereotype.Service;
 import com.seminario.ms_pedido.client.CatalogoClient;
 import com.seminario.ms_pedido.dto.ProductoResumidoDTO;
 import com.seminario.ms_pedido.exception.RequestException;
+import com.seminario.ms_pedido.dto.CarritoResponseDTO;
+import com.seminario.ms_pedido.mapper.CarritoMapper;
 import com.seminario.ms_pedido.model.Carrito;
-import com.seminario.ms_pedido.model.ClienteCarrito;
+import com.seminario.ms_pedido.model.Cliente;
 import com.seminario.ms_pedido.model.DetalleCarrito;
 import com.seminario.ms_pedido.repository.CarritoRepository;
+import com.seminario.ms_pedido.repository.ClienteRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class CarritoService {
-    private final CarritoRepository carritoRepository;
 
+    private final CarritoRepository carritoRepository;
+    private final ClienteRepository clienteRepository;
+    private final CarritoMapper carritoMapper;
     private final CatalogoClient catalogoClient;
 
-    public ArrayList<Carrito> getCarritoByClienteEmail(String clienteEmail) {
+    public CarritoResponseDTO agregarOModificarItem(String email, String vendedorId, String productoId, Integer cantidad, String observaciones) {
+        // 1. Obtener el cliente desde PostgreSQL usando el email del token
+        Cliente cliente = clienteRepository.findByEmail(email)
+            .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+
+        // 2. Buscar si ya existe un carrito para este cliente en este local
+        Carrito carrito = carritoRepository.findByClienteIdAndVendedorId(cliente.getId(), vendedorId)
+            .orElseGet(() -> {
+                Carrito nuevo = new Carrito();
+                nuevo.setClienteId(cliente.getId());
+                nuevo.setVendedorId(vendedorId);
+                return nuevo;
+            });
+
+        // 3. Buscar el producto en el ms-catalogo para tener precio actualizado
+        ProductoResumidoDTO productoDTO = catalogoClient.buscarProducto(productoId, vendedorId).getBody();
+
+        // 4. Lógica de ítems
+        DetalleCarrito detalleExistente = carrito.encontrarProducto(productoId);
+        
+        if (detalleExistente != null) {
+            // Si ya existe, sumamos la cantidad 
+            detalleExistente.setCantidad(detalleExistente.getCantidad() + cantidad);
+            detalleExistente.setObservaciones(observaciones); // Actualizamos obs si cambiaron
+        } else {
+            // Si es nuevo, lo agregamos
+            DetalleCarrito nuevoDetalle = new DetalleCarrito(
+                productoId, 
+                cantidad, 
+                productoDTO.getMontoUnitario(), 
+                observaciones
+            );
+            carrito.addDetalle(nuevoDetalle);
+        }
+
+        // 5. Recalcular y guardar
+        carrito.calcularMontosTotales();
+        return carritoMapper.toResponseDTO(carritoRepository.save(carrito));
+    }
+
+    // GET: Un carrito específico de un vendedor
+    public CarritoResponseDTO obtenerCarritoPorVendedor(String email, String vendedorId) {
+        Cliente cliente = buscarClientePorEmail(email);
+        return carritoRepository.findByClienteIdAndVendedorId(cliente.getId(), vendedorId)
+        .map(carritoMapper::toResponseDTO)
+        .orElse(CarritoResponseDTO.builder()
+                .vendedorId(vendedorId)
+                .items(new ArrayList<>())
+                .montoTotalProductos(BigDecimal.ZERO)
+                .build());
+    }
+
+    // GET: Todos los carritos del cliente (de distintos vendedores)
+    public List<CarritoResponseDTO> obtenerTodosLosCarritos(String email) {
+        Cliente cliente = buscarClientePorEmail(email);
+        List<Carrito> carritos = carritoRepository.findByClienteId(cliente.getId());
+        
+        return carritos.stream()
+            .map(carritoMapper::toResponseDTO)
+            .toList();
+    }
+
+    // DELETE: Borrar uno o más ítems
+    public CarritoResponseDTO eliminarItems(String email, String vendedorId, List<String> productosIds) {
+        Cliente cliente = buscarClientePorEmail(email);
+        Carrito carrito = carritoRepository.findByClienteIdAndVendedorId(cliente.getId(), vendedorId)
+            .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Carrito no encontrado"));
+
+        // Filtramos la lista eliminando los que coincidan con los IDs recibidos
+        carrito.getDetallesCarrito().removeIf(detalle -> productosIds.contains(detalle.getProductoId()));
+
+        if (carrito.getDetallesCarrito().isEmpty()) {
+            carritoRepository.delete(carrito);
+            return null; 
+        }
+
+        carrito.calcularMontosTotales();
+        return carritoMapper.toResponseDTO(carritoRepository.save(carrito));
+    }
+
+    private Cliente buscarClientePorEmail(String email) {
+        return clienteRepository.findByEmail(email)
+            .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+    }
+
+
+    /*public ArrayList<Carrito> getCarritoByClienteEmail(String clienteEmail) {
         ClienteCarrito clienteCarrito = carritoRepository.findByClienteEmail(clienteEmail).orElse(null);
         if (clienteCarrito != null) {
             return (ArrayList<Carrito>)clienteCarrito.getCarritos();
@@ -100,5 +193,5 @@ public class CarritoService {
 
         carritoRepository.save(clienteCarrito);
         
-    }
+    }*/
 }

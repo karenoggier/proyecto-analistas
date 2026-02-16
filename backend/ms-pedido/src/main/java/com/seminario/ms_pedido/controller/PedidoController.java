@@ -18,9 +18,9 @@ import lombok.RequiredArgsConstructor;
 public class PedidoController {
     private final PedidoService pedidoService;
 
-    @PostMapping("/crear")    
-    public ResponseEntity<Void> crearPedido(@RequestBody CrearPedidoDTO crearPedidoDTO/*, Authentication authentication*/) {
+    /*@PostMapping("/crear")    
+    public ResponseEntity<Void> crearPedido(@RequestBody CrearPedidoDTO crearPedidoDTO) {
         pedidoService.crearPedido(crearPedidoDTO.getPedidoRequestDTO(), crearPedidoDTO.getEnvioSeleccionDTO(), crearPedidoDTO.getPagoSeleccionDTO());
         return ResponseEntity.ok().build();
-    }
+    }*/
 }

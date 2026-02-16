@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class CrearPedidoDTO {
-    CarritoDTO pedidoRequestDTO;
+    /*CarritoDTO pedidoRequestDTO;
     EnvioSeleccionDTO envioSeleccionDTO;
-    PagoSeleccionDTO pagoSeleccionDTO;
+    PagoSeleccionDTO pagoSeleccionDTO;*/
 }

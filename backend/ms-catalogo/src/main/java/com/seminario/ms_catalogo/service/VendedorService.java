@@ -79,13 +79,18 @@ public class VendedorService {
     }
 
     
-    public Vendedor usuarioExistente(String usuarioId) {
+   /* public Vendedor usuarioExistente(String usuarioId) {
         Vendedor vendedor = vendedorRepository.findByUsuarioId(usuarioId).orElse(null);
         if (vendedor == null) {
             //codigoo puesto al azar
             throw new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado");
         }
         return vendedor;
+    }*/
+
+    public Vendedor usuarioExistente(String vendedorId) {
+        return vendedorRepository.findById(vendedorId) 
+            .orElseThrow(() -> new RequestException("CAT", 400, HttpStatus.BAD_REQUEST, "Vendedor no encontrado"));
     }
 
     /* 

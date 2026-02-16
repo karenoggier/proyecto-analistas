@@ -1,4 +1,4 @@
-package com.seminario.ms_pedido.model;
+/*package com.seminario.ms_pedido.model;
 
 import java.util.ArrayList;
 
@@ -35,3 +35,4 @@ public class ClienteCarrito {
     }
 }
 
+*/
