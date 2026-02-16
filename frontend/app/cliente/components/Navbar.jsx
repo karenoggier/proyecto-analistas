@@ -9,13 +9,14 @@ import styles from './Navbar.module.css';
 import AddressModal from './AddressModal';
 import NewAddressModal from './NewAddressModal';
 
-export default function Navbar({ showSearchBar = false, profile, onAddressUpdate }) {
+export default function Navbar({ showSearchBar = false, profile, onAddressUpdate, disableAddressModal = false }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [addressOpen, setAddressOpen] = useState(false);
   const [newAddressOpen, setNewAddressOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [showDisabledNotice, setShowDisabledNotice] = useState(false);
   const pathname = usePathname();
 
   const notifRef = useRef(null);
@@ -99,7 +100,15 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
         <div className={styles.addressSelector} ref={addressRef}>
           <button
             className={styles.addressBtn}
-            onClick={() => setAddressOpen(!addressOpen)}
+            onClick={() => {
+              if (disableAddressModal) {
+                setShowDisabledNotice(true);
+                setTimeout(() => setShowDisabledNotice(false), 3000);
+              } else {
+                setAddressOpen(!addressOpen);
+              }
+            }}
+            style={{ cursor: 'pointer' }}
           >
             {/*<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
@@ -114,6 +123,24 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
               <path d="M6 9l6 6 6-6" />
             </svg>
           </button>
+
+          {showDisabledNotice && (
+            <div style={{
+              position: 'absolute',
+              top: '110%',
+              left: '0',
+              backgroundColor: '#ff628e',
+              color: '#fff',
+              padding: '8px 12px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              zIndex: 1000,
+              whiteSpace: 'nowrap',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              No puedes cambiar la dirección en esta página
+            </div>
+          )}
 
           <AddressModal 
             isOpen={addressOpen} 

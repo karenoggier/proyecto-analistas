@@ -43,12 +43,12 @@ export default function VendedorProductosPage() {
   })
 
   const [filters, setFilters] = useState({
-    categorias: [],
-    subcategorias: [],
-    disponibilidad: [],
+    categoria: "",
+    subcategoria: "",
+    disponibilidad: "",
   })
 
-  const filterCount = filters.categorias.length + filters.subcategorias.length + filters.disponibilidad.length
+  const filterCount = (filters.categoria ? 1 : 0) + (filters.subcategoria ? 1 : 0) + (filters.disponibilidad ? 1 : 0)
 
   useEffect(() => {
     const token = sessionStorage.getItem("token")
@@ -114,12 +114,12 @@ export default function VendedorProductosPage() {
     const matchesSearch = product.nombre.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           product.descripcion?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesCategory = filters.categorias.length === 0 || filters.categorias.includes(product.categoria);
+    const matchesCategory = !filters.categoria || product.categoria === filters.categoria;
 
-    const matchesSubcategory = filters.subcategorias.length === 0 || filters.subcategorias.includes(product.subcategoria);
+    const matchesSubcategory = !filters.subcategoria || product.subcategoria === filters.subcategoria;
 
     const disponibilidadStr = (product.disponible === true || product.disponible === "ACTIVO" || product.disponible === "Disponible") ? "Disponible" : "No disponible";
-    const matchesAvailability = filters.disponibilidad.length === 0 || filters.disponibilidad.includes(disponibilidadStr);
+    const matchesAvailability = !filters.disponibilidad || disponibilidadStr === filters.disponibilidad;
 
     return matchesSearch && matchesCategory && matchesSubcategory && matchesAvailability;
   });
@@ -330,21 +330,14 @@ export default function VendedorProductosPage() {
   }
 
   const handleFilterChange = (type, value) => {
-    setFilters((prev) => {
-      const current = prev[type]
-      if (current.includes(value)) {
-        return { ...prev, [type]: current.filter((v) => v !== value) }
-      } else {
-        return { ...prev, [type]: [...current, value] }
-      }
-    })
+    setFilters((prev) => ({ ...prev, [type]: value }))
   }
 
   const clearFilters = () => {
     setFilters({
-      categorias: [],
-      subcategorias: [],
-      disponibilidad: [],
+      categoria: "",
+      subcategoria: "",
+      disponibilidad: "",
     })
   }
 
@@ -654,96 +647,89 @@ export default function VendedorProductosPage() {
         <div className={styles.modalOverlay} onClick={() => setShowFilters(false)}>
           <div className={styles.filtersModal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.filtersHeader}>
-              <h2 className={styles.filtersTitle}>Filtros ({filterCount})</h2>
-              <button className={styles.closeBtn} onClick={() => setShowFilters(false)}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#374151">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+              <h2>Filtros ({filterCount})</h2>
+              <button className={styles.modalClose} onClick={() => setShowFilters(false)}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
 
-            <div className={styles.filtersBody}>
-              {/* Categorías */}
-              <div className={styles.filterSection}>
-                <div className={styles.filterSectionHeader}>
-                  <span className={styles.filterSectionTitle}>Categorías</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
-                    <path d="M19 13H5v-2h14v2z" />
-                  </svg>
-                </div>
-                <div className={styles.filterOptions}>
-                  <label className={styles.filterOption}>
-                    {todasLasCategorias.map((cat) => (
-                    <label key={cat} className={styles.filterOption}>
-                      <input
-                        type="checkbox"
-                        checked={filters.categorias.includes(cat)}
-                        onChange={() => handleFilterChange("categorias", cat)}
-                      />
-                      <span>{cat}</span>
-                    </label>
-                  ))}
-                  {todasLasCategorias.length === 0 && <span style={{fontSize:'0.8rem', color:'#999'}}>Cargando...</span>}
-                  </label>
-                </div>
+            <div className={styles.filterSection}>
+              <div className={styles.filterSectionHeader}>
+                <h3>Categorias</h3>
               </div>
-
-              {/* Subcategorías */}
-              <div className={styles.filterSection}>
-                <div className={styles.filterSectionHeader}>
-                  <span className={styles.filterSectionTitle}>Subcategorías</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
-                    <path d="M19 13H5v-2h14v2z" />
-                  </svg>
-                </div>
-                <div className={styles.filterOptionsGrid}>
-                  {todasLasSubcategorias.map((sub) => (
-                    <label key={sub} className={styles.filterOption}>
-                      <input
-                        type="checkbox"
-                        checked={filters.subcategorias.includes(sub)}
-                        onChange={() => handleFilterChange("subcategorias", sub)}
-                      />
-                      <span>{sub}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Disponibilidad */}
-              <div className={styles.filterSection}>
-                <div className={styles.filterSectionHeader}>
-                  <span className={styles.filterSectionTitle}>Disponibilidad</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
-                    <path d="M19 13H5v-2h14v2z" />
-                  </svg>
-                </div>
-                <div className={styles.filterOptions}>
-                  <label className={styles.filterOption}>
+              <div className={styles.filterCheckboxes}>
+                {todasLasCategorias.map((cat) => (
+                  <label key={cat} className={styles.checkboxLabel}>
                     <input
-                      type="checkbox"
-                      checked={filters.disponibilidad.includes("Disponible")}
-                      onChange={() => handleFilterChange("disponibilidad", "Disponible")}
+                      type="radio"
+                      name="categoria"
+                      checked={filters.categoria === cat}
+                      onChange={() => handleFilterChange("categoria", cat)}
+                      className={styles.checkbox}
                     />
-                    <span>Disponible</span>
+                    {cat}
                   </label>
-                  <label className={styles.filterOption}>
-                    <input
-                      type="checkbox"
-                      checked={filters.disponibilidad.includes("No disponible")}
-                      onChange={() => handleFilterChange("disponibilidad", "No disponible")}
-                    />
-                    <span>No disponible</span>
-                  </label>
-                </div>
+                ))}
+                {todasLasCategorias.length === 0 && <span style={{fontSize:'0.8rem', color:'#999'}}>Cargando...</span>}
               </div>
             </div>
 
-            <div className={styles.filtersFooter}>
-              <button className={styles.applyBtn} onClick={() => setShowFilters(false)}>
+            <div className={styles.filterSection}>
+              <div className={styles.filterSectionHeader}>
+                <h3>Subcategorias</h3>
+              </div>
+              <div className={styles.filterSubGrid}>
+                {todasLasSubcategorias.map((sub) => (
+                  <label key={sub} className={styles.checkboxLabel}>
+                    <input
+                      type="radio"
+                      name="subcategoria"
+                      checked={filters.subcategoria === sub}
+                      onChange={() => handleFilterChange("subcategoria", sub)}
+                      className={styles.checkbox}
+                    />
+                    {sub}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.filterSection}>
+              <div className={styles.filterSectionHeader}>
+                <h3>Disponibilidad</h3>
+              </div>
+              <div className={styles.filterCheckboxes}>
+                <label className={styles.checkboxLabel}>
+                    <input
+                      type="radio"
+                      name="disponibilidad"
+                      checked={filters.disponibilidad === "Disponible"}
+                      onChange={() => handleFilterChange("disponibilidad", "Disponible")}
+                      className={styles.checkbox}
+                    />
+                    Disponible
+                </label>
+                <label className={styles.checkboxLabel}>
+                    <input
+                      type="radio"
+                      name="disponibilidad"
+                      checked={filters.disponibilidad === "No disponible"}
+                      onChange={() => handleFilterChange("disponibilidad", "No disponible")}
+                      className={styles.checkbox}
+                    />
+                    No disponible
+                </label>
+              </div>
+            </div>
+
+            <div className={styles.filterActions}>
+              <button className={styles.filterApplyBtn} onClick={() => setShowFilters(false)}>
                 Aplicar
               </button>
-              <button className={styles.clearBtn} onClick={clearFilters}>
+              <button className={styles.filterClearBtn} onClick={clearFilters}>
                 Limpiar filtros
               </button>
             </div>

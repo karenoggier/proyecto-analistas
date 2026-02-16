@@ -200,7 +200,7 @@ export default function BuscarPage() {
                     {results.map((local) => (
                       <Link 
                         key={local.idVendedor} 
-                        href={`/cliente/local/${local.idVendedor}`} 
+                        href={`/cliente/local/${local.idVendedor}?q=${encodeURIComponent(searchQuery)}`} 
                         className={styles.localCard}
                       >
                         <div className={styles.logoInner}>
@@ -246,7 +246,11 @@ export default function BuscarPage() {
                 {activeTab === 'productos' && (
                   <div className={styles.productosGrid}>
                     {results.map((prod, index) => (
-                      <div key={prod.id || `prod-idx-${index}`} className={styles.productCard}>
+                      <Link 
+                        key={prod.id || `prod-idx-${index}`} 
+                        href={`/cliente/local/${prod.idVendedor}?q=${encodeURIComponent(prod.nombre)}&original=${encodeURIComponent(searchQuery)}`}
+                        className={styles.productCard}
+                      >
                         <div className={styles.logoInner}>
                           {prod.imagen ? (
                           <img 
@@ -264,7 +268,7 @@ export default function BuscarPage() {
                           <p className={styles.productPrice}>${prod.precio}</p>
                           <p className={styles.productStore}>Local: {prod.nombreVendedor}</p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}

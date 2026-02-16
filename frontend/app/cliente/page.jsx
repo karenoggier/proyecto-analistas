@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import styles from './cliente.module.css';
@@ -300,7 +301,7 @@ export default function ClienteHome() {
               <p className={styles.noStoresLabel}>Cargando locales...</p>
             ) : stores.length > 0 ? (
             stores.map((store, i) => (
-              <div key={i} className={styles.storeCard}>
+              <Link key={i} href={`/cliente/local/${store.idVendedor}`} className={styles.storeCard}>
                 <div className={styles.storeLogo}>
                 {store.logo ? (
                       <Image src={store.logo} alt={store.nombreNegocio} width={64} height={64} />
@@ -328,7 +329,7 @@ export default function ClienteHome() {
                   </span>
                 </div>
               </div>
-              </div>
+              </Link>
             ))
             ) : (
               <div className={styles.noStoresContainer}>

@@ -1,142 +1,59 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import styles from '../local.module.css';
 
-const allProducts = [
-  {
-    id: 1,
-    name: 'Doble carne Doble queso + Papas medianas',
-    description: 'Hamburguesa doble carne junior 100% vacuna, dos fetas de queso cheddar, ketchup, mostaza y cebolla. Acompanado de papas medianas.',
-    price: 10000,
-    img: '/images/producto-burger.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Hamburguesa',
-  },
-  {
-    id: 2,
-    name: 'Doble carne Doble queso + Papas medianas',
-    description: 'Hamburguesa doble carne junior 100% vacuna, dos fetas de queso cheddar, ketchup, mostaza y cebolla. Acompanado de papas medianas.',
-    price: 10000,
-    img: '/images/producto-burger.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Hamburguesa',
-  },
-  {
-    id: 3,
-    name: 'McPollo + Papas Pequenas',
-    description: 'Medallon de pollo frito, mayonesa y lechuga con papas pequenas.',
-    price: 7000,
-    img: '/images/producto-chicken.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Hamburguesa',
-  },
-  {
-    id: 4,
-    name: 'McPollo + Papas Pequenas',
-    description: 'Medallon de pollo frito, mayonesa y lechuga con papas pequenas.',
-    price: 7000,
-    img: '/images/producto-chicken.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Hamburguesa',
-  },
-  {
-    id: 5,
-    name: 'McFlurry Oreo',
-    description: 'Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.',
-    price: 4000,
-    img: '/images/producto-mcflurry.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Helado',
-  },
-  {
-    id: 6,
-    name: 'McFlurry Oreo',
-    description: 'Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.',
-    price: 4000,
-    img: '/images/producto-mcflurry.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Helado',
-  },
-  {
-    id: 7,
-    name: 'McFlurry Oreo',
-    description: 'Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.',
-    price: 4000,
-    img: '/images/producto-mcflurry.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Helado',
-  },
-  {
-    id: 8,
-    name: 'McFlurry Oreo',
-    description: 'Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.',
-    price: 4000,
-    img: '/images/producto-mcflurry.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Helado',
-  },
-  {
-    id: 9,
-    name: 'McFlurry Oreo',
-    description: 'Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.',
-    price: 4000,
-    img: '/images/producto-mcflurry.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Helado',
-  },
-  {
-    id: 10,
-    name: 'McFlurry Oreo',
-    description: 'Helado de vainilla, galletitas oreo en trozos con salsa de chocolate.',
-    price: 4000,
-    img: '/images/producto-mcflurry.jpg',
-    categoria: 'Comida',
-    subcategoria: 'Helado',
-  },
-];
-
-const categorias = ['Comida', 'Bebida'];
-const subcategorias = [
-  'Hamburguesa', 'Pizza', 'Empanada', 'Milanesa', 'Pasta', 'Parrilla',
-  'Ensalada', 'Sushi', 'Helado', 'Postre', 'Celiaco', 'Vegetariano',
-  'Gaseosa', 'Agua', 'Cerveza', 'Vino', 'Trago', 'Cafe',
-];
-
 export default function LocalPage() {
+  const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const filterQuery = searchParams.get('q');
+  const originalQuery = searchParams.get('original');
   const { idVendedor } = params;
   const [vendorProfile, setVendorProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [clientProfile, setClientProfile] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(filterQuery || '');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [observations, setObservations] = useState('');
   const [cart, setCart] = useState([]);
-  const [filterCats, setFilterCats] = useState([]);
-  const [filterSubs, setFilterSubs] = useState([]);
-
-  const toggleFilter = (arr, setArr, val) => {
-    setArr(arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
-  };
+  const [filterCat, setFilterCat] = useState('');
+  const [filterSub, setFilterSub] = useState('');
+  const [isEditingCart, setIsEditingCart] = useState(false);
+  const [selectedCartItems, setSelectedCartItems] = useState([]);
+  const [categoriasMap, setCategoriasMap] = useState({});
 
   const clearFilters = () => {
-    setFilterCats([]);
-    setFilterSubs([]);
+    setFilterCat('');
+    setFilterSub('');
   };
 
-  const activeFilterCount = filterCats.length + filterSubs.length;
+  const activeFilterCount = (filterCat ? 1 : 0) + (filterSub ? 1 : 0);
 
-  const filteredProducts = allProducts.filter((p) => {
-    if (filterCats.length > 0 && !filterCats.includes(p.categoria)) return false;
-    if (filterSubs.length > 0 && !filterSubs.includes(p.subcategoria)) return false;
-    if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+  const products = vendorProfile?.productos || [];
+  const uniqueCategories = Object.keys(categoriasMap);
+  const uniqueSubcategories = filterCat 
+    ? (categoriasMap[filterCat] || [])
+    : [...new Set(Object.values(categoriasMap).flat())];
+
+  const filteredProducts = products.filter((p) => {
+    if (filterCat && p.categoria !== filterCat) return false;
+    if (filterSub && p.subcategoria !== filterSub) return false;
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchName = p.nombre?.toLowerCase().includes(query);
+      const matchDesc = p.descripcion?.toLowerCase().includes(query);
+      const matchCat = p.categoria?.toLowerCase().includes(query);
+      const matchSub = p.subcategoria?.toLowerCase().includes(query);
+      if (!matchName && !matchDesc && !matchCat && !matchSub) return false;
+    }
     return true;
   });
 
@@ -157,11 +74,57 @@ export default function LocalPage() {
     setObservations('');
   };
 
-  const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const cartSubtotal = cart.reduce((sum, item) => sum + item.precio * item.qty, 0);
+
+  const toggleCartEdit = () => {
+    setIsEditingCart(!isEditingCart);
+    setSelectedCartItems([]);
+  };
+
+  const toggleCartItemSelection = (id) => {
+    setSelectedCartItems((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const removeSelectedItems = () => {
+    setCart((prev) => prev.filter((item) => !selectedCartItems.includes(item.id)));
+    setIsEditingCart(false);
+    setSelectedCartItems([]);
+  };
 
   useEffect(() => {
+      const fetchCategorias = async () => {
+        try {
+          const token = sessionStorage.getItem("token");
+          const res = await fetch('/catalogoMs/api/categorias', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            setCategoriasMap(await res.json());
+          }
+        } catch (error) {
+          console.error("Error al cargar categorias:", error);
+        }
+      };
+      fetchCategorias();
       fetchPerfil();
     }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const currentQ = params.get('q') || '';
+
+    if (searchQuery !== currentQ) {
+      if (searchQuery) {
+        params.set('q', searchQuery);
+      } else {
+        params.delete('q');
+      }
+      const queryString = params.toString();
+      router.replace(queryString ? `/cliente/local/${idVendedor}?${queryString}` : `/cliente/local/${idVendedor}`, { scroll: false });
+    }
+  }, [searchQuery, searchParams, idVendedor, router]);
 
   useEffect(() => {
     if (idVendedor) {
@@ -170,6 +133,7 @@ export default function LocalPage() {
   }, [idVendedor]);
 
   const fetchVendorProfile = async () => {
+    setLoading(true);
     try {
       const token = sessionStorage.getItem("token");
       const res = await fetch(`/catalogoMs/api/vendedores/perfil-publico/${idVendedor}`, {
@@ -186,6 +150,8 @@ export default function LocalPage() {
       }
     } catch (error) {
       console.error("Error al cargar perfil del vendedor:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -233,18 +199,20 @@ export default function LocalPage() {
 
   return (
     <div className={styles.page}>
-      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile}/>
+      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} disableAddressModal={true} />
 
       <main className={styles.main}>
         {/* Store Header */}
         <div className={styles.storeHeader}>
-          <Link href="/cliente/buscar" className={styles.backBtn}>
+          <Link href={originalQuery ? `/cliente/buscar?q=${encodeURIComponent(originalQuery)}` : (filterQuery ? `/cliente/buscar?q=${encodeURIComponent(filterQuery)}` : "/cliente")} className={styles.backBtn}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>
           </Link>
           <div className={styles.storeLogo}>
-            {vendorProfile?.logo ? (
+            {loading ? (
+               <div className={styles.storeLogoImg} style={{backgroundColor: '#eee'}} />
+            ) : vendorProfile?.logo ? (
               <img src={vendorProfile.logo} alt={vendorProfile.nombreNegocio} className={styles.storeLogoImg} />
             ) : (
               <div className={styles.storeLogoImg} style={{backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -253,7 +221,7 @@ export default function LocalPage() {
             )}
           </div>
           <div className={styles.storeInfo}>
-            <h1 className={styles.storeName}>{vendorProfile?.nombreNegocio || 'Cargando...'}</h1>
+            <h1 className={styles.storeName}>{loading ? 'Cargando...' : (vendorProfile?.nombreNegocio || 'Local no disponible')}</h1>
             <div className={styles.storeDetails}>
               <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg> 
                 {vendorProfile?.direccion ? `${vendorProfile.direccion.calle} ${vendorProfile.direccion.numero}, ${vendorProfile.direccion.localidad}` : 'Dirección no disponible'}
@@ -319,12 +287,23 @@ export default function LocalPage() {
                 onClick={() => { setSelectedProduct(product); setQuantity(1); setObservations(''); }}
               >
                 <div className={styles.productInfo}>
-                  <h3 className={styles.productName}>{product.name}</h3>
-                  <p className={styles.productDesc}>{product.description}</p>
-                  <p className={styles.productPrice}>$ {product.price.toLocaleString()}</p>
+                  <h3 className={styles.productName}>{product.nombre}</h3>
+                  <p className={styles.productDesc}>{product.descripcion}</p>
+                  <p className={styles.productPrice}>$ {product.precio?.toLocaleString()}</p>
                 </div>
                 <div className={styles.productImgWrapper}>
-                  <Image src={product.img || "/placeholder.svg"} alt={product.name} width={120} height={120} className={styles.productImg} />
+                  {product.imagen ? (
+                    <img 
+                      src={product.imagen} 
+                      alt={product.nombre} 
+                      className={styles.productImg}
+                      style={{width:'100%', height:'100%', objectFit:'cover'}} 
+                    />
+                  ) : (
+                      <div style={{width:'100%', height:'100%', background:'#eee', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                        <span style={{fontSize:'10px', color:'#999'}}>Sin imagen</span>
+                      </div>
+                  )}
                 </div>
               </button>
             ))}
@@ -335,14 +314,28 @@ export default function LocalPage() {
             <aside className={styles.cartSidebar}>
               <div className={styles.cartHeader}>
                 <h3>Resumen de carrito</h3>
-                <Link href="/cliente/carrito" className={styles.cartEditLink}>Editar</Link>
+                <button 
+                  className={styles.cartEditLink} 
+                  onClick={toggleCartEdit}
+                  style={{background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit'}}
+                >
+                  {isEditingCart ? 'Cancelar' : 'Editar'}
+                </button>
               </div>
               <div className={styles.cartItems}>
                 {cart.map((item) => (
                   <div key={item.id} className={styles.cartItem}>
+                    {isEditingCart && (
+                      <input 
+                        type="checkbox" 
+                        checked={selectedCartItems.includes(item.id)}
+                        onChange={() => toggleCartItemSelection(item.id)}
+                        className={styles.cartItemCheckbox}
+                      />
+                    )}
                     <span className={styles.cartItemQty}>{item.qty} x</span>
-                    <span className={styles.cartItemName}>{item.name}</span>
-                    <span className={styles.cartItemPrice}>$ {(item.price * item.qty).toLocaleString()}</span>
+                    <span className={styles.cartItemName}>{item.nombre}</span>
+                    <span className={styles.cartItemPrice}>$ {(item.precio * item.qty).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
@@ -350,9 +343,19 @@ export default function LocalPage() {
                 <span>Subtotal</span>
                 <span>${cartSubtotal.toLocaleString()}</span>
               </div>
-              <Link href="/cliente/carrito" className={styles.cartGoBtn}>
-                Ir al carrito
-              </Link>
+              {isEditingCart ? (
+                <button 
+                  className={styles.cartGoBtn} 
+                  onClick={removeSelectedItems}
+                  style={{width: '100%'}}
+                >
+                  Eliminar seleccionados
+                </button>
+              ) : (
+                <Link href="/cliente/carrito" className={styles.cartGoBtn}>
+                  Ir al carrito
+                </Link>
+              )}
             </aside>
           )}
         </div>
@@ -372,28 +375,41 @@ export default function LocalPage() {
             </button>
 
             <div className={styles.modalImgWrapper}>
-              <Image src={selectedProduct.img || "/placeholder.svg"} alt={selectedProduct.name} width={200} height={200} className={styles.modalImg} />
+              {selectedProduct.imagen ? (
+                <img 
+                  src={selectedProduct.imagen} 
+                  alt={selectedProduct.nombre} 
+                  className={styles.modalImg}
+                  style={{width:'100%', height:'100%', objectFit:'cover'}} 
+                />
+              ) : (
+                  <div style={{width:'100%', height:'100%', background:'#eee', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                    <span style={{fontSize:'10px', color:'#999'}}>Sin imagen</span>
+                  </div>
+              )}
             </div>
 
             <div className={styles.modalBody}>
               <div className={styles.modalTitleRow}>
-                <h2 className={styles.modalTitle}>{selectedProduct.name}</h2>
-                <span className={styles.modalPrice}>$ {selectedProduct.price.toLocaleString()}</span>
+                <h2 className={styles.modalTitle}>{selectedProduct.nombre}</h2>
+                <span className={styles.modalPrice}>$ {selectedProduct.precio?.toLocaleString()}</span>
               </div>
-              <p className={styles.modalDesc}>{selectedProduct.description}</p>
+              <p className={styles.modalDesc}>{selectedProduct.descripcion}</p>
 
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>Unidades</label>
-                <div className={styles.qtyControl}>
-                  <button
-                    className={styles.qtyBtn}
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  >-</button>
-                  <span className={styles.qtyValue}>{quantity}</span>
-                  <button
-                    className={styles.qtyBtn}
-                    onClick={() => setQuantity(quantity + 1)}
-                  >+</button>
+                <div className={styles.qtyWrapper}>
+                  <span className={styles.modalLabel} style={{marginBottom: 0}}>Unidades</span>
+                  <div className={styles.qtyControl}>
+                    <button
+                      className={styles.qtyBtn}
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    >-</button>
+                    <span className={styles.qtyValue}>{quantity}</span>
+                    <button
+                      className={styles.qtyBtn}
+                      onClick={() => setQuantity(quantity + 1)}
+                    >+</button>
+                  </div>
                 </div>
               </div>
 
@@ -434,12 +450,13 @@ export default function LocalPage() {
                 <h3>Categorias</h3>
               </div>
               <div className={styles.filterCheckboxes}>
-                {categorias.map((cat) => (
+                {uniqueCategories.map((cat) => (
                   <label key={cat} className={styles.checkboxLabel}>
                     <input
-                      type="checkbox"
-                      checked={filterCats.includes(cat)}
-                      onChange={() => toggleFilter(filterCats, setFilterCats, cat)}
+                      type="radio"
+                      name="categoria"
+                      checked={filterCat === cat}
+                      onChange={() => { setFilterCat(cat); setFilterSub(''); }}
                       className={styles.checkbox}
                     />
                     {cat}
@@ -453,12 +470,13 @@ export default function LocalPage() {
                 <h3>Subcategorias</h3>
               </div>
               <div className={styles.filterSubGrid}>
-                {subcategorias.map((sub) => (
+                {uniqueSubcategories.map((sub) => (
                   <label key={sub} className={styles.checkboxLabel}>
                     <input
-                      type="checkbox"
-                      checked={filterSubs.includes(sub)}
-                      onChange={() => toggleFilter(filterSubs, setFilterSubs, sub)}
+                      type="radio"
+                      name="subcategoria"
+                      checked={filterSub === sub}
+                      onChange={() => setFilterSub(sub)}
                       className={styles.checkbox}
                     />
                     {sub}
