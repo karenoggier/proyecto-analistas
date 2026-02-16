@@ -60,10 +60,12 @@ public class CarritoController {
             @Valid @RequestBody BorrarItemsRequestDTO request, Authentication auth) {
         
         CarritoResponseDTO resultado = carritoService.eliminarItems(
-            auth.getName(), request.getVendedorId(), request.getProductosIds()
+            auth.getName(), 
+            request.getVendedorId(), 
+            request.getItemsIds() 
         );
 
-        return resultado != null ? ResponseEntity.ok(resultado) : ResponseEntity.noContent().build();
+        return ResponseEntity.ok(resultado);
     }
 
     /*@GetMapping("/view")

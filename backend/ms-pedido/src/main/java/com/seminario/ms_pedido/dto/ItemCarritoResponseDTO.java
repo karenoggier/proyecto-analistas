@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class ItemCarritoResponseDTO {
+    private String idItem;
     private String productoId;
     private String nombreProducto; 
     private String urlImagen;      

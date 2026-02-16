@@ -25,6 +25,7 @@ public class CarritoMapper {
                 ProductoResumidoDTO prod = catalogoClient.buscarProducto(detalle.getProductoId(), carrito.getVendedorId()).getBody();
                 
                 return ItemCarritoResponseDTO.builder()
+                    .idItem(detalle.getIdItem())
                     .productoId(detalle.getProductoId())
                     .nombreProducto(prod.getNombre())
                     .urlImagen(prod.getImagenUrl())

@@ -11,6 +11,6 @@ public class BorrarItemsRequestDTO {
     @NotBlank(message = "El ID del vendedor es obligatorio")
     private String vendedorId;
     
-    @NotEmpty(message = "La lista de IDs de productos no puede estar vacía")
-    private List<String> productosIds;
+    @NotEmpty(message = "La lista de IDs de items no puede estar vacía")
+    private List<String> itemsIds;
 }

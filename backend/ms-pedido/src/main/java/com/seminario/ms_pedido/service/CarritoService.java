@@ -3,6 +3,8 @@ package com.seminario.ms_pedido.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -47,14 +49,18 @@ public class CarritoService {
         ProductoResumidoDTO productoDTO = catalogoClient.buscarProducto(productoId, vendedorId).getBody();
 
         // 4. Lógica de ítems
-        DetalleCarrito detalleExistente = carrito.encontrarProducto(productoId);
-        
+        // Buscamos un detalle que coincida en ID Y en la misma observación
+        DetalleCarrito detalleExistente = carrito.getDetallesCarrito().stream()
+            .filter(d -> d.getProductoId().equals(productoId) && 
+                        Objects.equals(d.getObservaciones(), observaciones))
+            .findFirst()
+            .orElse(null);
+
         if (detalleExistente != null) {
-            // Si ya existe, sumamos la cantidad 
+            // Si coinciden ambos, solo ahí sumamos cantidad
             detalleExistente.setCantidad(detalleExistente.getCantidad() + cantidad);
-            detalleExistente.setObservaciones(observaciones); // Actualizamos obs si cambiaron
         } else {
-            // Si es nuevo, lo agregamos
+            // Si el producto es igual pero la observación es distinta (o es nuevo), creamos línea nueva
             DetalleCarrito nuevoDetalle = new DetalleCarrito(
                 productoId, 
                 cantidad, 
@@ -62,11 +68,10 @@ public class CarritoService {
                 observaciones
             );
             carrito.addDetalle(nuevoDetalle);
-        }
+    }
 
-        // 5. Recalcular y guardar
-        carrito.calcularMontosTotales();
-        return carritoMapper.toResponseDTO(carritoRepository.save(carrito));
+    carrito.calcularMontosTotales();
+    return carritoMapper.toResponseDTO(carritoRepository.save(carrito));
     }
 
     // GET: Un carrito específico de un vendedor
@@ -75,6 +80,7 @@ public class CarritoService {
         return carritoRepository.findByClienteIdAndVendedorId(cliente.getId(), vendedorId)
         .map(carritoMapper::toResponseDTO)
         .orElse(CarritoResponseDTO.builder()
+                .id(null)
                 .vendedorId(vendedorId)
                 .items(new ArrayList<>())
                 .montoTotalProductos(BigDecimal.ZERO)
@@ -92,21 +98,35 @@ public class CarritoService {
     }
 
     // DELETE: Borrar uno o más ítems
-    public CarritoResponseDTO eliminarItems(String email, String vendedorId, List<String> productosIds) {
+    public CarritoResponseDTO eliminarItems(String email, String vendedorId, List<String> itemsIds) {
         Cliente cliente = buscarClientePorEmail(email);
-        Carrito carrito = carritoRepository.findByClienteIdAndVendedorId(cliente.getId(), vendedorId)
-            .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Carrito no encontrado"));
+        
+        Optional<Carrito> carritoOpt = carritoRepository.findByClienteIdAndVendedorId(cliente.getId(), vendedorId);
+        
+        if (carritoOpt.isEmpty()) {
+            return crearCarritoVacioDTO(vendedorId);
+        }
 
-        // Filtramos la lista eliminando los que coincidan con los IDs recibidos
-        carrito.getDetallesCarrito().removeIf(detalle -> productosIds.contains(detalle.getProductoId()));
+        Carrito carrito = carritoOpt.get();
+
+        carrito.getDetallesCarrito().removeIf(detalle -> itemsIds.contains(detalle.getIdItem()));
 
         if (carrito.getDetallesCarrito().isEmpty()) {
             carritoRepository.delete(carrito);
-            return null; 
+            return crearCarritoVacioDTO(vendedorId);
         }
 
         carrito.calcularMontosTotales();
         return carritoMapper.toResponseDTO(carritoRepository.save(carrito));
+    }
+
+    private CarritoResponseDTO crearCarritoVacioDTO(String vendedorId) {
+        return CarritoResponseDTO.builder()
+                .id(null)
+                .vendedorId(vendedorId)
+                .items(new ArrayList<>())
+                .montoTotalProductos(BigDecimal.ZERO)
+                .build();
     }
 
     private Cliente buscarClientePorEmail(String email) {
