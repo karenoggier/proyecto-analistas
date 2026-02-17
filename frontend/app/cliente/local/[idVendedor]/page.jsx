@@ -37,6 +37,22 @@ export default function LocalPage() {
 
   const activeFilterCount = (filterCat ? 1 : 0) + (filterSub ? 1 : 0);
 
+  const isOpen = (() => {
+    if (!vendorProfile?.horarioApertura || !vendorProfile?.horarioCierre) return true;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    
+    try {
+      const [openH, openM] = vendorProfile.horarioApertura.split(':').map(Number);
+      const [closeH, closeM] = vendorProfile.horarioCierre.split(':').map(Number);
+      const start = openH * 60 + openM;
+      const end = closeH * 60 + closeM;
+      
+      if (end < start) return currentMinutes >= start || currentMinutes < end;
+      return currentMinutes >= start && currentMinutes < end;
+    } catch (e) { return true; }
+  })();
+
   const products = vendorProfile?.productos || [];
   const uniqueCategories = Object.keys(categoriasMap);
   const uniqueSubcategories = filterCat 
@@ -57,24 +73,38 @@ export default function LocalPage() {
     return true;
   });
 
-  const addToCart = () => {
+  const addToCart = async () => {
     if (!selectedProduct) return;
-    const existing = cart.find((item) => item.id === selectedProduct.id);
-    if (existing) {
-      setCart(cart.map((item) =>
-        item.id === selectedProduct.id
-          ? { ...item, qty: item.qty + quantity, obs: observations }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...selectedProduct, qty: quantity, obs: observations }]);
+    
+    try {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch('/pedidoMs/carrito/items', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          vendedorId: idVendedor,
+          productoId: selectedProduct.id,
+          cantidad: quantity,
+          observaciones: observations
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setCart(data.items || []);
+        setSelectedProduct(null);
+        setQuantity(1);
+        setObservations('');
+      }
+    } catch (error) {
+      console.error("Error al agregar al carrito:", error);
     }
-    setSelectedProduct(null);
-    setQuantity(1);
-    setObservations('');
   };
 
-  const cartSubtotal = cart.reduce((sum, item) => sum + item.precio * item.qty, 0);
+  const cartSubtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
 
   const toggleCartEdit = () => {
     setIsEditingCart(!isEditingCart);
@@ -87,10 +117,32 @@ export default function LocalPage() {
     );
   };
 
-  const removeSelectedItems = () => {
-    setCart((prev) => prev.filter((item) => !selectedCartItems.includes(item.id)));
-    setIsEditingCart(false);
-    setSelectedCartItems([]);
+  const removeSelectedItems = async () => {
+    if (selectedCartItems.length === 0) return;
+
+    try {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch('/pedidoMs/carrito/items', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          vendedorId: idVendedor,
+          itemsIds: selectedCartItems
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setCart(data.items || []);
+        setIsEditingCart(false);
+        setSelectedCartItems([]);
+      }
+    } catch (error) {
+      console.error("Error al eliminar items del carrito:", error);
+    }
   };
 
   useEffect(() => {
@@ -129,8 +181,27 @@ export default function LocalPage() {
   useEffect(() => {
     if (idVendedor) {
       fetchVendorProfile();
+      fetchCart();
     }
   }, [idVendedor]);
+
+  const fetchCart = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) return;
+      
+      const res = await fetch(`/pedidoMs/carrito/vendedor/${idVendedor}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setCart(data.items || []);
+      }
+    } catch (error) {
+      console.error("Error al cargar carrito:", error);
+    }
+  };
 
   const fetchVendorProfile = async () => {
     setLoading(true);
@@ -221,7 +292,15 @@ export default function LocalPage() {
             )}
           </div>
           <div className={styles.storeInfo}>
-            <h1 className={styles.storeName}>{loading ? 'Cargando...' : (vendorProfile?.nombreNegocio || 'Local no disponible')}</h1>
+            <div className={styles.nameRow}>
+              <h1 className={styles.storeName}>{loading ? 'Cargando...' : (vendorProfile?.nombreNegocio || 'Local no disponible')}</h1>
+              {!loading && vendorProfile && (
+                <div className={`${styles.statusBanner} ${isOpen ? styles.statusOpen : styles.statusClosed}`}>
+                  <span className={styles.statusDot}></span>
+                  {isOpen ? `¡Abierto ahora! • Cierra a las ${vendorProfile.horarioCierre} hs` : `Cerrado ahora • Abre a las ${vendorProfile.horarioApertura} hs`}
+                </div>
+              )}
+            </div>
             <div className={styles.storeDetails}>
               <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg> 
                 {vendorProfile?.direccion ? `${vendorProfile.direccion.calle} ${vendorProfile.direccion.numero}, ${vendorProfile.direccion.localidad}` : 'Dirección no disponible'}
@@ -313,7 +392,17 @@ export default function LocalPage() {
           {cart.length > 0 && (
             <aside className={styles.cartSidebar}>
               <div className={styles.cartHeader}>
-                <h3>Resumen de carrito</h3>
+                <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                 <h3>Resumen de carrito</h3>
+                  <div className={styles.tooltipWrapper}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span className={styles.tooltip}>Por políticas de la aplicación, los productos se guardan por 2 horas. Luego se eliminan automáticamente.</span>
+                  </div>
+                </div>
                 <button 
                   className={styles.cartEditLink} 
                   onClick={toggleCartEdit}
@@ -324,18 +413,18 @@ export default function LocalPage() {
               </div>
               <div className={styles.cartItems}>
                 {cart.map((item) => (
-                  <div key={item.id} className={styles.cartItem}>
+                  <div key={item.idItem} className={styles.cartItem}>
                     {isEditingCart && (
                       <input 
                         type="checkbox" 
-                        checked={selectedCartItems.includes(item.id)}
-                        onChange={() => toggleCartItemSelection(item.id)}
+                        checked={selectedCartItems.includes(item.idItem)}
+                        onChange={() => toggleCartItemSelection(item.idItem)}
                         className={styles.cartItemCheckbox}
                       />
                     )}
-                    <span className={styles.cartItemQty}>{item.qty} x</span>
-                    <span className={styles.cartItemName}>{item.nombre}</span>
-                    <span className={styles.cartItemPrice}>$ {(item.precio * item.qty).toLocaleString()}</span>
+                    <span className={styles.cartItemQty}>{item.cantidad} x</span>
+                    <span className={styles.cartItemName}>{item.nombreProducto}</span>
+                    <span className={styles.cartItemPrice}>$ {item.subtotal?.toLocaleString()}</span>
                   </div>
                 ))}
               </div>
@@ -423,8 +512,13 @@ export default function LocalPage() {
                 />
               </div>
 
-              <button className={styles.addToCartBtn} onClick={addToCart}>
-                Agregar al carrito
+              <button 
+                className={styles.addToCartBtn} 
+                onClick={addToCart} 
+                disabled={!isOpen}
+                style={!isOpen ? { opacity: 0.5, cursor: 'not-allowed', backgroundColor: '#9ca3af' } : {}}
+              >
+                {isOpen ? 'Agregar al carrito' : 'Local Cerrado'}
               </button>
             </div>
           </div>

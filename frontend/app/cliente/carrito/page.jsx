@@ -1,122 +1,259 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import styles from './carrito.module.css';
 
-const initialCarts = [
-  {
-    vendor: 'Burger King Obelisco',
-    items: [
-      {
-        id: 1,
-        name: 'Doble carne Doble queso + Papas medianas',
-        price: 10000,
-        qty: 1,
-        obs: '',
-        img: '/images/producto-burger.jpg',
-      },
-    ],
-  },
-  {
-    vendor: "McDonald's",
-    items: [
-      {
-        id: 2,
-        name: 'Doble carne Doble queso + Papas medianas',
-        price: 10000,
-        qty: 1,
-        obs: '',
-        img: '/images/producto-burger.jpg',
-      },
-      {
-        id: 3,
-        name: 'McFlurry Oreo',
-        price: 4000,
-        qty: 1,
-        obs: '',
-        img: '/images/producto-mcflurry.jpg',
-      },
-    ],
-  },
-];
-
-const ENVIO = 1200;
 const SERVICIO = 500;
 
 export default function CarritoPage() {
-  const [carts, setCarts] = useState(initialCarts);
+  const router = useRouter();
+  const [carts, setCarts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCartId, setSelectedCartId] = useState(null);
+  const [clientProfile, setClientProfile] = useState(null);
 
-  const updateQty = (vendorIdx, itemId, delta) => {
-    setCarts(carts.map((cart, ci) => {
-      if (ci !== vendorIdx) return cart;
-      return {
-        ...cart,
-        items: cart.items.map((item) => {
-          if (item.id !== itemId) return item;
-          const newQty = Math.max(1, item.qty + delta);
-          return { ...item, qty: newQty };
-        }),
-      };
-    }));
+  useEffect(() => {
+    fetchPerfil();
+    fetchCarts();
+  }, []);
+
+  const fetchPerfil = async () => {
+      const token = sessionStorage.getItem("token")
+      const rol = sessionStorage.getItem("rol")
+  
+      if (!token || rol !== "CLIENTE") {
+        window.location.href = "/login"
+        return
+      }
+        try {
+          const headers = {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          };
+  
+          const [perfilRes] = await Promise.all([
+              fetch('/pedidoMs/clientes/perfil', { method: 'GET', headers }),
+          ]);
+  
+          if (perfilRes.status === 401 || perfilRes.status === 403) {
+              sessionStorage.clear(); 
+              window.location.href = "/login?expired=true"; 
+              return;
+          }
+  
+          if (perfilRes.ok) {
+              const dataPerfil = await perfilRes.json();
+              setClientProfile(dataPerfil);
+          } else {
+              console.error("Error al obtener perfil del cliente");
+          }
+  
+        } catch (error) {
+          console.error("Error de red:", error);
+        } 
+  }
+
+  const fetchCarts = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) return;
+
+      const res = await fetch('/pedidoMs/carrito/todos', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        
+        const enrichedCarts = await Promise.all(data.map(async (cart) => {
+          let vendorName = "Vendedor";
+          let realizaEnvios = false;
+          try {
+            const vRes = await fetch(`/catalogoMs/api/vendedores/perfil-publico/${cart.vendedorId}`, {
+               headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (vRes.ok) {
+              const vData = await vRes.json();
+              vendorName = vData.nombreNegocio;
+              realizaEnvios = vData.realizaEnvios;
+            }
+          } catch (e) {
+            console.error("Error fetching vendor:", e);
+          }
+          return { ...cart, vendorName, realizaEnvios };
+        }));
+
+        setCarts(enrichedCarts);
+      }
+    } catch (error) {
+      console.error("Error fetching carts:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const removeItem = (vendorIdx, itemId) => {
-    setCarts(carts.map((cart, ci) => {
-      if (ci !== vendorIdx) return cart;
-      return {
-        ...cart,
-        items: cart.items.filter((item) => item.id !== itemId),
-      };
-    }).filter((cart) => cart.items.length > 0));
+  const updateQty = async (cart, item, delta) => {
+    const newQty = item.cantidad + delta;
+    
+    if (newQty <= 0) {
+      await removeItem(cart, item);
+      return;
+    }
+
+    try {
+      const token = sessionStorage.getItem("token");
+      
+      if (delta < 0) {
+        const deleteRes = await fetch('/pedidoMs/carrito/items', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            vendedorId: cart.vendedorId,
+            itemsIds: [item.idItem]
+          })
+        });
+
+        if (!deleteRes.ok) return;
+
+        const rePostRes = await fetch('/pedidoMs/carrito/items', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            vendedorId: cart.vendedorId,
+            productoId: item.productoId,
+            cantidad: newQty,
+            observaciones: item.observaciones
+          })
+        });
+
+        if (rePostRes.ok) {
+          await fetchCarts();
+        }
+      } else {
+        const res = await fetch('/pedidoMs/carrito/items', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            vendedorId: cart.vendedorId,
+            productoId: item.productoId,
+            cantidad: delta,
+            observaciones: item.observaciones
+          })
+        });
+
+        if (res.ok) {
+          await fetchCarts();
+        }
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+    }
+  };
+
+  const removeItem = async (cart, item) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch('/pedidoMs/carrito/items', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          vendedorId: cart.vendedorId,
+          itemsIds: [item.idItem]
+        })
+      });
+
+      if (res.ok) {
+        await fetchCarts();
+      } else {
+        console.error("Error al eliminar item, status:", res.status);
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+    }
+  };
+
+  const handleRefreshProfile = () => {
+    fetchPerfil();
   };
 
   return (
     <div className={styles.page}>
-      <Navbar />
+      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} />
 
       <main className={styles.main}>
         <div className={styles.header}>
-          <Link href="/cliente" className={styles.backBtn}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="11" fill="#fef0f2" stroke="#e84c6a" strokeWidth="1.5" />
-              <path d="M14 8l-4 4 4 4" stroke="#e84c6a" strokeWidth="2" />
+          <button onClick={() => router.back()} className={styles.backBtn}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+               <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>
-          </Link>
+          </button>
           <h1 className={styles.title}>MIS CARRITOS</h1>
         </div>
 
+        {loading ? (
+          <div style={{textAlign: 'center', padding: '2rem'}}>Cargando carritos...</div>
+        ) : carts.length === 0 ? (
+          <div style={{textAlign: 'center', padding: '2rem'}}>No tienes carritos activos.</div>
+        ) : (
         <div className={styles.cartList}>
-          {carts.map((cart, vendorIdx) => {
-            const subtotal = cart.items.reduce((s, item) => s + item.price * item.qty, 0);
-            const total = subtotal + ENVIO + SERVICIO;
-            const totalItems = cart.items.reduce((s, item) => s + item.qty, 0);
+          {carts.map((cart) => {
+            const subtotal = cart.montoTotalProductos;
+            const total = subtotal + SERVICIO;
+            const totalItems = cart.items.reduce((s, item) => s + item.cantidad, 0);
+            const isSelected = selectedCartId === cart.id;
 
             return (
-              <div key={vendorIdx} className={styles.cartGroup}>
+              <div key={cart.id} className={styles.cartGroup}>
                 <div className={styles.cartGroupInner}>
                   <div className={styles.cartLeft}>
                     <div className={styles.vendorHeader}>
-                      <div className={styles.vendorDot} />
-                      <h2 className={styles.vendorName}>Productos de {cart.vendor}</h2>
+                      <input 
+                        type="radio" 
+                        name="selectedCart"
+                        checked={isSelected}
+                        onClick={() => setSelectedCartId(isSelected ? null : cart.id)}
+                        onChange={() => {}}
+                        style={{ marginRight: '10px', accentColor: '#e84c6a', width: '20px', height: '20px', cursor: 'pointer' }}
+                      />
+                      <h2 className={styles.vendorName}>Productos de {cart.vendorName}</h2>
                     </div>
 
                     <div className={styles.itemList}>
                       {cart.items.map((item) => (
-                        <div key={item.id} className={styles.cartItem}>
+                        <div key={item.idItem} className={styles.cartItem}>
                           <div className={styles.itemImg}>
-                            <Image src={item.img || "/placeholder.svg"} alt={item.name} width={60} height={60} className={styles.itemImage} />
+                            {item.urlImagen ? (
+                              <Image src={item.urlImagen} alt={item.nombreProducto} width={60} height={60} className={styles.itemImage} />
+                            ) : (
+                              <div style={{width:'100%', height:'100%', background:'#eee', display:'flex', justifyContent:'center', alignItems:'center'}}>
+                                <span style={{fontSize:'10px', color:'#999'}}>Sin imagen</span>
+                              </div>
+                            )}
                           </div>
                           <div className={styles.itemInfo}>
                             <div className={styles.itemTop}>
                               <span className={styles.itemName}>
-                                {item.name}
+                                {item.nombreProducto}
                                 <button
                                   className={styles.deleteItemBtn}
-                                  onClick={() => removeItem(vendorIdx, item.id)}
+                                  onClick={() => removeItem(cart, item)}
                                   aria-label="Eliminar"
                                 >
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2">
@@ -125,13 +262,20 @@ export default function CarritoPage() {
                                   </svg>
                                 </button>
                               </span>
-                              <span className={styles.itemPrice}>$ {item.price.toLocaleString()}</span>
+                              <span className={styles.itemPrice}>$ {item.montoUnitario.toLocaleString()}</span>
                             </div>
-                            <p className={styles.itemObs}>Observaciones: {item.obs || '-'}</p>
+                            <p className={styles.itemObs}>Observaciones: {item.observaciones || '-'}</p>
                             <div className={styles.qtyControl}>
-                              <button className={styles.qtyBtn} onClick={() => updateQty(vendorIdx, item.id, -1)}>-</button>
-                              <span className={styles.qtyValue}>{item.qty}</span>
-                              <button className={styles.qtyBtn} onClick={() => updateQty(vendorIdx, item.id, 1)}>+</button>
+                              <button 
+                                className={styles.qtyBtn} 
+                                onClick={() => updateQty(cart, item, -1)}
+                                disabled={item.cantidad === 1}
+                                style={{opacity: item.cantidad === 1 ? 0.5 : 1, cursor: item.cantidad === 1 ? 'not-allowed' : 'pointer'}}
+                              >
+                                -
+                              </button>
+                              <span className={styles.qtyValue}>{item.cantidad}</span>
+                              <button className={styles.qtyBtn} onClick={() => updateQty(cart, item, 1)}>+</button>
                             </div>
                           </div>
                         </div>
@@ -146,10 +290,22 @@ export default function CarritoPage() {
                         <span>Productos ({totalItems})</span>
                         <span>${subtotal.toLocaleString()}</span>
                       </div>
-                      <div className={styles.summaryRow}>
-                        <span>Costo de envio</span>
-                        <span>${ENVIO.toLocaleString()}</span>
-                      </div>
+                      {cart.realizaEnvios && (
+                        <div className={styles.summaryRow}>
+                          <span style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                            Costo de envio
+                            <div className={styles.tooltipWrapper}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e84c6a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                              </svg>
+                              <span className={styles.tooltip}>El costo de envío será calculado en la sección de dirección.</span>
+                            </div>
+                          </span>
+                          <span>-</span>
+                        </div>
+                      )}
                       <div className={styles.summaryRow}>
                         <span>Tarifa de servicio</span>
                         <span>${SERVICIO.toLocaleString()}</span>
@@ -158,9 +314,15 @@ export default function CarritoPage() {
                         <span>Total</span>
                         <span>${total.toLocaleString()}</span>
                       </div>
-                      <Link href="/cliente/proceso-pedido/paso1" className={styles.continueBtn}>
-                        Continuar
-                      </Link>
+                      {isSelected ? (
+                        <Link href={`/cliente/proceso-pedido/paso1?carritoId=${cart.id}`} className={styles.continueBtn}>
+                          Continuar
+                        </Link>
+                      ) : (
+                        <button className={styles.continueBtn} disabled>
+                          Continuar
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -168,6 +330,7 @@ export default function CarritoPage() {
             );
           })}
         </div>
+        )}
       </main>
 
       <Footer />
