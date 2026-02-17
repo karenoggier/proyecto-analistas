@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
@@ -11,17 +11,61 @@ import styles from '../proceso-pedido.module.css';
 
 export default function Paso4Page() {
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
+  const [clientProfile, setClientProfile] = useState(null);
+  
+  useEffect(() => {
+    fetchPerfil();
+  }, []);
+    
+  const fetchPerfil = async () => {
+    const token = sessionStorage.getItem("token")
+    const rol = sessionStorage.getItem("rol")
+      
+    if (!token || rol !== "CLIENTE") {
+      window.location.href = "/login"
+      return
+    }
+      try {
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+      
+        const [perfilRes] = await Promise.all([
+          fetch('/pedidoMs/clientes/perfil', { method: 'GET', headers }),
+        ]);
+      
+        if (perfilRes.status === 401 || perfilRes.status === 403) {
+          sessionStorage.clear(); 
+          window.location.href = "/login?expired=true"; 
+          return;
+        }
+      
+        if (perfilRes.ok) {
+          const dataPerfil = await perfilRes.json();
+          setClientProfile(dataPerfil);
+        } else {
+            console.error("Error al obtener perfil del cliente");
+        }
+      
+        } catch (error) {
+          console.error("Error de red:", error);
+        } 
+  }
+
+  const handleRefreshProfile = () => {
+    fetchPerfil();
+  };
 
   return (
     <div className={styles.page}>
-      <Navbar />
+      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} disableAddressModal={true}/>
 
       <main className={styles.main}>
         <div className={styles.header}>
           <Link href="/cliente/proceso-pedido/paso3" className={styles.backBtn}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="11" fill="#fef0f2" stroke="#e84c6a" strokeWidth="1.5" />
-              <path d="M14 8l-4 4 4 4" stroke="#e84c6a" strokeWidth="2" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+               <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>
           </Link>
           <h1 className={styles.title}>PROGRESO DE PEDIDO</h1>
@@ -41,35 +85,34 @@ export default function Paso4Page() {
                 value="mercadopago"
                 checked={paymentMethod === 'mercadopago'}
                 onChange={() => setPaymentMethod('mercadopago')}
-                className={styles.addressRadio}
               />
               <div className={styles.paymentContent}>
-                <div className={styles.paymentHeader}>
+                <div className={styles.paymentDetails}>
                   <span className={styles.paymentName}>Mercado Pago</span>
-                  <Image
-                    src="/images/mercadopago-logo.jpg"
-                    alt="Mercado Pago"
-                    width={60}
-                    height={40}
-                    className={styles.paymentLogo}
-                  />
-                </div>
-                <p className={styles.paymentDesc}>
-                  La plataforma de pago mas confiable de Latinoamerica.
-                  Usa tus tarjetas de credito y debito.
-                </p>
-                <p className={styles.paymentDesc}>
-                  Al presionar el boton de abajo, sera redirigido a la
-                  aplicacion de <em>Mercado Pago</em> para completar tu pago de
-                  forma segura. Una vez finalizado, volveras
-                  automaticamente a nuestra aplicacion.
-                </p>
+                  <p className={styles.paymentDesc}>
+                    La plataforma de pago mas confiable de Latinoamerica.
+                    Usa tus tarjetas de credito y debito.
+                  </p>
+                  <p className={styles.paymentDesc}>
+                    Al presionar el boton de abajo, sera redirigido a la
+                    aplicacion de <em>Mercado Pago</em> para completar tu pago de
+                    forma segura. Una vez finalizado, volveras
+                    automaticamente a nuestra aplicacion.
+                  </p>
 
-                <Link href="/cliente/proceso-pedido/paso5" className={styles.mercadoPagoBtn}>
-                  <Image src="/images/mercadopago-logo.jpg" alt="" width={80} height={20} className={styles.mercadoPagoBtnImg} />
-                  mercado pago
-                </Link>
-                <p className={styles.paymentSecure}>Paga de forma segura</p>
+                  <Link href="/cliente/proceso-pedido/paso5" className={styles.mercadoPagoBtn}>
+                    <Image src="/images/mercadopago-logo.jpg" alt="" width={80} height={20} className={styles.mercadoPagoBtnImg} />
+                    mercado pago
+                  </Link>
+                  <p className={styles.paymentSecure}>Paga de forma segura</p>
+                </div>
+                <Image
+                  src="/cliente/mercado-pago.png"
+                  alt="Mercado Pago"
+                  width={60}
+                  height={40}
+                  className={styles.paymentLogo}
+                />
               </div>
             </div>
           </div>

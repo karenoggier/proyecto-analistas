@@ -315,7 +315,7 @@ export default function CarritoPage() {
                         <span>${total.toLocaleString()}</span>
                       </div>
                       {isSelected ? (
-                        <Link href={`/cliente/proceso-pedido/paso1?carritoId=${cart.id}`} className={styles.continueBtn}>
+                        <Link href={`/cliente/proceso-pedido/paso1?vendedorId=${cart.vendedorId}`} className={styles.continueBtn}>
                           Continuar
                         </Link>
                       ) : (

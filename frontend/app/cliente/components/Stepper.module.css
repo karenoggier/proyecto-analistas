@@ -22,7 +22,7 @@
 }
 
 .lineActive {
-  background: #e84c6a;
+  background: #ff4b7e;
 }
 
 .stepContent {
@@ -49,14 +49,14 @@
 }
 
 .circleActive {
-  border-color: #e84c6a;
-  background: #e84c6a;
+  border-color: #ff4b7e;
+  background: #ff4b7e;
   color: #fff;
 }
 
 .circleCompleted {
-  border-color: #e84c6a;
-  background: #e84c6a;
+  border-color: #ff4b7e;
+  background: #ff4b7e;
   color: #fff;
 }
 
@@ -69,12 +69,12 @@
 }
 
 .labelActive {
-  color: #e84c6a;
+  color: #ff4b7e;
   font-weight: 700;
 }
 
 .labelCompleted {
-  color: #e84c6a;
+  color: #ff4b7e;
   font-weight: 600;
 }
 
