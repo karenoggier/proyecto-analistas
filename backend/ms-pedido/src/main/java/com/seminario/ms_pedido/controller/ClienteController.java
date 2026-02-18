@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_pedido.dto.ClienteResponseDTO;
 import com.seminario.ms_pedido.dto.eventos_ms_usuarios.ClienteRegistradoEvent;
-import com.seminario.ms_pedido.mapper.ClienteMapper;
-import com.seminario.ms_pedido.model.Cliente;
 import com.seminario.ms_pedido.service.ClienteService;
 
 import io.swagger.v3.oas.annotations.Operation;

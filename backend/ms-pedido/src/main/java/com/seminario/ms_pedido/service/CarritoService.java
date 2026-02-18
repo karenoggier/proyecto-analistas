@@ -10,9 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.seminario.ms_pedido.client.CatalogoClient;
+import com.seminario.ms_pedido.dto.CarritoResponseDTO;
 import com.seminario.ms_pedido.dto.ProductoResumidoDTO;
 import com.seminario.ms_pedido.exception.RequestException;
-import com.seminario.ms_pedido.dto.CarritoResponseDTO;
 import com.seminario.ms_pedido.mapper.CarritoMapper;
 import com.seminario.ms_pedido.model.Carrito;
 import com.seminario.ms_pedido.model.Cliente;
@@ -46,7 +46,7 @@ public class CarritoService {
             });
 
         // 3. Buscar el producto en el ms-catalogo para tener precio actualizado
-        ProductoResumidoDTO productoDTO = catalogoClient.buscarProducto(productoId, vendedorId).getBody();
+        ProductoResumidoDTO productoDTO = catalogoClient.buscarProducto(productoId, vendedorId);
 
         // 4. Lógica de ítems
         // Buscamos un detalle que coincida en ID Y en la misma observación

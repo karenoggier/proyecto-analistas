@@ -41,6 +41,19 @@
 			<artifactId>resilience4j-spring-boot3</artifactId>
 			<version>2.1.0</version>
 		</dependency>
+		
+		<!-- Micrometer Tracing con Brave -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+    
+    <!-- OPCIONAL: Si quieres ver los traces en Zipkin/Jaeger -->
+		<dependency>
+			<groupId>io.zipkin.reporter2</groupId>
+			<artifactId>zipkin-reporter-brave</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-circuitbreaker</artifactId>

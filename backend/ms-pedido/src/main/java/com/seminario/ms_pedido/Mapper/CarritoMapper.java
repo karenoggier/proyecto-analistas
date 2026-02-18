@@ -22,7 +22,7 @@ public class CarritoMapper {
         List<ItemCarritoResponseDTO> items = carrito.getDetallesCarrito().stream()
             .map(detalle -> {
                 // Enriquecemos con datos del ms-catalogo para el front
-                ProductoResumidoDTO prod = catalogoClient.buscarProducto(detalle.getProductoId(), carrito.getVendedorId()).getBody();
+                ProductoResumidoDTO prod = catalogoClient.buscarProducto(detalle.getProductoId(), carrito.getVendedorId());
                 
                 return ItemCarritoResponseDTO.builder()
                     .idItem(detalle.getIdItem())

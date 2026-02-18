@@ -1,0 +1,305 @@
+# ============================================================================
+# CONFIGURACIÓN MS-PEDIDO
+# Spring Boot 4.0.2 + Java 21 LTS
+# ============================================================================
+
+spring:
+  application:
+    name: ms-pedido
+  
+  # ===== VIRTUAL THREADS (NUEVO EN SPRING BOOT 4) =====
+  threads:
+    virtual:
+      enabled: true
+  
+  # ===== BASE DE DATOS POSTGRESQL =====
+  datasource:
+    url: jdbc:postgresql://localhost:5433/pedidos_db
+    username: postgres
+    password: ${DB_PASSWORD:admin}  # Usa variable de entorno en producción
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 20000
+  
+  # ===== JPA / HIBERNATE =====
+  jpa:
+    hibernate:
+      ddl-auto: update  # En producción usa 'validate' o Flyway/Liquibase
+    show-sql: false  # Cambia a false en producción
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  
+  # ===== MONGODB PARA CARRITO =====
+  
+  mongodb:
+    uri: mongodb://localhost:27018/carrito_db
+    auto-index-creation: true
+  
+  # ===== CACHE CON CAFFEINE =====
+  cache:
+    type: caffeine
+    cache-names: productos, usuarios
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=5m
+
+# ===== SERVIDOR =====
+server:
+  port: 8082
+  servlet:
+    context-path: /pedidoMs
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  web:
+    resources:
+      cache:
+        period: 1h
+        cachecontrol:
+          max-age: 3600
+          must-revalidate: true
+    error:
+      include-message: always
+      include-binding-errors: always
+      include-stacktrace: on_param  # Solo muestra stacktrace si ?trace=true
+      include-exception: false
+
+# ===== MICROSERVICIOS EXTERNOS =====
+usuarios:
+  ms:
+    url: ${USUARIOS_MS_URL:http://localhost:8080}
+
+catalogo:
+  ms:
+    url: ${CATALOGO_MS_URL:http://localhost:8081}
+
+# ===== SEGURIDAD JWT =====
+jwt:
+  secret: ${JWT_SECRET_KEY:c2VjcmV0b19zdXBlcl9segdyb19wYXJhX2Rlc2YXJyb2xsb19lbiVsYWN1bA==}
+  # IMPORTANTE: En producción, SIEMPRE usa variable de entorno
+  # export JWT_SECRET_KEY="tu_secret_real_super_largo"
+
+# ===== RESILIENCE4J =====
+resilience4j:
+  
+  # Circuit Breaker para servicios externos
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: 3s
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        registerHealthIndicator: true
+        
+        # Excepciones que cuentan como fallos
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - org.springframework.web.client.ResourceAccessException
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+          - java.util.concurrent.TimeoutException
+        
+        # Excepciones que NO cuentan como fallos (errores de cliente)
+        ignoreExceptions:
+          - org.springframework.web.client.HttpClientErrorException.BadRequest
+          - org.springframework.web.client.HttpClientErrorException.Unauthorized
+          - org.springframework.web.client.HttpClientErrorException.Forbidden
+          - org.springframework.web.client.HttpClientErrorException.NotFound
+          - com.seminario.ms_pedido.exception.ProductoNoEncontradoException
+    
+    instances:
+      # Circuit Breaker para MS-Catálogo
+      catalogo:
+        baseConfig: default
+      
+      # Circuit Breaker para MS-Usuarios
+      usuarios:
+        baseConfig: default
+        # Puedes personalizar aquí si necesitas configuración diferente
+        # waitDurationInOpenState: 20s
+  
+
+# ===== ACTUATOR & OBSERVABILIDAD =====
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,circuitbreakerevents,loggers
+      base-path: /actuator
+  
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+    
+    circuitbreakers:
+      enabled: true
+    
+    circuitbreakerevents:
+      enabled: true
+  
+  health:
+    circuitbreakers:
+      enabled: true
+    
+    livenessstate:
+      enabled: true
+    
+    readinessstate:
+      enabled: true
+    
+    # Health checks para bases de datos
+    db:
+      enabled: true
+    
+    mongodb:
+      enabled: true
+  
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+  
+  # ===== MÉTRICAS =====
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+    
+    tags:
+      application: ${spring.application.name}
+      environment: ${ENVIRONMENT:dev}
+    
+    export:
+      prometheus:
+        enabled: true
+  
+  # ===== TRACING DISTRIBUIDO (Opcional pero recomendado) =====
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0  # 100% en dev, 0.1 (10%) en producción
+  
+  # Si usas Zipkin/Jaeger (opcional)
+  # zipkin:
+  #   tracing:
+  #     endpoint: http://localhost:9411/api/v2/traces
+
+# ===== SPRINGDOC / SWAGGER =====
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    show-extensions: true
+    
+  # Configuración de seguridad en Swagger (para JWT)
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+  
+  api-docs:
+    path: /api-docs
+  
+  packages-to-scan: com.seminario.ms_pedido.controller
+  show-actuator: true
+  
+
+# ===== LOGGING =====
+logging:
+  level:
+    root: INFO
+    com.seminario.ms_pedido: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: INFO  # Cambiaste a INFO
+    io.github.resilience4j: DEBUG
+    org.hibernate.SQL: DEBUG  # SQL queries
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Parámetros SQL
+  
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    # Si tienes tracing habilitado, usa este pattern:
+    # console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [${spring.application.name:},%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+  
+  file:
+    name: logs/ms-pedido.log
+    max-size: 10MB
+    max-history: 30
+
+# ===== PERFILES =====
+# Configuración base, usa perfiles para dev/prod
+---
+# PERFIL DE DESARROLLO
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    root: DEBUG
+    com.seminario.ms_pedido: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Expone TODOS los endpoints en dev
+
+server:
+  web:
+    error:
+      include-stacktrace: always  # Muestra stacktrace en dev
+
+---
+# PERFIL DE PRODUCCIÓN
+spring:
+  config:
+    activate:
+      on-profile: prod
+      
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate  # NO modifica la DB en producción
+
+logging:
+  level:
+    root: WARN
+    com.seminario.ms_pedido: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus  # Solo lo necesario
+
+  tracing:
+    sampling:
+      probability: 0.1  # Solo 10% de traces en producción
+
+server:
+  web:
+    error:
+      include-stacktrace: never  # NO exponer stacktrace en producción
+      include-message: never
