@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.seminario.ms_usuarios.exception.RequestException;
-import com.seminario.ms_usuarios.mapper.VendedorMapper;
 import com.seminario.ms_usuarios.model.Usuario;
 import com.seminario.ms_usuarios.repository.UsuarioRepository;
 
@@ -30,6 +29,7 @@ public class UsuarioService {
     public Optional<Usuario> buscarPorId(String id) {
         return usuarioRepository.findById(id);
     }
+
 
    /*  public VendedorResponseDTO actualizarVendedor(VendedorUpdateRequestDTO vendedorDTO) {
         Vendedor vendedor = vendedorService.buscarPorId(vendedorDTO.getUsuarioId())

@@ -1,17 +1,12 @@
 package com.seminario.ms_usuarios.service;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import com.seminario.ms_usuarios.dto.NominatimResponseDTO;
-import com.seminario.ms_usuarios.exception.RequestException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.seminario.ms_usuarios.dto.NominatimResponseDTO;
+import com.seminario.ms_usuarios.exception.RequestException;
 
 @Service
 public class GeocodingService {
@@ -88,4 +83,31 @@ public class GeocodingService {
 
         return null;
     }
+
+    public double calcularDistancia(Double latitud, Double longitud, Double latitud2, Double longitud2) {
+        return obtenerDistanciaPorCalle(String.valueOf(latitud), String.valueOf(longitud), String.valueOf(latitud2), String.valueOf(longitud2));
+       
+    }
+    public double obtenerDistanciaPorCalle(String lat1, String lon1, String lat2, String lon2) {
+    // El formato de OSRM es longitud,latitud;longitud,latitud
+    String coords = String.format("%s,%s;%s,%s", lon1, lat1, lon2, lat2);
+    String url = "http://router.project-osrm.org/route/v1/driving/" + coords + "?overview=false";
+
+    try {
+        String jsonResponse = restTemplate.getForObject(url, String.class);
+        JsonNode root = objectMapper.readTree(jsonResponse);
+        
+        // Verificamos que la ruta sea exitosa
+        if ("Ok".equals(root.path("code").asText())) {
+            // La distancia viene en metros en: routes[0].distance
+            double distanciaMetros = root.path("routes").get(0).path("distance").asDouble();
+            
+            // Convertimos a kilómetros
+            return distanciaMetros / 1000.0;
+        }
+    } catch (Exception e) {
+        System.err.println("Error calculando ruta: " + e.getMessage());
+    }
+    return -1; // O manejar el error según tu lógica
+}
 }

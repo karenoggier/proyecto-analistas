@@ -176,7 +176,27 @@ public class DireccionService {
         direccionRepository.save(direccion);
     }
 
-    
+    public double calcularDistanciaEntreDirecciones(Direccion direccionVendedor, Direccion direccionCliente) {
+        if(!direccionVendedor.getProvincia().getId().equals(direccionCliente.getProvincia().getId()) && !direccionVendedor.getLocalidad().getId().equals(direccionCliente.getLocalidad().getId())) {
+            throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, "El vendedor y el cliente tienen la misma dirección, no se puede calcular la distancia");
+        }
+        //se calcula la distancia utilizando la formula de Haversine, que tiene en cuenta la curvatura de la tierra, y devuelve el resultado en kilometros  
+        double lon1 = Math.toRadians(direccionVendedor.getLongitud());
+        double lat1 = Math.toRadians(direccionVendedor.getLatitud());
+        double lat2 = Math.toRadians(direccionCliente.getLatitud());
+        double lon2 = Math.toRadians(direccionCliente.getLongitud());
 
+        double dLat = lat2 - lat1;
+        double dLon = lon2 - lon1;
 
-}
+        double a = Math.pow(Math.sin(dLat / 2), 2)
+                + Math.cos(lat1) * Math.cos(lat2)
+                * Math.pow(Math.sin(dLon / 2), 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        
+        double radioTierra = 6371.0; // Radio en kilómetros
+        return radioTierra * c;
+    }
+
+    }

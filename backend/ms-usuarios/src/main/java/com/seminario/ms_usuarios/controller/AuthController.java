@@ -1,13 +1,22 @@
 package com.seminario.ms_usuarios.controller;
 
-import com.seminario.ms_usuarios.dto.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.seminario.ms_usuarios.dto.ClienteRequestDTO;
+import com.seminario.ms_usuarios.dto.ClienteResponseDTO;
+import com.seminario.ms_usuarios.dto.LoginRequestDTO;
+import com.seminario.ms_usuarios.dto.LoginResponseDTO;
+import com.seminario.ms_usuarios.dto.VendedorRequestDTO;
+import com.seminario.ms_usuarios.dto.VendedorResponseDTO;
 import com.seminario.ms_usuarios.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/auth")
@@ -33,4 +42,5 @@ public class AuthController {
     public ResponseEntity<VendedorResponseDTO> registrarVendedor(@Valid @RequestBody VendedorRequestDTO dto) {
         return ResponseEntity.ok(authService.registrarVendedor(dto));
     }
+
 }
