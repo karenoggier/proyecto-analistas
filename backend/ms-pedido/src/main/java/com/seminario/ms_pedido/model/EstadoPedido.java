@@ -2,6 +2,7 @@ package com.seminario.ms_pedido.model;
 
 public enum EstadoPedido {
     RECHAZADO,
+    ACEPTADO,
     EN_PREPARACION,
     EN_ENVIO,
     ENTREGADO,

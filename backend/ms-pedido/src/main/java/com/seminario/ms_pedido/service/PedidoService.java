@@ -1,21 +1,40 @@
 package com.seminario.ms_pedido.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.seminario.ms_pedido.client.CatalogoClient;
 import com.seminario.ms_pedido.client.UsuarioClient;
+import com.seminario.ms_pedido.dto.ConfirmarEnvioRequestDTO;
+import com.seminario.ms_pedido.dto.IniciarCheckoutRequestDTO;
+import com.seminario.ms_pedido.dto.PedidoResponseDTO;
+import com.seminario.ms_pedido.dto.CarritoResponseDTO;
+import com.seminario.ms_pedido.exception.RequestException;
+import com.seminario.ms_pedido.mapper.PedidoMapper;
+import com.seminario.ms_pedido.model.Carrito;
+import com.seminario.ms_pedido.model.Cliente;
+import com.seminario.ms_pedido.model.DetallePedido;
+import com.seminario.ms_pedido.model.Direccion;
+import com.seminario.ms_pedido.model.EstadoPedido;
+import com.seminario.ms_pedido.model.Pedido;
 import com.seminario.ms_pedido.repository.PedidoRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-
 public class PedidoService {
     private final PedidoRepository pedidoRepository;
+    private final DireccionService direccionService; 
+    private final CarritoService carritoService;
+    private final ClienteService clienteService;
+    private final PedidoMapper pedidoMapper;
     private final CatalogoClient catalogoClient;
     private final UsuarioClient usuarioClient;
 
@@ -44,45 +63,87 @@ public class PedidoService {
         
     }
 
-    /*public void crearPedido(CarritoDTO carrito, EnvioSeleccionDTO envioSeleccionDTO, PagoSeleccionDTO pagoSeleccionDTO) {
-        Pedido pedido = new Pedido();
-        
-        //datos del pedido
-        //pedido.setClienteId(carrito.getClienteId());
-        pedido.setVendedorId(carrito.getVendedorId());
-        pedido.setFechaCreacion(LocalDateTime.now());
-        pedido.setEstado(EstadoPedido.PENDIENTE);
-        pedido.setMontoTotalProductos(carrito.getMontoTotalProductos());
-        pedido.setMontoTotal(carrito.getMontoTotal());
+    @Transactional
+    public PedidoResponseDTO crearBorradorPedido(String vendedorId, Authentication auth) {
+        String emailCliente = auth.getName();
 
-        //detalles del pedido
-        pedido.setDetalles(new java.util.ArrayList<>());
-        for (DetalleCarritoDTO item : carrito.getDetallesCarrito()) {
+        CarritoResponseDTO carrito = carritoService.obtenerCarritoPorVendedor(emailCliente, vendedorId);
+
+        if (carrito.getItems().isEmpty()) {
+            throw new RequestException("PED", 400, HttpStatus.BAD_REQUEST, "No se puede iniciar el checkout con un carrito vacío");
+        }
+
+        Cliente cliente = clienteService.obtenerClientePorEmail(emailCliente);
+
+        // Buscamos o creamos el Pedido en PostgreSQL
+        Pedido pedido = pedidoRepository
+            .findByClienteIdAndVendedorIdAndEstado(cliente.getId(), vendedorId, EstadoPedido.PENDIENTE)
+            .orElse(new Pedido());
+
+        // 3. Mapeo de cabecera
+        pedido.setClienteId(cliente.getId());
+        pedido.setCliente(cliente);
+        pedido.setClienteId(cliente.getId());
+        pedido.setVendedorId(vendedorId);
+        pedido.setEstado(EstadoPedido.PENDIENTE);
+        pedido.setFechaCreacion(LocalDateTime.now());
+        pedido.setMontoTotalProductos(carrito.getMontoTotalProductos());
+        pedido.setComisionApp(carrito.getComisionApp());
+
+        // 4. Mapeo de ítems (de CarritoItem a DetallePedido)
+        if (pedido.getDetalles() != null) {
+            pedido.getDetalles().clear();
+        } else {
+            pedido.setDetalles(new ArrayList<>());
+        }
+
+        carrito.getItems().forEach(item -> {
             DetallePedido detalle = new DetallePedido();
             detalle.setIdProducto(item.getProductoId());
-            detalle.setCantidad(item.getCantidad());
+            detalle.setCantidad(item.getCantidad()); // Asegurarse de que ambos sean Integer
             detalle.setMontoUnitario(item.getMontoUnitario());
             detalle.setObservaciones(item.getObservaciones());
+            detalle.setPedido(pedido); // FK hacia el Pedido
             pedido.getDetalles().add(detalle);
+        });
+
+        return pedidoMapper.toResponseDTO(pedidoRepository.save(pedido));
+    }
+
+    @Transactional
+    public PedidoResponseDTO confirmarOActualizarEnvio(ConfirmarEnvioRequestDTO dto, Authentication auth) {
+        String emailCliente = auth.getName();
+        Cliente cliente = clienteService.obtenerClientePorEmail(emailCliente);
+        
+        // 1. Recuperar o crear borrador
+        Pedido pedido = pedidoRepository
+            .findByClienteIdAndVendedorIdAndEstado(cliente.getId(), dto.getVendedorId(), EstadoPedido.PENDIENTE)
+            .orElse(new Pedido());
+
+        if (pedido.getId() == null) {
+            pedido.setEstado(EstadoPedido.PENDIENTE);
+            pedido.setFechaCreacion(LocalDateTime.now());
+            pedido.setClienteId(cliente.getId());
+            pedido.setCliente(cliente);
+            pedido.setVendedorId(dto.getVendedorId());
+            
         }
 
-        //forma de envio
-        pedido.setMetodoEnvio(TipoEnvio.valueOf(envioSeleccionDTO.getMetodoEnvio()));
-        if(TipoEnvio.valueOf(envioSeleccionDTO.getMetodoEnvio()) == TipoEnvio.ENVIO_A_DOMICILIO) {
-            DetalleEnvio detalleEnvio = new DetalleEnvio();
-            detalleEnvio.setCalle(envioSeleccionDTO.getDireccion().getCalle());
-            detalleEnvio.setNumero(envioSeleccionDTO.getDireccion().getNumero());
-            detalleEnvio.setLocalidad(envioSeleccionDTO.getDireccion().getLocalidad());
-            detalleEnvio.setProvincia(envioSeleccionDTO.getDireccion().getProvincia());
-            detalleEnvio.setCodigoPostal(envioSeleccionDTO.getDireccion().getCodigoPostal());
-            detalleEnvio.setLatitud(envioSeleccionDTO.getDireccion().getLatitud());
-            detalleEnvio.setLongitud(envioSeleccionDTO.getDireccion().getLongitud());
+        // 2. Vincular dirección mediante el Service
+        Direccion dir = direccionService.obtenerEntidadPorId(dto.getIdDireccion());
+        pedido.setDireccion(dir);
+        pedido.setMetodoEnvio(dto.getMetodoEnvio());
 
-            pedido.setDetalleEnvio(detalleEnvio);
-        }
+        // 3. Cálculo de montos
+        BigDecimal costoEnvio = calcularCostoEnvio(dto.getVendedorId(), String.valueOf(dto.getIdDireccion()), auth);
+        pedido.setCostoEnvio(costoEnvio);
+   
+        pedido.setMontoTotal(pedido.getMontoTotalProductos()
+                .add(pedido.getComisionApp())
+                .add(pedido.getCostoEnvio()));
 
-        //pago
+        return pedidoMapper.toResponseDTO(pedidoRepository.save(pedido));
+    }
 
-        pedidoRepository.save(pedido);
-    }*/
+
 }

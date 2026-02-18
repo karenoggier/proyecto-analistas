@@ -1,11 +1,14 @@
 package com.seminario.ms_pedido.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,32 +32,38 @@ import lombok.ToString;
 public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
     private String id;
-    @Column(name = "clienteId")
+
     private String clienteId;
-    @Column(name = "vendedorId")
+
     private String vendedorId;
-    @Column(name = "fechaCreacion")
+
     private LocalDateTime fechaCreacion;
-    @Column(name = "estado")
+
+    @Enumerated(EnumType.STRING)
     private EstadoPedido estado;
-    @Column(name = "montoTotal")
-    private Double montoTotal;
-    @Column(name = "montoTotalProductos")
-    private Double montoTotalProductos;
-    @Column(name = "metodoEnvio")
+
+    private BigDecimal montoTotal;
+
+    private BigDecimal montoTotalProductos;
+
+    private BigDecimal costoEnvio; 
+
+    private BigDecimal comisionApp;
+
+    @Enumerated(EnumType.STRING)
     private TipoEnvio metodoEnvio;
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "idPedido", referencedColumnName = "id")
-    private DetalleEnvio detalleEnvio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_direccion", referencedColumnName = "id", nullable = true)
+    private Direccion direccion;
+
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "idPedido", referencedColumnName = "id")
+    @JoinColumn(name = "id_pedido", referencedColumnName = "id")
     private List<DetallePedido> detalles;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idCliente", nullable = true) // this line specifies the foreign key column  idUsuario in the "direccion" table
-    
+    @JoinColumn(name = "id_cliente", nullable = false)// this line specifies the foreign key column  idUsuario in the "direccion" table
     @ToString.Exclude // important to avoid circular references in toString() method
     private Cliente cliente;
 }
