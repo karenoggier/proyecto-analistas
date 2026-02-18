@@ -63,8 +63,9 @@ public class DireccionController {
             Authentication authentication) {
 
             String email = authentication.getName();
+            String localidadDecodificada = java.net.URLDecoder.decode(localidad, java.nio.charset.StandardCharsets.UTF_8);
         
-        return ResponseEntity.ok(direccionService.filtrarPorLocalidad(email, localidad));
+        return ResponseEntity.ok(direccionService.filtrarPorLocalidad(email, localidadDecodificada));
     }
 
 }

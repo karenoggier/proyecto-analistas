@@ -73,7 +73,7 @@ public class DireccionService {
         
         Cliente cliente = clienteService.obtenerClientePorEmail(email);
 
-        List<Direccion> direcciones = direccionRepository.findByClienteIdAndLocalidadIgnoreCase(
+        List<Direccion> direcciones = direccionRepository.findActivasByClienteAndLocalidad(
                 cliente.getId(), 
                 localidadVendedor
         );
