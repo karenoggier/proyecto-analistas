@@ -45,7 +45,7 @@ public class ProductoController {
     }*/
 
     @GetMapping("/resumen")
-    @Operation(summary = "Obtiene un resumen de un producto")
+    @Operation(summary = "Obtiene un resumen de un producto. Llamado internamente por ms-pedido")
     public ResponseEntity<ProductoResumidoDTO> getProductoResumido(
         @RequestParam String productoId,
         @RequestParam String vendedorId) {

@@ -100,6 +100,7 @@ public class CatalogoClient {
     // Método Fallback para Resilience4j
     public String obtenerIdUsuarioFallback(String idVendedor, Exception exception) {
         log.error("Circuit Breaker abierto para CatalogoClient. Motivo: {}", exception.getMessage());
-        return "ID_TEMPORAL_FALLBACK"; // O lanzar una excepción personalizada
+        throw new RequestException("PED", 503, HttpStatus.SERVICE_UNAVAILABLE, 
+        "No pudimos calcular el envío porque el servicio de catálogo está temporalmente fuera de servicio."); // O lanzar una excepción personalizada
     }
 }

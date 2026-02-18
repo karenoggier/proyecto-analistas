@@ -20,4 +20,7 @@ public interface DireccionRepository extends JpaRepository<Direccion, String> {
            "AND LOWER(d.localidad) = LOWER(:localidad) " +
            "AND d.estado = EstadoDireccion.ACTIVO")
     List<Direccion> findActivasByClienteAndLocalidad(String clienteId, String localidad);
+    Optional<Direccion> findById(String id);
+
+    
 }

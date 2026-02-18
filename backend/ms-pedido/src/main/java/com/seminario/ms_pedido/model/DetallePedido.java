@@ -1,5 +1,7 @@
 package com.seminario.ms_pedido.model;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,10 +12,12 @@ public class DetallePedido {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(name = "idPedido")
-    private String idPedido;
     private String idProducto;
-    private Double cantidad;
-    private Double montoUnitario;
+    private Integer cantidad;
+    private BigDecimal montoUnitario;
     private String observaciones;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_pedido")
+    private Pedido pedido;
 }

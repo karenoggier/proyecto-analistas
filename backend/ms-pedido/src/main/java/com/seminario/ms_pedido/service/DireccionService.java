@@ -70,7 +70,6 @@ public class DireccionService {
     }
 
     public List<DireccionResponseDTO> filtrarPorLocalidad(String email, String localidadVendedor) {
-        
         Cliente cliente = clienteService.obtenerClientePorEmail(email);
 
         List<Direccion> direcciones = direccionRepository.findActivasByClienteAndLocalidad(
@@ -83,6 +82,10 @@ public class DireccionService {
             .toList();
     }
     
+    public Direccion obtenerEntidadPorId(String id) {
+        return direccionRepository.findById(id)
+                .orElseThrow(() -> new RequestException("DIR", 404, HttpStatus.NOT_FOUND, "La dirección seleccionada no existe."));
+    }
 
 
 }

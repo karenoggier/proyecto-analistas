@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
@@ -11,10 +11,12 @@ import ResumenCompra from '../../components/ResumenCompra';
 import styles from '../proceso-pedido.module.css';
 
 export default function Paso1Page() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [cart, setCart] = useState(null);
   const [clientProfile, setClientProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     fetchPerfil();
@@ -49,7 +51,7 @@ export default function Paso1Page() {
           const dataPerfil = await perfilRes.json();
           setClientProfile(dataPerfil);
         } else {
-            console.error("Error al obtener perfil del cliente");
+            console.error("✗ Error al obtener perfil del cliente:", perfilRes.status);
         }
     
         } catch (error) {
@@ -62,7 +64,9 @@ export default function Paso1Page() {
       const token = sessionStorage.getItem("token");
       const vendedorId = searchParams.get("vendedorId");
       
+
       if (!token || !vendedorId) {
+        console.warn("✗ No hay token o vendedorId. No se carga carrito.");
         setLoading(false);
         return;
       }
@@ -92,10 +96,10 @@ export default function Paso1Page() {
         
         setCart({ ...data, vendorName, realizaEnvios });
       } else {
-        console.error("Error fetching cart:", res.status);
+        console.error("✗ Error fetching cart:", res.status);
       }
     } catch (error) {
-      console.error("Error fetching cart:", error);
+      console.error("✗ Error fetching cart:", error);
     } finally {
       setLoading(false);
     }
@@ -201,6 +205,60 @@ export default function Paso1Page() {
     fetchPerfil();
   };
 
+  const handleContinue = async () => {
+    console.log("handleContinue debug:", {
+      clientProfile,
+      clientProfileId: clientProfile?.id,
+      cart,
+      cartVendedorId: cart?.vendedorId
+    });
+    
+    setProcessing(true);
+    try {
+      const token = sessionStorage.getItem("token");
+
+      const res = await fetch(`/pedidoMs/pedidos/iniciar-checkout/${cart.vendedorId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          clienteId: clientProfile.id
+        })
+      });
+
+      const resText = await res.text();
+
+      if (res.ok) {
+        try {
+          const pedido = JSON.parse(resText);
+          
+          const pedidoId = pedido.id || pedido.pedidoId;
+          if (!pedidoId) {
+            alert("Error: No se pudo obtener el ID del pedido. Intenta de nuevo.");
+            setProcessing(false);
+            return;
+          }
+          
+          sessionStorage.setItem("currentPedidoId", pedidoId);
+          router.push(`/cliente/proceso-pedido/paso2?vendedorId=${cart.vendedorId}`);
+        } catch (parseError) {
+          console.error("Error parseando JSON:", parseError);
+          alert("Error procesando la respuesta del servidor.");
+          setProcessing(false);
+        }
+      } else {
+        alert(`Error al iniciar checkout. Status: ${res.status}. Revisa la consola.`);
+        setProcessing(false);
+      }
+    } catch (error) {
+      console.error("Error de red:", error);
+      alert("Error de conexión. Intenta de nuevo.");
+      setProcessing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className={styles.page}>
@@ -298,9 +356,9 @@ export default function Paso1Page() {
         </div>
 
         <div className={styles.continueBtnWrapper}>
-          <Link href="/cliente/proceso-pedido/paso2" className={styles.continueBtn}>
-            Continuar
-          </Link>
+          <button onClick={handleContinue} className={styles.continueBtn} disabled={processing}>
+            {processing ? 'Procesando...' : 'Continuar'}
+          </button>
         </div>
       </main>
 
