@@ -1,18 +1,12 @@
 package com.seminario.ms_pedido.service;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-//import com.seminario.ms_pedido.dto.CarritoDTO;
-//import com.seminario.ms_pedido.dto.DetalleCarritoDTO;
-import com.seminario.ms_pedido.dto.EnvioSeleccionDTO;
-//import com.seminario.ms_pedido.dto.PagoSeleccionDTO;
-import com.seminario.ms_pedido.model.DetalleEnvio;
-import com.seminario.ms_pedido.model.DetallePedido;
-import com.seminario.ms_pedido.model.EstadoPedido;
-import com.seminario.ms_pedido.model.Pedido;
-import com.seminario.ms_pedido.model.TipoEnvio;
+import com.seminario.ms_pedido.client.CatalogoClient;
+import com.seminario.ms_pedido.client.UsuarioClient;
 import com.seminario.ms_pedido.repository.PedidoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +16,33 @@ import lombok.RequiredArgsConstructor;
 
 public class PedidoService {
     private final PedidoRepository pedidoRepository;
+    private final CatalogoClient catalogoClient;
+    private final UsuarioClient usuarioClient;
+
+    public BigDecimal calcularCostoEnvio(String idVendedor, String idDireccionCliente, Authentication authentication) {
+        //Se busca el id del vendedor que pertenece a la base de datos de usuarios
+        String idVendedorUsuario = catalogoClient.obtenerIdUsuarioPorVendedorId(idVendedor);
+        System.out.println("ID Vendedor Usuario: " + idVendedorUsuario);
+
+        Double distancia = usuarioClient.calcularDistanciaEntreDirecciones(idVendedorUsuario, idDireccionCliente, authentication);
+        System.out.println("Distancia calculada: " + distancia);
+
+        BigDecimal costoEnvio;
+
+        //Esto hay que redefinirlo
+        if (distancia <= 2) {
+            costoEnvio = BigDecimal.valueOf(1000);
+        } else if (distancia <= 5) {
+            costoEnvio = BigDecimal.valueOf(2000);
+        } else if (distancia <= 10) {
+            costoEnvio = BigDecimal.valueOf(2500);
+        }  else {
+            costoEnvio = BigDecimal.valueOf(3000);
+        }
+
+        return costoEnvio;
+        
+    }
 
     /*public void crearPedido(CarritoDTO carrito, EnvioSeleccionDTO envioSeleccionDTO, PagoSeleccionDTO pagoSeleccionDTO) {
         Pedido pedido = new Pedido();

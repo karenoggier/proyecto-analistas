@@ -2,9 +2,12 @@ package com.seminario.ms_pedido.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -123,6 +126,73 @@ public class UsuarioClient {
         }
         throw new RequestException("US", 503, HttpStatus.SERVICE_UNAVAILABLE, "Servicio de eliminación de direcciones temporalmente inactivo.");
     }
+@CircuitBreaker(name = "usuarioClient", fallbackMethod = "calcularDistanciaFallback")
+@Retry(name = "usuarioClient")
+public Double calcularDistanciaEntreDirecciones(String idVendedorUsuario, String idDireccionCliente, Authentication authentication) {
+    
+    // 1. Extraer el token JWT del objeto authentication
+    String tokenValue;
+    try {
+        // En Spring Security con OAuth2, el principal suele ser el objeto Jwt
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        tokenValue = jwt.getTokenValue();
+    } catch (Exception e) {
+        log.error("Error al extraer el token JWT: {}", e.getMessage());
+        throw new RequestException("PED", 401, HttpStatus.UNAUTHORIZED, "No se pudo recuperar la sesión del usuario");
+    }
 
+    // 2. Configurar cabeceras con el token
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(tokenValue);
+    HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
+    // 3. Definir la URL
+    // Nota: Verifica si "/usuariosMs" es realmente parte del path o el context-path
+    String url = usuariosBaseUrl + "/usuariosMs/direcciones/calcular-distancia/{idVendedor}/{idDireccionCliente}";
+
+    try {
+        log.info("Solicitando distancia a ms-usuarios. Vendedor: {}, Cliente: {}, Usuario: {}", 
+            idVendedorUsuario, idDireccionCliente, authentication.getName());
+
+        ResponseEntity<Double> response = restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            requestEntity, // Enviamos el header con el token
+            Double.class,
+            idVendedorUsuario,
+            idDireccionCliente
+        );
+
+        return response.getBody();
+
+    } catch (HttpStatusCodeException e) {
+        log.error("Error HTTP desde ms-usuarios al calcular distancia: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+        
+        String mensajeReal = "Error al calcular distancia";
+        try {
+            JsonNode jsonNode = objectMapper.readTree(e.getResponseBodyAsString());
+            mensajeReal = jsonNode.path("message").asText(jsonNode.path("mensaje").asText(mensajeReal));
+        } catch (Exception ex) {
+            mensajeReal = e.getResponseBodyAsString();
+        }
+
+        throw new RequestException("USU", e.getStatusCode().value(), (HttpStatus) e.getStatusCode(), mensajeReal);
+
+    } catch (Exception e) {
+        log.error("Error inesperado de comunicación: {}", e.getMessage());
+        throw new RequestException("USU", 503, HttpStatus.SERVICE_UNAVAILABLE, "El servicio de usuarios no responde.");
+    }
+}
+
+// IMPORTANTE: El método Fallback debe tener la MISMA firma que el original + la excepción
+public Double calcularDistanciaFallback(String idVendedorUsuario, String idDireccionCliente, Authentication authentication, Throwable t) {
+    log.error("Fallback activado para calcularDistancia. Usuario: {}. Motivo: {}", authentication.getName(), t.getMessage());
+    
+    if (t instanceof RequestException) {
+        throw (RequestException) t;
+    }
+    
+    throw new RequestException("US", 503, HttpStatus.SERVICE_UNAVAILABLE, 
+        "El servicio de usuarios no está disponible para calcular la distancia.");
+}
 }

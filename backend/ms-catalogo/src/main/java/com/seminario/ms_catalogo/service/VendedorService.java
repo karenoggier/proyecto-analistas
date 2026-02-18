@@ -447,5 +447,13 @@ public class VendedorService {
         return vendedorMapper.toPublicDTO(vendedor);
     }
 
+
+    public String obtenerIdUsuarioPorVendedorId(String id) {
+        Vendedor vendedor = vendedorRepository.findById(id)
+                .orElseThrow(() -> new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado con ID: " + id));
+        
+        return vendedor.getUsuarioId();
+    }
+
 }
 

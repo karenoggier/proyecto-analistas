@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,7 +49,7 @@ public class DireccionController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/calcular-distancia/{idVendedor}/{idDireccionCliente}")
+    @GetMapping("/calcular-distancia/{idVendedor}/{idDireccionCliente}")
     @Operation(summary = "Calcula la distancia entre la dirección de un vendedor y la dirección de un cliente. Llamado internamente por ms-pedido")
     public ResponseEntity<Double> calcularDistanciaEntreDirecciones(@PathVariable String idVendedor, @PathVariable String idDireccionCliente, Authentication authentication) {
         String email = authentication.getName();

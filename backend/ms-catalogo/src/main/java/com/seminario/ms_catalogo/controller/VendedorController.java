@@ -156,4 +156,10 @@ public class VendedorController {
     public ResponseEntity<VendedorResponsePublicDTO> obtenerPerfilPublico(@PathVariable String vendedorId) {
         return ResponseEntity.ok(vendedorService.buscarVendedorPorId(vendedorId));
     }
+
+    @GetMapping("/id-usuario/{id}")
+    @Operation(summary = "Obtiene el idUsuario (id del ms_usuarios) de un vendedor a partir del id del vendedor")
+    public ResponseEntity<String> obtenerIdUsuarioPorVendedorId(@PathVariable String id) {
+        return ResponseEntity.ok(vendedorService.obtenerIdUsuarioPorVendedorId(id));
+    }
 }

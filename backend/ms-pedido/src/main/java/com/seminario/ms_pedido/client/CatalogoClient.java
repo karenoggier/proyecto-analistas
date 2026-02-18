@@ -69,4 +69,37 @@ public class CatalogoClient {
         throw new RequestException("CAT", 503, HttpStatus.SERVICE_UNAVAILABLE,
             "El servicio de catalogo no está disponible. Por favor intente más tarde.");
     }
+
+    @CircuitBreaker(name = "catalogoClient", fallbackMethod = "obtenerIdUsuarioFallback")
+    @Retry(name = "catalogoClient")
+    public String obtenerIdUsuarioPorVendedorId(String idVendedor) {
+        // CORRECCIÓN: El {id} debe ser parte del path, no un parámetro ?id=...
+        // Asumiendo que el RequestMapping del Controller en ms_catalogo es "/catalogoMs"
+        String url = catalogoBaseUrl + "/catalogoMs/api/vendedores/id-usuario/{id}";
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null, // Los GET no llevan body
+                String.class,
+                idVendedor // Este valor reemplaza al {id} en la URL
+            );
+            return response.getBody();
+        } catch (HttpStatusCodeException ex) {
+            log.error("Error al obtener ID de usuario. VendedorID={}, Status={}", idVendedor, ex.getStatusCode());
+            throw new RequestException("PED", ex.getStatusCode().value(), (HttpStatus) ex.getStatusCode(), 
+                "Error al consultar el servicio de catálogo: " + ex.getResponseBodyAsString());
+        } catch (Exception ex) {
+            log.error("Error inesperado en CatalogoClient: {}", ex.getMessage());
+            throw new RequestException("PED", 503, HttpStatus.SERVICE_UNAVAILABLE,
+                "El servicio de catálogo no está disponible.");
+        }
+    }
+
+    // Método Fallback para Resilience4j
+    public String obtenerIdUsuarioFallback(String idVendedor, Exception exception) {
+        log.error("Circuit Breaker abierto para CatalogoClient. Motivo: {}", exception.getMessage());
+        return "ID_TEMPORAL_FALLBACK"; // O lanzar una excepción personalizada
+    }
 }
