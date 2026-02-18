@@ -63,7 +63,7 @@ public class Pedido {
     private List<DetallePedido> detalles;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idCliente", nullable = true) // this line specifies the foreign key column  idUsuario in the "direccion" table
+    @JoinColumn(name = "id_cliente", nullable = false)// this line specifies the foreign key column  idUsuario in the "direccion" table
     @ToString.Exclude // important to avoid circular references in toString() method
     private Cliente cliente;
 }

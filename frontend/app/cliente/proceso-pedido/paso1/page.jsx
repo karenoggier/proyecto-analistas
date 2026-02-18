@@ -233,6 +233,7 @@ export default function Paso1Page() {
       if (res.ok) {
         try {
           const pedido = JSON.parse(resText);
+          console.log("Pedido recibido completo:", pedido);
           
           const pedidoId = pedido.id || pedido.pedidoId;
           if (!pedidoId) {
@@ -242,6 +243,8 @@ export default function Paso1Page() {
           }
           
           sessionStorage.setItem("currentPedidoId", pedidoId);
+          // Guardar pedido completo para reutilizar en paso 2
+          sessionStorage.setItem("currentPedido", JSON.stringify(pedido));
           router.push(`/cliente/proceso-pedido/paso2?vendedorId=${cart.vendedorId}`);
         } catch (parseError) {
           console.error("Error parseando JSON:", parseError);
@@ -352,7 +355,7 @@ export default function Paso1Page() {
               ))}
             </div>
           </div>
-          <ResumenCompra items={totalItems} subtotal={subtotal} realizaEnvios={cart.realizaEnvios} />
+          <ResumenCompra items={totalItems} subtotal={subtotal} realizaEnvios={cart.realizaEnvios} comisionApp={cart.comisionApp} />
         </div>
 
         <div className={styles.continueBtnWrapper}>
