@@ -81,4 +81,41 @@ public class CatalogoService {
         );
     }
 
+    @CircuitBreaker(name = "catalogo", fallbackMethod = "buscarProductoFallback")
+    @Cacheable(value = "productos", key = "#productoId + '_' + #vendedorId")
+    @Observed(
+        name = "catalogo.buscar-producto",
+        contextualName = "buscar-producto-catalogo"
+    )
+    public @NonNull String obtenerIdUsuarioPorVendedorId(@NonNull String vendedorId) {
+
+        try {
+            String id = catalogoClient.obtenerIdUsuarioPorVendedorId(vendedorId);
+            
+            return id;
+            
+        } catch (HttpClientErrorException.BadRequest e) {
+            // 400: Request mal formado
+            throw e;
+            
+        } catch (HttpClientErrorException e) {
+            throw e;
+            
+        } catch (ResourceAccessException e) {
+            // Error de conectividad (timeout, connection refused, etc.)
+            log.error("Error de conectividad con MS-Catálogo: {}", e.getMessage());
+            throw new ServicioNoDisponibleException("catálogo", e);
+        }
+    }
+
+    
+    private @NonNull String obtenerIdUsuarioPorVendedorIdFallback(@NonNull String vendedorId, Exception e) {
+        
+        throw new ServicioNoDisponibleException(
+            "catálogo",
+            "El servicio de catálogo no está disponible en este momento. " +
+            e.getMessage()
+        );
+    }
+
 }
