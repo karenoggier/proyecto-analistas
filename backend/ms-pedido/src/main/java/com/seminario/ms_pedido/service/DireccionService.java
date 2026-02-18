@@ -1,4 +1,6 @@
 package com.seminario.ms_pedido.service;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +49,6 @@ public class DireccionService {
 
     @Transactional
     public void eliminarDireccion(String idDireccion, String email) {
-        // Buscar la dirección y verificar que pertenezca al usuario con ese email
-        // Si no pertenece, lanzar una RequestException con 403 Forbidden
         Cliente cliente = clienteService.obtenerClientePorEmail(email);
         
         Direccion direccion = direccionRepository.findByIdAndCliente(idDireccion, cliente)
@@ -68,15 +68,21 @@ public class DireccionService {
         }
         
     }
+
+    public List<DireccionResponseDTO> filtrarPorLocalidad(String email, String localidadVendedor) {
+        
+        Cliente cliente = clienteService.obtenerClientePorEmail(email);
+
+        List<Direccion> direcciones = direccionRepository.findByClienteIdAndLocalidadIgnoreCase(
+                cliente.getId(), 
+                localidadVendedor
+        );
+
+        return direcciones.stream()
+            .map(direccionMapper::toResponseDTO)
+            .toList();
+    }
     
-    /* 
-    public ArrayList<DireccionResponseDTO> obtenerDireccion(Cliente obtenerPerfil) {
-        ArrayList<Direccion> direcciones = direccionRepository.findByCliente(obtenerPerfil);
-        ArrayList<DireccionResponseDTO> direccionesResponse = new ArrayList<>();
-        for (Direccion direccion : direcciones) {
-            direccionesResponse.add(direccionMapper.toResponseDTO(direccion));
-        }
-        return direccionesResponse;
-    }*/
+
 
 }

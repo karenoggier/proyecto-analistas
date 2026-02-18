@@ -8,8 +8,6 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import styles from './carrito.module.css';
 
-const SERVICIO = 500;
-
 export default function CarritoPage() {
   const router = useRouter();
   const [carts, setCarts] = useState([]);
@@ -214,8 +212,8 @@ export default function CarritoPage() {
         ) : (
         <div className={styles.cartList}>
           {carts.map((cart) => {
-            const subtotal = cart.montoTotalProductos;
-            const total = subtotal + SERVICIO;
+            const subtotal = cart.montoTotalProductos || 0;
+            const total = cart.montoTotal || 0;
             const totalItems = cart.items.reduce((s, item) => s + item.cantidad, 0);
             const isSelected = selectedCartId === cart.id;
 
@@ -308,7 +306,7 @@ export default function CarritoPage() {
                       )}
                       <div className={styles.summaryRow}>
                         <span>Tarifa de servicio</span>
-                        <span>${SERVICIO.toLocaleString()}</span>
+                        <span>${(cart.comisionApp || 0).toLocaleString()}</span>
                       </div>
                       <div className={styles.summaryTotal}>
                         <span>Total</span>
