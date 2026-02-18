@@ -27,6 +27,8 @@ public class Carrito {
 
     private BigDecimal montoTotalProductos;
 
+    private BigDecimal comisionApp;
+
     private List<DetalleCarrito> detallesCarrito = new ArrayList<>();;
 
     @CreatedDate // Se setea automáticamente al insertar el documento
@@ -41,16 +43,14 @@ public class Carrito {
     }
 
     public void calcularMontosTotales() {
-        this.montoTotalProductos = BigDecimal.ZERO;
-        if (this.detallesCarrito != null) {
-            for (DetalleCarrito detalle : this.detallesCarrito) {
-                this.montoTotalProductos = this.montoTotalProductos.add(
-                    BigDecimal.valueOf(detalle.getMontoUnitario()).multiply(BigDecimal.valueOf(detalle.getCantidad()))
-                );
-            }
-        }
-        // lógica para calcular descuentos, impuestos, etc.
-        this.montoTotal = this.montoTotalProductos; // Por simplicidad, sin descuentos ni impuestos
+        // 1. Sumamos los subtotales de cada detalle
+        this.montoTotalProductos = detallesCarrito.stream()
+            .map(d -> d.getMontoUnitario().multiply(BigDecimal.valueOf(d.getCantidad())))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        this.comisionApp = this.montoTotalProductos.multiply(new BigDecimal("0.05"));
+
+        this.montoTotal = this.montoTotalProductos.add(this.comisionApp);
     }
 
     public DetalleCarrito encontrarProducto(String productoId) {

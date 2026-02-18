@@ -64,7 +64,7 @@ public class CarritoService {
             DetalleCarrito nuevoDetalle = new DetalleCarrito(
                 productoId, 
                 cantidad, 
-                productoDTO.getMontoUnitario(), 
+                BigDecimal.valueOf(productoDTO.getMontoUnitario()), 
                 observaciones
             );
             carrito.addDetalle(nuevoDetalle);
@@ -78,7 +78,10 @@ public class CarritoService {
     public CarritoResponseDTO obtenerCarritoPorVendedor(String email, String vendedorId) {
         Cliente cliente = buscarClientePorEmail(email);
         return carritoRepository.findByClienteIdAndVendedorId(cliente.getId(), vendedorId)
-        .map(carritoMapper::toResponseDTO)
+        .map(carrito -> {
+            carrito.calcularMontosTotales(); 
+            return carritoMapper.toResponseDTO(carrito);
+        })
         .orElse(CarritoResponseDTO.builder()
                 .id(null)
                 .vendedorId(vendedorId)
@@ -93,7 +96,10 @@ public class CarritoService {
         List<Carrito> carritos = carritoRepository.findByClienteId(cliente.getId());
         
         return carritos.stream()
-            .map(carritoMapper::toResponseDTO)
+            .map(carrito -> {
+                carrito.calcularMontosTotales(); // Recalculamos antes de responder
+                return carritoMapper.toResponseDTO(carrito);
+            })
             .toList();
     }
 

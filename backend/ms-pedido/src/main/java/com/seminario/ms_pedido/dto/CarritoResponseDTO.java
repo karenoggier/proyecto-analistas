@@ -11,6 +11,8 @@ import lombok.Data;
 public class CarritoResponseDTO {
     private String id;
     private String vendedorId;
-    private BigDecimal montoTotalProductos;
+    private BigDecimal montoTotalProductos; // Suma de los ítems
+    private BigDecimal comisionApp;
+    private BigDecimal montoTotal;          // Suma final (Productos + Comisión)
     private List<ItemCarritoResponseDTO> items;
 }

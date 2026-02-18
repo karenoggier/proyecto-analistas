@@ -17,10 +17,10 @@ public class DetalleCarrito {
     private String idItem;
     private String productoId;
     private Integer cantidad;
-    private Double montoUnitario;
+    private BigDecimal montoUnitario;
     private String observaciones;
 
-    public DetalleCarrito(String productoId, Integer cantidad, Double montoUnitario, String observaciones) {
+    public DetalleCarrito(String productoId, Integer cantidad, BigDecimal montoUnitario, String observaciones) {
         this.idItem = UUID.randomUUID().toString(); 
         this.productoId = productoId;
         this.cantidad = cantidad;

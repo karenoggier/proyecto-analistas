@@ -30,8 +30,8 @@ public class CarritoMapper {
                     .nombreProducto(prod.getNombre())
                     .urlImagen(prod.getImagenUrl())
                     .cantidad(detalle.getCantidad())
-                    .montoUnitario(BigDecimal.valueOf(detalle.getMontoUnitario()))
-                    .subtotal(BigDecimal.valueOf(detalle.getMontoUnitario()).multiply(BigDecimal.valueOf(detalle.getCantidad())))
+                    .montoUnitario(detalle.getMontoUnitario())
+                    .subtotal(detalle.getMontoUnitario().multiply(BigDecimal.valueOf(detalle.getCantidad())))
                     .observaciones(detalle.getObservaciones())
                     .build();
             }).toList();
@@ -40,6 +40,8 @@ public class CarritoMapper {
             .id(carrito.getId())
             .vendedorId(carrito.getVendedorId())
             .montoTotalProductos(carrito.getMontoTotalProductos())
+            .comisionApp(carrito.getComisionApp())
+            .montoTotal(carrito.getMontoTotal())
             .items(items)
             .build();
     }
