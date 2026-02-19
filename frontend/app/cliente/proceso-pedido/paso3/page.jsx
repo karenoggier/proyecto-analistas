@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
@@ -9,10 +10,28 @@ import ResumenCompra from '../../components/ResumenCompra';
 import styles from '../proceso-pedido.module.css';
 
 export default function Paso3Page() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [clientProfile, setClientProfile] = useState(null);
+  const [pedido, setPedido] = useState(null);
+  const [vendedorId, setVendedorId] = useState(searchParams.get('vendedorId'));
     
   useEffect(() => {
     fetchPerfil();
+  }, []);
+
+  useEffect(() => {
+    // Cargar pedido desde sessionStorage
+    const pedidoStr = sessionStorage.getItem("currentPedido");
+    if (pedidoStr) {
+      try {
+        const pedidoData = JSON.parse(pedidoStr);
+        console.log("Pedido cargado en paso 3:", pedidoData);
+        setPedido(pedidoData);
+      } catch (e) {
+        console.error("Error parseando pedido de sessionStorage:", e);
+      }
+    }
   }, []);
       
   const fetchPerfil = async () => {
@@ -55,17 +74,21 @@ export default function Paso3Page() {
     fetchPerfil();
   };
 
+  const handleBackButton = () => {
+    router.back();
+  };
+
   return (
     <div className={styles.page}>
       <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} disableAddressModal={true}/>
 
       <main className={styles.main}>
         <div className={styles.header}>
-          <Link href="/cliente/proceso-pedido/paso2" className={styles.backBtn}>
+          <button onClick={handleBackButton} className={styles.backBtn}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>
-          </Link>
+          </button>
           <h1 className={styles.title}>PROGRESO DE PEDIDO</h1>
         </div>
 
@@ -76,13 +99,19 @@ export default function Paso3Page() {
             <h2 className={styles.sectionTitle}>Datos personales</h2>
 
             <div className={styles.datosCard}>
-              <p className={styles.datosRow}><strong>Nombre:</strong> Karen</p>
-              <p className={styles.datosRow}><strong>Apellido:</strong> Oggier</p>
-              <p className={styles.datosRow}><strong>Telefono:</strong> 3496-511096</p>
-              <p className={styles.datosRow}><strong>Email:</strong> karenoggier@gmail.com</p>
+              <p className={styles.datosRow}><strong>Nombre:</strong> {clientProfile?.nombre || '-'}</p>
+              <p className={styles.datosRow}><strong>Apellido:</strong> {clientProfile?.apellido || '-'}</p>
+              <p className={styles.datosRow}><strong>Telefono:</strong> {clientProfile?.telefono || '-'}</p>
+              <p className={styles.datosRow}><strong>Email:</strong> {clientProfile?.email || '-'}</p>
             </div>
           </div>
-          <ResumenCompra />
+          <ResumenCompra 
+            realizaEnvios={!(pedido?.costoEnvio === 0 || pedido?.costoEnvio === null || pedido?.metodoEnvio === 'RETIRO_EN_LOCAL')}
+            subtotal={pedido?.montoTotalProductos ? parseFloat(pedido.montoTotalProductos) : 0}
+            comisionApp={pedido?.comisionApp ? parseFloat(pedido.comisionApp) : 0}
+            costoEnvio={pedido?.costoEnvio ? parseFloat(pedido.costoEnvio) : 0}
+            items={pedido?.detalles && Array.isArray(pedido.detalles) ? pedido.detalles.reduce((acc, item) => acc + (item.cantidad || 0), 0) : 0}
+          />
         </div>
 
         <div className={styles.continueBtnWrapper}>

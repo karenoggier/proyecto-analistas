@@ -1,9 +1,7 @@
 import styles from './ResumenCompra.module.css';
 
-const SERVICIO = 500;
-
-export default function ResumenCompra({ items = 1, subtotal = 10000, realizaEnvios = false, costoEnvio = null }) {
-  const total = subtotal + SERVICIO + (costoEnvio || 0);
+export default function ResumenCompra({ items = 1, subtotal = 0, realizaEnvios = false, costoEnvio = null, comisionApp = 0 }) {
+  const total = subtotal + comisionApp + (costoEnvio || 0);
 
   return (
     <div className={styles.card}>
@@ -32,7 +30,7 @@ export default function ResumenCompra({ items = 1, subtotal = 10000, realizaEnvi
       )}
       <div className={styles.row}>
         <span>Tarifa de servicio</span>
-        <span>${SERVICIO.toLocaleString()}</span>
+        <span>${comisionApp.toLocaleString()}</span>
       </div>
       <div className={styles.total}>
         <span>Total</span>

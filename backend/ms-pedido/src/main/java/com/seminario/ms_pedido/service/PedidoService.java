@@ -82,6 +82,8 @@ public class PedidoService {
 
         // 3. Mapeo de cabecera
         pedido.setClienteId(cliente.getId());
+        pedido.setCliente(cliente);
+        pedido.setClienteId(cliente.getId());
         pedido.setVendedorId(vendedorId);
         pedido.setEstado(EstadoPedido.PENDIENTE);
         pedido.setFechaCreacion(LocalDateTime.now());
@@ -122,6 +124,7 @@ public class PedidoService {
             pedido.setEstado(EstadoPedido.PENDIENTE);
             pedido.setFechaCreacion(LocalDateTime.now());
             pedido.setClienteId(cliente.getId());
+            pedido.setCliente(cliente);
             pedido.setVendedorId(dto.getVendedorId());
             
         }

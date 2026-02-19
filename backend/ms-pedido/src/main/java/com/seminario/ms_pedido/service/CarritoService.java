@@ -47,7 +47,7 @@ public class CarritoService {
             });
 
         // 3. Buscar el producto en el ms-catalogo para tener precio actualizado
-        ProductoResumidoDTO productoDTO = catalogoClient.buscarProducto(productoId, vendedorId).getBody();
+        ProductoResumidoDTO productoDTO = catalogoClient.buscarProducto(productoId, vendedorId);
 
         // 4. Lógica de ítems
         // Buscamos un detalle que coincida en ID Y en la misma observación

@@ -20,6 +20,7 @@ export default function Paso2Page() {
   const [costoEnvio, setCostoEnvio] = useState(null);
   const [vendorRealizaEnvios, setVendorRealizaEnvios] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pedido, setPedido] = useState(null);
 
   useEffect(() => {
     const paramId = searchParams.get('vendedorId');
@@ -35,6 +36,38 @@ export default function Paso2Page() {
   useEffect(() => {
     fetchPerfil();
   }, []);
+
+  useEffect(() => {
+    const pedidoId = sessionStorage.getItem("currentPedidoId");
+    const pedidoStr = sessionStorage.getItem("currentPedido");
+    
+    // Cargar pedido desde sessionStorage
+    if (pedidoStr) {
+      try {
+        const pedidoData = JSON.parse(pedidoStr);
+        console.log("Pedido cargado desde sessionStorage:", pedidoData);
+        setPedido(pedidoData);
+      } catch (e) {
+        console.error("Error parseando pedido de sessionStorage:", e);
+        // Si falla, intenta cargar por ID
+        if (pedidoId) fetchPedido(pedidoId);
+      }
+    } else if (pedidoId) {
+      // Si no hay en sessionStorage, intenta cargar por ID (fallback)
+      fetchPedido(pedidoId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (pedido) {
+      console.log("Estado de pedido actualizado:", {
+        montoTotalProductos: pedido.montoTotalProductos,
+        comisionApp: pedido.comisionApp,
+        detalles: pedido.detalles,
+        cantidadTotal: pedido.detalles?.reduce((acc, item) => acc + item.cantidad, 0) || 0
+      });
+    }
+  }, [pedido]);
 
   useEffect(() => {
     if (clientProfile && vendedorId) {
@@ -86,6 +119,24 @@ export default function Paso2Page() {
           console.error("Error de red:", error);
     } 
   }
+
+  const fetchPedido = async (id) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch(`/pedidoMs/pedidos/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const dataPedido = await res.json();
+        console.log("Pedido cargado en paso 2:", dataPedido);
+        setPedido(dataPedido);
+      } else {
+        console.error("Error fetching pedido, status:", res.status);
+      }
+    } catch (error) {
+      console.error("Error fetching pedido:", error);
+    }
+  };
 
   const fetchDireccionesValidas = async () => {
     try {
@@ -214,7 +265,20 @@ export default function Paso2Page() {
         return;
       }
 
-      const respodidoData = await res.json();
+      const pedidoData = await res.json();
+      console.log("Pedido actualizado con envío:", pedidoData);
+      
+      // Asegurar que el costo de envío esté incluido
+      const pedidoConCosto = {
+        ...pedidoData,
+        costoEnvio: deliveryType === 'address' ? (costoEnvio || 0) : 0,
+        metodoEnvio: deliveryType === 'address' ? 'ENVIO_A_DOMICILIO' : 'RETIRO_EN_LOCAL'
+      };
+      
+      console.log("Pedido con costo agregado:", pedidoConCosto);
+      
+      // Guardar pedido actualizado para paso 3
+      sessionStorage.setItem("currentPedido", JSON.stringify(pedidoConCosto));
 
       // Navegar al paso siguiente
       router.push(`/cliente/proceso-pedido/paso3?vendedorId=${vendedorId}`);
@@ -231,11 +295,14 @@ export default function Paso2Page() {
 
       <main className={styles.main}>
         <div className={styles.header}>
-          <Link href={`/cliente/proceso-pedido/paso1?vendedorId=${vendedorId}`} className={styles.backBtn}>
+          <button 
+            onClick={() => router.back()} 
+            className={styles.backBtn}
+          >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>
-          </Link>
+          </button>
           <h1 className={styles.title}>PROGRESO DE PEDIDO</h1>
         </div>
 
@@ -312,7 +379,13 @@ export default function Paso2Page() {
               </>
             )}
           </div>
-          <ResumenCompra realizaEnvios={deliveryType === 'address'} costoEnvio={costoEnvio} />
+          <ResumenCompra 
+            realizaEnvios={deliveryType === 'address'} 
+            costoEnvio={costoEnvio || 0} 
+            subtotal={pedido?.montoTotalProductos ? parseFloat(pedido.montoTotalProductos) : 0}
+            comisionApp={pedido?.comisionApp ? parseFloat(pedido.comisionApp) : 0}
+            items={pedido?.detalles && Array.isArray(pedido.detalles) ? pedido.detalles.reduce((acc, item) => acc + (item.cantidad || 0), 0) : 0}
+          />
         </div>
 
         <div className={styles.continueBtnWrapper}>
