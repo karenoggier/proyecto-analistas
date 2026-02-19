@@ -24,6 +24,11 @@ const nextConfig = {
         source: '/pedidoMs/:path*',
         destination: 'http://127.0.0.1:8090/pedidoMs/:path*', 
       },
+      {
+        // 4. Todo lo que sea de PAGO -> Al Gateway (8090)
+        source: '/pagoMs/:path*',
+        destination: 'http://127.0.0.1:8090/pagoMs/:path*', 
+      },
     ]
   },
 }

@@ -9,10 +9,14 @@ import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
 import ResumenCompra from '../../components/ResumenCompra';
 import styles from '../proceso-pedido.module.css';
+import BtnMercadoPago from '../../components/BtnMercadoPago';
 
 export default function Paso4Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [preferenceId, setPreferenceId] = useState('3211823743-f8d0566b-d329-474a-887a-756803e7f88e');
+  const [loading, setLoading] = useState(false);
   
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
   const [clientProfile, setClientProfile] = useState(null);
@@ -123,12 +127,7 @@ export default function Paso4Page() {
                     forma segura. Una vez finalizado, volveras
                     automaticamente a nuestra aplicacion.
                   </p>
-
-                  <Link href="/cliente/proceso-pedido/paso5" className={styles.mercadoPagoBtn}>
-                    <Image src="/images/mercadopago-logo.jpg" alt="" width={80} height={20} className={styles.mercadoPagoBtnImg} />
-                    mercado pago
-                  </Link>
-                  <p className={styles.paymentSecure}>Paga de forma segura</p>
+                  <BtnMercadoPago preferenceId={preferenceId} />
                 </div>
                 <Image
                   src="/cliente/mercado-pago.png"

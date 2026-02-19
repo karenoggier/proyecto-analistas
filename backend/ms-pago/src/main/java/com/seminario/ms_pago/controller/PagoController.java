@@ -1,0 +1,20 @@
+package com.seminario.ms_pago.controller;
+
+import com.seminario.ms_pago.service.PagoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/pagos")
+public class PagoController {
+    @Autowired
+    private PagoService pagoService;
+
+    @PostMapping("/create-preference/{pedidoId}")
+    public ResponseEntity<Map<String, String>> crear(@PathVariable String pedidoId) {
+        return ResponseEntity.ok(pagoService.crearPreferencia(pedidoId));
+    }
+}
