@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,6 @@ import org.springframework.web.context.request.WebRequest;
 import com.seminario.ms_pedido.dto.exceptions_dtos.ErrorResponseDTO;
 
 import io.micrometer.tracing.Tracer;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
  * @author Tu Nombre
  */
 @RestControllerAdvice
-@RequiredArgsConstructor
 @Slf4j
 public class GlobalExceptionHandler {
     
@@ -202,5 +201,12 @@ public class GlobalExceptionHandler {
     private boolean isProductionProfile() {
         return "prod".equalsIgnoreCase(activeProfile) || 
                "production".equalsIgnoreCase(activeProfile);
+    }
+
+    public GlobalExceptionHandler(@Autowired(required = false) @Nullable Tracer tracer) {
+        this.tracer = tracer;
+        if (tracer == null) {
+            log.info("Micrometer Tracer no configurado - Trace IDs no disponibles");
+        }
     }
 }

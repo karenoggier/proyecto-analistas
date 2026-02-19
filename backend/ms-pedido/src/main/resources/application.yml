@@ -51,6 +51,13 @@ spring:
     caffeine:
       spec: maximumSize=1000,expireAfterWrite=5m
 
+  web:
+    error:
+      include-message: always
+      include-binding-errors: always
+      include-stacktrace: on_param  # Solo muestra stacktrace si ?trace=true
+      include-exception: false
+
 # ===== SERVIDOR =====
 server:
   port: 8082
@@ -59,18 +66,7 @@ server:
   compression:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
-  web:
-    resources:
-      cache:
-        period: 1h
-        cachecontrol:
-          max-age: 3600
-          must-revalidate: true
-    error:
-      include-message: always
-      include-binding-errors: always
-      include-stacktrace: on_param  # Solo muestra stacktrace si ?trace=true
-      include-exception: false
+  
 
 # ===== MICROSERVICIOS EXTERNOS =====
 usuarios:
@@ -129,9 +125,6 @@ resilience4j:
       # Circuit Breaker para MS-Usuarios
       usuarios:
         baseConfig: default
-        # Puedes personalizar aquí si necesitas configuración diferente
-        # waitDurationInOpenState: 20s
-  
 
 # ===== ACTUATOR & OBSERVABILIDAD =====
 management:
@@ -189,20 +182,27 @@ management:
       application: ${spring.application.name}
       environment: ${ENVIRONMENT:dev}
     
+    
+  prometheus:
     export:
-      prometheus:
-        enabled: true
+      enabled: true
   
-  # ===== TRACING DISTRIBUIDO (Opcional pero recomendado) =====
+  # ===== TRACING DISTRIBUIDO HABILITADO =====
   tracing:
     enabled: true
     sampling:
       probability: 1.0  # 100% en dev, 0.1 (10%) en producción
+    
+    # Propaga trace context a través de requests HTTP
+    propagation:
+      type: W3C  # W3C Trace Context (estándar)
   
-  # Si usas Zipkin/Jaeger (opcional)
-  # zipkin:
-  #   tracing:
-  #     endpoint: http://localhost:9411/api/v2/traces
+  # ===== ZIPKIN (OPCIONAL - Para visualizar traces) =====
+  # Descomenta si quieres ver los traces en Zipkin
+  # Primero inicia Zipkin: docker run -d -p 9411:9411 openzipkin/zipkin
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
 
 # ===== SPRINGDOC / SWAGGER =====
 springdoc:
@@ -212,8 +212,6 @@ springdoc:
     tags-sorter: alpha
     display-request-duration: true
     show-extensions: true
-    
-  # Configuración de seguridad en Swagger (para JWT)
     oauth:
       use-pkce-with-authorization-code-grant: true
   
@@ -222,39 +220,38 @@ springdoc:
   
   packages-to-scan: com.seminario.ms_pedido.controller
   show-actuator: true
-  
 
-# ===== LOGGING =====
+# ===== LOGGING CON TRACE IDs =====
 logging:
   level:
     root: INFO
     com.seminario.ms_pedido: DEBUG
     org.springframework.web: INFO
     org.springframework.security: DEBUG
-    org.springframework.data.mongodb.core.MongoTemplate: INFO  # Cambiaste a INFO
+    org.springframework.data.mongodb.core.MongoTemplate: INFO
     io.github.resilience4j: DEBUG
-    org.hibernate.SQL: DEBUG  # SQL queries
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Parámetros SQL
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   
+  # ✅ PATTERN CON TRACE IDs HABILITADO
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-    # Si tienes tracing habilitado, usa este pattern:
-    # console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [${spring.application.name:},%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [${spring.application.name:},%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
   
   file:
     name: logs/ms-pedido.log
     max-size: 10MB
     max-history: 30
 
-# ===== PERFILES =====
-# Configuración base, usa perfiles para dev/prod
 ---
-# PERFIL DE DESARROLLO
+# ===== PERFIL DE DESARROLLO =====
 spring:
   config:
     activate:
       on-profile: dev
 
+  web:
+    error:
+      include-stacktrace: always  # Muestra stacktrace completo en dev
 logging:
   level:
     root: DEBUG
@@ -266,40 +263,37 @@ management:
       exposure:
         include: "*"  # Expone TODOS los endpoints en dev
 
-server:
-  web:
-    error:
-      include-stacktrace: always  # Muestra stacktrace en dev
-
 ---
-# PERFIL DE PRODUCCIÓN
+# ===== PERFIL DE PRODUCCIÓN =====
 spring:
   config:
     activate:
       on-profile: prod
-      
+
   jpa:
     show-sql: false
     hibernate:
       ddl-auto: validate  # NO modifica la DB en producción
 
+  web:
+    error:
+      include-stacktrace: never
+      include-message: never
 logging:
   level:
     root: WARN
     com.seminario.ms_pedido: INFO
+  
+  # En producción, logs sin trace IDs (más limpio)
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus  # Solo lo necesario
+        include: health,info,metrics,prometheus
 
   tracing:
     sampling:
       probability: 0.1  # Solo 10% de traces en producción
-
-server:
-  web:
-    error:
-      include-stacktrace: never  # NO exponer stacktrace en producción
-      include-message: never

@@ -26,7 +26,7 @@ public interface CatalogoClient {
      * @throws org.springframework.web.client.HttpClientErrorException.NotFound si el producto no existe
      * @throws org.springframework.web.client.ResourceAccessException si hay problemas de conectividad
      */
-    @GetExchange("/productos/getProductoByIdAndVendedorId")
+    @GetExchange("/productos/resumen")
     @NonNull ProductoResumidoDTO buscarProducto(
         @RequestParam @NonNull String productoId,
         @RequestParam @NonNull String vendedorId

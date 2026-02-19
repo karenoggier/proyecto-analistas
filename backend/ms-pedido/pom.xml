@@ -42,6 +42,12 @@
 			<version>2.1.0</version>
 		</dependency>
 		
+		<!-- Actuator (REQUERIDO para tracing) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
 		<!-- Micrometer Tracing con Brave -->
 		<dependency>
 			<groupId>io.micrometer</groupId>
