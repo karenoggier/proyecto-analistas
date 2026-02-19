@@ -83,7 +83,6 @@ public class PedidoService {
         // 3. Mapeo de cabecera
         pedido.setClienteId(cliente.getId());
         pedido.setCliente(cliente);
-        pedido.setClienteId(cliente.getId());
         pedido.setVendedorId(vendedorId);
         pedido.setEstado(EstadoPedido.PENDIENTE);
         pedido.setFechaCreacion(LocalDateTime.now());
@@ -100,14 +99,16 @@ public class PedidoService {
         carrito.getItems().forEach(item -> {
             DetallePedido detalle = new DetallePedido();
             detalle.setIdProducto(item.getProductoId());
-            detalle.setCantidad(item.getCantidad()); // Asegurarse de que ambos sean Integer
+            detalle.setCantidad(item.getCantidad()); 
             detalle.setMontoUnitario(item.getMontoUnitario());
             detalle.setObservaciones(item.getObservaciones());
-            detalle.setPedido(pedido); // FK hacia el Pedido
+            detalle.setPedido(pedido); 
             pedido.getDetalles().add(detalle);
         });
 
-        return pedidoMapper.toResponseDTO(pedidoRepository.save(pedido));
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        return pedidoMapper.toResponseDTO(pedidoGuardado);
     }
 
     @Transactional

@@ -58,8 +58,8 @@ public class Pedido {
     @JoinColumn(name = "id_direccion", referencedColumnName = "id", nullable = true)
     private Direccion direccion;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_pedido", referencedColumnName = "id")
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<DetallePedido> detalles;
 
     @ManyToOne(fetch = FetchType.LAZY)

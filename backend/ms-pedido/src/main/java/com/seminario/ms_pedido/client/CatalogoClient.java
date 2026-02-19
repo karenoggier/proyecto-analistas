@@ -1,6 +1,7 @@
 package com.seminario.ms_pedido.client;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
@@ -32,6 +33,6 @@ public interface CatalogoClient {
         @RequestParam @NonNull String vendedorId
     );
 
-    @GetExchange("/vendedores/id-usuario")
-    @NonNull String obtenerIdUsuarioPorVendedorId(@RequestParam @NonNull String vendedorId);
+    @GetExchange("/vendedores/id-usuario/{vendedorId}")
+    @NonNull String obtenerIdUsuarioPorVendedorId(@PathVariable("vendedorId") @NonNull String vendedorId);
 }
