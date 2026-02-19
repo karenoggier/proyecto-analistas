@@ -26,8 +26,10 @@ import com.seminario.ms_pedido.model.Pedido;
 import com.seminario.ms_pedido.repository.PedidoRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PedidoService {
     private final PedidoRepository pedidoRepository;
@@ -184,6 +186,17 @@ public class PedidoService {
         Pedido pedido = pedidoRepository.findById(pedidoId)
             .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Pedido no encontrado"));
         return pedidoMapper.toResponseDTO(pedido);
+    }
+
+    @Transactional
+    public void marcarComoPagado(String id) {
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Pedido no encontrado"));
+        
+        pedido.setEstado(EstadoPedido.REALIZADO);
+        pedidoRepository.save(pedido);
+        
+        log.info("Pedido {} pagado exitosamente. Estado actualizado a REALIZADO.", id);
     }
 
 }

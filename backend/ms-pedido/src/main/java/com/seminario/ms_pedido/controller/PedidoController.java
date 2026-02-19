@@ -74,4 +74,11 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.obtenerPedidoPorId(pedidoId));
     }
 
+    @PatchMapping("/{id}/confirmar-pago")
+    @Operation(summary = "Webhook interno: ms-pago avisa que el pago fue exitoso")
+    public ResponseEntity<Void> confirmarPago(@PathVariable String id) {
+        pedidoService.marcarComoPagado(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

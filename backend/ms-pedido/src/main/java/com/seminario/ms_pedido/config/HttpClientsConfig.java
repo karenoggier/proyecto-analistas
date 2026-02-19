@@ -107,7 +107,7 @@ public class HttpClientsConfig {
                 request.getHeaders().setBearerAuth(token);
                 
             } else {
-                log.warn("⚠️ No se encontró JWT token en SecurityContext para request a: {}", 
+                log.warn("No se encontró JWT token en SecurityContext para request a: {}", 
                         request.getURI());
             }
             
