@@ -455,5 +455,16 @@ public class VendedorService {
         return vendedor.getUsuarioId();
     }
 
+
+    public List<String> obtenerDatosVendedor(String id) {
+        Vendedor vendedor = vendedorRepository.findById(id)
+                .orElseThrow(() -> new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado con ID: " + id));
+        
+        List<String> datos = new ArrayList<>();
+        datos.add(vendedor.getNombreNegocio());
+        datos.add(vendedor.getLogo());
+        return datos;   
+    }
+
 }
 

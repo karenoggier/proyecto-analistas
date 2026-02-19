@@ -1,5 +1,7 @@
 package com.seminario.ms_pedido.mapper;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.seminario.ms_pedido.client.CatalogoClient;
@@ -18,11 +20,14 @@ public class PedidoMapper {
 
     public PedidoResponseDTO toResponseDTO(Pedido pedido) {
         if (pedido == null) return null;
+        List<String> datosVendedor = obtenerDatosVendedor(pedido.getVendedorId());
 
         return PedidoResponseDTO.builder()
                 .id(pedido.getId())
-                .clienteId(pedido.getClienteId())
-                .vendedorId(pedido.getVendedorId())
+                .nombreLocal(datosVendedor.get(0))
+                .logo(datosVendedor.get(1))
+                //.clienteId(pedido.getClienteId())
+                //.vendedorId(pedido.getVendedorId())
                 .fechaCreacion(pedido.getFechaCreacion())
                 .estado(pedido.getEstado() != null ? pedido.getEstado().name() : null)
                 .montoTotalProductos(pedido.getMontoTotalProductos())
@@ -40,20 +45,24 @@ public class PedidoMapper {
     public PedidoListadoDTO toListadoDTO(Pedido pedido) {
         if (pedido == null) return null;
         //el primer string es el nombre del local, el segundo el logo
-        /*List<String> datosVendedor = catalogoClient.obtenerDatosVendedor(pedido.getVendedorId());
+        List<String> datosVendedor = obtenerDatosVendedor(pedido.getVendedorId());
 
         String nombreLocal = datosVendedor.get(0);
-        String logo = datosVendedor.get(1);*/
+        String logo = datosVendedor.get(1);
 
         return PedidoListadoDTO.builder()
                 .id(pedido.getId())
-                //.nombreLocal(nombreLocal)
-                //.logo(logo)
+                .nombreLocal(nombreLocal)
+                .logo(logo)
                 .fechaCreacion(pedido.getFechaCreacion())
                 .estado(pedido.getEstado() != null ? pedido.getEstado().name() : null)
                 .montoTotal(pedido.getMontoTotal())
                 .cantidadProductos(pedido.getDetalles() != null ? pedido.getDetalles().size() : 0)
                 .build();
+    }
+
+    public List<String> obtenerDatosVendedor(String vendedorId) {
+        return catalogoClient.obtenerDatosVendedor(vendedorId);
     }
 
     

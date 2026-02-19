@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PedidoResponseDTO {
     private String id;
-    private String clienteId;
-    private String vendedorId;
+    private String nombreLocal;
+    private String logo;
     private LocalDateTime fechaCreacion;
     private String estado; 
     
@@ -28,4 +28,6 @@ public class PedidoResponseDTO {
     private String metodoEnvio;
     private DireccionResponseDTO direccion; 
     private List<DetallePedidoDTO> detalles; 
+   // private String clienteId;
+   // private String vendedorId;
 }

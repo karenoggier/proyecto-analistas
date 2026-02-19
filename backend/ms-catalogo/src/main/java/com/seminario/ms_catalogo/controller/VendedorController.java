@@ -162,4 +162,10 @@ public class VendedorController {
     public ResponseEntity<String> obtenerIdUsuarioPorVendedorId(@PathVariable String id) {
         return ResponseEntity.ok(vendedorService.obtenerIdUsuarioPorVendedorId(id));
     }
+
+    @GetMapping("/nombre-logo/{id}")
+    @Operation(summary = "Obtiene el nombre y logo de un local por su ID")
+    public ResponseEntity<List<String>> obtenerDatosVendedor(@PathVariable String id) {
+        return ResponseEntity.ok(vendedorService.obtenerDatosVendedor(id));
+    }
 }

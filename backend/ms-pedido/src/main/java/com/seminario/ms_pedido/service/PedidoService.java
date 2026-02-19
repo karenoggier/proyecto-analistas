@@ -146,14 +146,38 @@ public class PedidoService {
         return pedidoMapper.toResponseDTO(pedidoRepository.save(pedido));
     }
 
-    public List<PedidoListadoDTO> obtenerListadoPedidos(String emailCliente) {
+    public List<PedidoListadoDTO> obtenerListadoPedidos(String emailCliente, String estado, String periodo) {
         Cliente cliente = clienteService.obtenerClientePorEmail(emailCliente);
-        
-        return pedidoRepository.findByClienteIdAndEstadoNot(cliente.getId(), EstadoPedido.PENDIENTE)
-                .stream()
-                .map(pedidoMapper::toListadoDTO)
-                .toList();
-    }
+        LocalDateTime fechaLimite = switch (periodo != null ? periodo : "") {
+            case "SEMANA"  -> LocalDateTime.now().minusWeeks(1);
+            case "15_DIAS" -> LocalDateTime.now().minusDays(15);
+            case "1_MES"   -> LocalDateTime.now().minusMonths(1);
+            case "3_MESES" -> LocalDateTime.now().minusMonths(3);
+            case "6_MESES" -> LocalDateTime.now().minusMonths(6);
+            default        -> null; // Si es vacío o no coincide, no filtra por fecha
+        };
+        System.out.println("antes de entrar a la base de datos");
 
+        List<Pedido> pedidos = pedidoRepository.findByClienteId(cliente.getId());
+        System.out.println("paso la busqueda en la base de datos ");
+       //se filtra por estado si se proporcionó, y por fecha si se proporcionó
+       return pedidos.stream()
+            // Filtro 1: Siempre excluir PENDIENTE
+            .filter(p -> p.getEstado() != EstadoPedido.PENDIENTE)
+            
+            // Filtro 2: Por Estado (si se proporcionó y no es vacío)
+            .filter(p -> (estado == null || estado.isEmpty()) || 
+                         p.getEstado().name().equalsIgnoreCase(estado))
+            
+            // Filtro 3: Por Fecha (si hay fecha límite calculada)
+            .filter(p -> fechaLimite == null || p.getFechaCreacion().isAfter(fechaLimite))
+            
+            // Ordenar por fecha (más reciente primero)
+            .sorted((p1, p2) -> p2.getFechaCreacion().compareTo(p1.getFechaCreacion()))
+            
+            // Convertir a DTO y enriquecer
+           .map(pedidoMapper::toListadoDTO)
+           .toList();
+    }
 
 }

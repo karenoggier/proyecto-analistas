@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_pedido.dto.ConfirmarEnvioRequestDTO;
-import com.seminario.ms_pedido.dto.IniciarCheckoutRequestDTO;
 import com.seminario.ms_pedido.dto.PedidoListadoDTO;
 import com.seminario.ms_pedido.dto.PedidoResponseDTO;
 import com.seminario.ms_pedido.service.PedidoService;
@@ -59,8 +59,13 @@ public class PedidoController {
 
     @GetMapping("/listado-pedidos")
     @Operation(summary = "Listado de pedidos (con estado distinto de PENDIENTE) del cliente autenticado")
-    public ResponseEntity<List<PedidoListadoDTO>> obtenerListadoPedidos(Authentication auth) {
-        return ResponseEntity.ok(pedidoService.obtenerListadoPedidos(auth.getName()));
+    public ResponseEntity<List<PedidoListadoDTO>> obtenerListadoPedidos(Authentication auth,
+     @RequestParam(required = false) String filtroEstado, 
+     @RequestParam(required = false) String filtroPeriodo) {
+        // Si filtro es null, le pasamos un String vacío para que tu Service no explote
+        String estado = (filtroEstado == null) ? "" : filtroEstado;
+        String periodo = (filtroPeriodo == null) ? "" : filtroPeriodo;
+        return ResponseEntity.ok(pedidoService.obtenerListadoPedidos(auth.getName(), estado, periodo));
     }
 
 }
