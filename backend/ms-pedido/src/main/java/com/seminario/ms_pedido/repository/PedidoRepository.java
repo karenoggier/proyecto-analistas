@@ -1,6 +1,7 @@
 package com.seminario.ms_pedido.repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, String> {
     Optional<Pedido> findByClienteIdAndVendedorIdAndEstado(String clienteId, String vendedorId, EstadoPedido estado);
 
     int deleteByEstadoAndFechaCreacionBefore(EstadoPedido estado, LocalDateTime fecha);
+
+    Collection<Pedido> findByClienteIdAndEstadoNot(String clienteId, EstadoPedido pendiente);
 }

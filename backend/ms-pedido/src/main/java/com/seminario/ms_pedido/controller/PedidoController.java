@@ -1,6 +1,7 @@
 package com.seminario.ms_pedido.controller;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_pedido.dto.ConfirmarEnvioRequestDTO;
 import com.seminario.ms_pedido.dto.IniciarCheckoutRequestDTO;
+import com.seminario.ms_pedido.dto.PedidoListadoDTO;
 import com.seminario.ms_pedido.dto.PedidoResponseDTO;
 import com.seminario.ms_pedido.service.PedidoService;
 
@@ -55,5 +57,10 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.confirmarOActualizarEnvio(dto, auth));
     }
 
+    @GetMapping("/listado-pedidos")
+    @Operation(summary = "Listado de pedidos (con estado distinto de PENDIENTE) del cliente autenticado")
+    public ResponseEntity<List<PedidoListadoDTO>> obtenerListadoPedidos(Authentication auth) {
+        return ResponseEntity.ok(pedidoService.obtenerListadoPedidos(auth.getName()));
+    }
 
 }

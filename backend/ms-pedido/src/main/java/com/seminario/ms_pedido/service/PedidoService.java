@@ -3,6 +3,7 @@ package com.seminario.ms_pedido.service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -11,13 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.seminario.ms_pedido.client.CatalogoClient;
 import com.seminario.ms_pedido.client.UsuarioClient;
-import com.seminario.ms_pedido.dto.ConfirmarEnvioRequestDTO;
-import com.seminario.ms_pedido.dto.IniciarCheckoutRequestDTO;
-import com.seminario.ms_pedido.dto.PedidoResponseDTO;
 import com.seminario.ms_pedido.dto.CarritoResponseDTO;
+import com.seminario.ms_pedido.dto.ConfirmarEnvioRequestDTO;
+import com.seminario.ms_pedido.dto.PedidoListadoDTO;
+import com.seminario.ms_pedido.dto.PedidoResponseDTO;
 import com.seminario.ms_pedido.exception.RequestException;
 import com.seminario.ms_pedido.mapper.PedidoMapper;
-import com.seminario.ms_pedido.model.Carrito;
 import com.seminario.ms_pedido.model.Cliente;
 import com.seminario.ms_pedido.model.DetallePedido;
 import com.seminario.ms_pedido.model.Direccion;
@@ -140,6 +140,15 @@ public class PedidoService {
                 .add(pedido.getCostoEnvio()));
 
         return pedidoMapper.toResponseDTO(pedidoRepository.save(pedido));
+    }
+
+    public List<PedidoListadoDTO> obtenerListadoPedidos(String emailCliente) {
+        Cliente cliente = clienteService.obtenerClientePorEmail(emailCliente);
+        
+        return pedidoRepository.findByClienteIdAndEstadoNot(cliente.getId(), EstadoPedido.PENDIENTE)
+                .stream()
+                .map(pedidoMapper::toListadoDTO)
+                .toList();
     }
 
 

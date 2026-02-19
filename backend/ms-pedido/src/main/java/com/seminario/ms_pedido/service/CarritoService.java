@@ -8,11 +8,12 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.seminario.ms_pedido.client.CatalogoClient;
+import com.seminario.ms_pedido.dto.CarritoResponseDTO;
 import com.seminario.ms_pedido.dto.ProductoResumidoDTO;
 import com.seminario.ms_pedido.exception.RequestException;
-import com.seminario.ms_pedido.dto.CarritoResponseDTO;
 import com.seminario.ms_pedido.mapper.CarritoMapper;
 import com.seminario.ms_pedido.model.Carrito;
 import com.seminario.ms_pedido.model.Cliente;
@@ -139,6 +140,17 @@ public class CarritoService {
         return clienteRepository.findByEmail(email)
             .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Cliente no encontrado"));
     }
+
+    @Transactional
+    public void eliminarCarritoPorVendedorYCliente(String name, String vendedorId) {
+        Cliente cliente = buscarClientePorEmail(name);
+        Optional<Carrito> carrito = carritoRepository.findByClienteIdAndVendedorId(cliente.getId(), vendedorId);
+        if (carrito.isPresent()) {
+            carritoRepository.delete(carrito.get());
+        }
+    }
+
+   
 
 
     /*public ArrayList<Carrito> getCarritoByClienteEmail(String clienteEmail) {
