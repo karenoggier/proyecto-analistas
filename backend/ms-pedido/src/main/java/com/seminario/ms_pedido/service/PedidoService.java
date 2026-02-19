@@ -180,4 +180,10 @@ public class PedidoService {
            .toList();
     }
 
+    public PedidoResponseDTO obtenerPedidoPorId(String pedidoId) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+            .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Pedido no encontrado"));
+        return pedidoMapper.toResponseDTO(pedido);
+    }
+
 }

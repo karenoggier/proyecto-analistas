@@ -68,4 +68,10 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.obtenerListadoPedidos(auth.getName(), estado, periodo));
     }
 
+    @GetMapping("/{pedidoId}")
+    @Operation(summary = "Obtiene los detalles de un pedido específico del cliente autenticado")    
+    public ResponseEntity<PedidoResponseDTO> obtenerPedidoPorId(@PathVariable String pedidoId, Authentication auth) {
+        return ResponseEntity.ok(pedidoService.obtenerPedidoPorId(pedidoId));
+    }
+
 }

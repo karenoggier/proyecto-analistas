@@ -17,5 +17,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, String> {
     int deleteByEstadoAndFechaCreacionBefore(EstadoPedido estado, LocalDateTime fecha);
 
     List<Pedido> findByClienteId(String clienteId);
+
+    Optional<Pedido> findByIdAndClienteId(String pedidoId, String name);
 }
     
