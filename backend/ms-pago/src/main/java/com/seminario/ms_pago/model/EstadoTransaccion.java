@@ -4,5 +4,6 @@ public enum EstadoTransaccion {
     PENDIENTE,
     APROBADO,
     RECHAZADO,
-    REEMBOLSADO
+    REEMBOLSADO,
+    CANCELADO
 }

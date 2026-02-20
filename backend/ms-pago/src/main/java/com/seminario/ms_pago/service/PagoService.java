@@ -23,9 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayList;import java.util.List;import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -36,6 +36,19 @@ public class PagoService {
 
     public Map<String, String> crearPreferencia(String pedidoId) {
         try {
+            // Validar que no exista una transacción PENDIENTE para este pedido
+            List<Pago> pagosPendientes = pagoRepository.findByPedidoIdAndEstadoOrderByFechaCreacionAsc(pedidoId, EstadoTransaccion.PENDIENTE);
+            
+            if (!pagosPendientes.isEmpty()) {
+                Pago pagoPendiente = pagosPendientes.get(0);
+                log.warn("Ya existe una transacción PENDIENTE para el pedido {}. Preferencia ID: {}", pedidoId, pagoPendiente.getPreferenciaId());
+                // Retornar la preferencia existente en lugar de crear una nueva
+                return Map.of(
+                    "preferenceId", pagoPendiente.getPreferenciaId(),
+                    "url", "https://www.mercadopago.com.ar/checkout/v1/redirect?preference-id=" + pagoPendiente.getPreferenciaId()
+                );
+            }
+
             PedidoResponseDTO pedido = pedidoClient.obtenerPedidoPorId(pedidoId);
 
             PreferenceClient client = new PreferenceClient();
@@ -89,32 +102,111 @@ public class PagoService {
         }
     }
 
+   /*  @Transactional
+    public void procesarNotificacionPago(String paymentId) {
+        try {
+            
+            PaymentClient client = new PaymentClient();
+            Payment payment = client.get(Long.parseLong(paymentId));
+            String pedidoId = payment.getExternalReference();
+
+            // 1. Obtener el estado real de Mercado Pago (convertir approved -> APROBADO, etc.)
+            EstadoTransaccion nuevoEstado = mapearEstado(payment.getStatus());
+
+            // 2. Buscar y borrar TODOS los registros previos (pendientes) de este pedido
+            List<Pago> pagosPrevios = pagoRepository.findAllByPedidoIdOrderByFechaCreacionDesc(pedidoId);
+            String preferenciaIdOriginal = null;
+            
+            if (!pagosPrevios.isEmpty()) {
+                preferenciaIdOriginal = pagosPrevios.get(0).getPreferenciaId();
+                log.info("Borrando {} registros previos para el pedido {}", pagosPrevios.size(), pedidoId);
+                pagoRepository.deleteAll(pagosPrevios);
+                // Forzamos el borrado para evitar conflictos de ID si usas la misma clave primaria
+                pagoRepository.flush(); 
+            }
+
+            // 3. Crear el nuevo registro con el estado final
+            Pago pagoFinal = new Pago();
+            pagoFinal.setPedidoId(pedidoId);
+            pagoFinal.setIdMP(paymentId);
+            pagoFinal.setPreferenciaId(preferenciaIdOriginal);
+            pagoFinal.setMonto(payment.getTransactionAmount());
+            pagoFinal.setEstado(nuevoEstado);
+            pagoFinal.setFechaCreacion(LocalDateTime.now());
+            
+            if (payment.getDateApproved() != null) {
+                pagoFinal.setFechaAprobacion(payment.getDateApproved().toLocalDateTime());
+            }
+            
+            pagoFinal.setMetodoDePago(mapearMetodo(payment.getPaymentTypeId()));
+
+            // 4. Guardar el nuevo registro limpio
+            pagoRepository.save(pagoFinal);
+
+            // 5. Si fue aprobado, confirmar al micro de pedidos
+            if (EstadoTransaccion.APROBADO.equals(nuevoEstado)) {
+                pedidoClient.confirmarPago(pedidoId);
+                log.info("Pedido {} confirmado exitosamente tras borrar pendientes.", pedidoId);
+            }
+
+        } catch (Exception e) {
+            log.error("Error procesando Webhook de MP para el pago {}: {}", paymentId, e.getMessage(), e);
+        }
+    }*/
+
     @Transactional
     public void procesarNotificacionPago(String paymentId) {
         try {
             PaymentClient client = new PaymentClient();
             Payment payment = client.get(Long.parseLong(paymentId));
+            String pedidoId = payment.getExternalReference();
+            String mpStatus = payment.getStatus();
 
-            if ("approved".equals(payment.getStatus())) {
-                String pedidoId = payment.getExternalReference(); 
-
-                Pago pago = pagoRepository.findByPedidoId(pedidoId)
-                    .orElseThrow(() -> new RuntimeException("No se encontró el registro local para el pedido: " + pedidoId));
-
-                pago.setIdMP(paymentId); 
-                pago.setEstado(EstadoTransaccion.APROBADO);
-                pago.setFechaAprobacion(payment.getDateApproved().toLocalDateTime());
-                      
-                pago.setMetodoDePago(mapearMetodo(payment.getPaymentTypeId()));
-                
-                pagoRepository.save(pago); 
-
-                pedidoClient.confirmarPago(pedidoId);
-                
-                log.info("Pedido {} marcado como PAGADO. Transacción MP: {}", pedidoId, paymentId);
+            // 1. Buscamos registros previos para este pedido
+            List<Pago> pagosPrevios = pagoRepository.findAllByPedidoIdOrderByFechaCreacionDesc(pedidoId);
+            
+            // Intentamos recuperar el preferenciaId de lo que ya tenemos guardado
+            String preferenciaIdGuardada = null;
+            if (!pagosPrevios.isEmpty()) {
+                preferenciaIdGuardada = pagosPrevios.get(0).getPreferenciaId();
             }
+
+            // 2. Buscamos si este intento de pago (paymentId) ya existe
+            Optional<Pago> pagoExistentePorMP = pagoRepository.findByIdMP(paymentId);
+            Pago pago;
+
+            if (pagoExistentePorMP.isPresent()) {
+                pago = pagoExistentePorMP.get();
+            } else {
+                // Si es un reintento o el primer aviso, creamos un registro
+                pago = new Pago();
+                pago.setPedidoId(pedidoId);
+                pago.setFechaCreacion(LocalDateTime.now());
+                // 💡 REUTILIZAMOS el ID de preferencia que recuperamos arriba
+                pago.setPreferenciaId(preferenciaIdGuardada); 
+            }
+
+            // 3. Seteamos los datos que SÍ funcionan en todas las versiones de la SDK
+            pago.setIdMP(paymentId);
+            pago.setEstado(mapearEstado(mpStatus));
+            pago.setMonto(payment.getTransactionAmount());
+            
+            if (payment.getDateApproved() != null) {
+                pago.setFechaAprobacion(payment.getDateApproved().toLocalDateTime());
+            }
+            
+            pago.setMetodoDePago(mapearMetodo(payment.getPaymentTypeId()));
+
+            pagoRepository.save(pago);
+
+            // 4. Si el pago actual es el aprobado, confirmar pedido
+            if ("approved".equals(mpStatus)) {
+                pedidoClient.confirmarPago(pedidoId);
+                log.info("¡ÉXITO! Pedido {} pagado con ID MP: {}", pedidoId, paymentId);
+            }
+
         } catch (Exception e) {
-            log.error("Error procesando Webhook de MP para el pago {}: {}", paymentId, e.getMessage());
+            log.error("Error procesando pago {}: {}", paymentId, e.getMessage());
         }
     }
 
@@ -125,4 +217,34 @@ public class PagoService {
             default -> MetodoPago.DINERO_CUENTA;
         };
     }
+
+    public Map<String, Object> obtenerEstadoPago(String pedidoId) {
+        List<Pago> pagos = pagoRepository.findAllByPedidoIdOrderByFechaCreacionDesc(pedidoId);
+        
+        if (pagos.isEmpty()) {
+            return Map.of(
+                "estado", "SIN_PAGO",
+                "mensaje", "No hay transacción registrada para este pedido"
+            );
+        }
+
+        Pago pago = pagos.get(0);
+        return Map.of(
+            "estado", pago.getEstado().toString(),
+            "idMP", pago.getIdMP() != null ? pago.getIdMP() : "",
+            "monto", pago.getMonto(),
+            "metodoDePago", pago.getMetodoDePago() != null ? pago.getMetodoDePago().toString() : "",
+            "fechaCreacion", pago.getFechaCreacion().toString(),
+            "fechaAprobacion", pago.getFechaAprobacion() != null ? pago.getFechaAprobacion().toString() : ""
+        );
+    }
+
+    private EstadoTransaccion mapearEstado(String mpStatus) {
+        return switch (mpStatus) {
+            case "approved" -> EstadoTransaccion.APROBADO;
+            case "rejected" -> EstadoTransaccion.RECHAZADO; // Asegúrate de tener este en tu Enum
+            case "cancelled" -> EstadoTransaccion.CANCELADO;
+            default -> EstadoTransaccion.PENDIENTE;
+        };
+}
 }

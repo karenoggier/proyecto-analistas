@@ -17,4 +17,9 @@ public class PagoController {
     public ResponseEntity<Map<String, String>> crear(@PathVariable String pedidoId) {
         return ResponseEntity.ok(pagoService.crearPreferencia(pedidoId));
     }
+
+    @GetMapping("/estado/{pedidoId}")
+    public ResponseEntity<Map<String, Object>> obtenerEstadoPago(@PathVariable String pedidoId) {
+        return ResponseEntity.ok(pagoService.obtenerEstadoPago(pedidoId));
+    }
 }

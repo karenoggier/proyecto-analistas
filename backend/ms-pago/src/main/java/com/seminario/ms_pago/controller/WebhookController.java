@@ -23,15 +23,17 @@ public class WebhookController {
     public ResponseEntity<Void> recibirNotificacion(
             @RequestParam(value = "data.id", required = false) String dataId,
             @RequestParam(value = "id", required = false) String id,
-            @RequestParam("type") String type) {
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "topic", required = false) String topic) {
         
         String paymentId = (dataId != null) ? dataId : id;
         
-        log.info("Notificación recibida de MP: Tipo={}, ID={}", type, paymentId);
+        String notificationType = (type != null) ? type : topic;
+        
 
-        if ("payment".equals(type) && paymentId != null) {
+        if (paymentId != null && ("payment".equals(notificationType) || "payment".equals(topic))) {
             pagoService.procesarNotificacionPago(paymentId);
-        }
+        } 
 
         return ResponseEntity.ok().build();
     }

@@ -1,34 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./pedidos.module.css";
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
-
-const ORDERS = [
-  {
-    id: "462595752",
-    vendor: "Burger King Obelisco",
-    logo: "/images/burger-king-logo.jpg",
-    status: "En curso",
-    statusKey: "enCurso",
-    products: 1,
-    date: "09/02/2026",
-    total: 11700,
-  },
-  {
-    id: "585264864",
-    vendor: "McDonald's",
-    logo: "/images/mcdonalds-logo.jpg",
-    status: "Entregado",
-    statusKey: "entregado",
-    products: 3,
-    date: "01/02/2026",
-    total: 35050,
-  },
-];
 
 const STATUS_FILTERS = ["Entregados", "Cancelados"];
 const PERIOD_FILTERS = [
@@ -43,6 +20,90 @@ export default function MisPedidosPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [clientProfile, setClientProfile] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPerfil();
+    fetchPedidos();
+  }, [selectedStatus, selectedPeriod]);
+
+  const fetchPerfil = async () => {
+      const token = sessionStorage.getItem("token")
+      const rol = sessionStorage.getItem("rol")
+  
+      if (!token || rol !== "CLIENTE") {
+        window.location.href = "/login"
+        return
+      }
+        try {
+          const headers = {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          };
+  
+          const [perfilRes] = await Promise.all([
+              fetch('/pedidoMs/clientes/perfil', { method: 'GET', headers }),
+          ]);
+  
+          if (perfilRes.status === 401 || perfilRes.status === 403) {
+              sessionStorage.clear(); 
+              window.location.href = "/login?expired=true"; 
+              return;
+          }
+  
+          if (perfilRes.ok) {
+              const dataPerfil = await perfilRes.json();
+              setClientProfile(dataPerfil);
+          } else {
+              console.error("Error al obtener perfil del cliente");
+          }
+  
+        } catch (error) {
+          console.error("Error de red:", error);
+        } 
+  }
+
+  const fetchPedidos = async () => {
+    setLoading(true);
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) return;
+
+      const params = new URLSearchParams();
+      
+      // Mapeo de filtros UI -> Backend
+      if (selectedStatus) {
+        const statusMap = { "Entregados": "ENTREGADO", "Cancelados": "CANCELADO" };
+        if (statusMap[selectedStatus]) params.append("filtroEstado", statusMap[selectedStatus]);
+      }
+      
+      if (selectedPeriod) {
+        const periodMap = {
+          "Ultima semana": "SEMANA",
+          "Ultimos 15 dias": "15_DIAS",
+          "Ultimos 30 dias": "1_MES",
+          "Ultimos 3 meses": "3_MESES",
+          "Ultimos 6 meses": "6_MESES"
+        };
+        if (periodMap[selectedPeriod]) params.append("filtroPeriodo", periodMap[selectedPeriod]);
+      }
+
+      const res = await fetch(`/pedidoMs/pedidos/listado-pedidos?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const activeFilterCount =
     (selectedStatus ? 1 : 0) + (selectedPeriod ? 1 : 0);
@@ -56,95 +117,109 @@ export default function MisPedidosPage() {
     setShowFilters(false);
   }
 
-  const statusClassName = (key) => {
-    if (key === "entregado") return styles.statusEntregado;
-    if (key === "cancelado") return styles.statusCancelado;
-    return styles.statusEnCurso;
+  const getStatusClass = (status) => {
+    if (!status) return styles.statusEnCurso;
+    const s = status.toUpperCase();
+    if (s === 'ENTREGADO' || s === 'REALIZADO') return styles.statusEntregado;
+    if (s === 'CANCELADO') return styles.statusCancelado;
+    return styles.statusEnCurso; // Para EN_PREPARACION, EN_CAMINO, etc.
+  };
+
+  const handleRefreshProfile = () => {
+    fetchPerfil();
   };
 
   return (
-    <div>
-      <Navbar />
-    <div className={styles.container}>
-      <div className={styles.titleRow}>
-        <Link href="/" className={styles.backBtn} aria-label="Volver">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"
-              fill="#fff"
-            />
-          </svg>
-        </Link>
-        <h1 className={styles.title}>Mis Pedidos</h1>
-      </div>
+    <div className={styles.page}>
+      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} />
+      
+      <main className={styles.main}>
+        <div className={styles.header}>
+          <Link href="/cliente" className={styles.backBtn} aria-label="Volver">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+            </svg>
+          </Link>
+          <h1 className={styles.title}>Mis Pedidos</h1>
+        </div>
 
-      <div className={styles.filterBar}>
-        <button
-          className={styles.filterBtn}
-          onClick={() => setShowFilters(true)}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+        <div className={styles.filterBar}>
+          <button
+            className={styles.filterBtn}
+            onClick={() => setShowFilters(true)}
           >
-            <path
-              d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"
-              fill="#666"
-            />
-          </svg>
-          Filtrar por...
-        </button>
-      </div>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"
+              fill="#ff4b7e"
+              />
+            </svg>
+            Filtrar por...
+          </button>
+        </div>
 
-      <div className={styles.orderList}>
-        {ORDERS.map((order) => (
-          <div key={order.id} className={styles.orderCard}>
-            <Image
-              src={order.logo || "/placeholder.svg"}
-              alt={order.vendor}
-              width={64}
-              height={64}
-              className={styles.vendorLogo}
-            />
-            <div className={styles.orderInfo}>
-              <span
-                className={`${styles.statusBadge} ${statusClassName(order.statusKey)}`}
-              >
-                {order.status}
-              </span>
-              <p className={styles.vendorName}>{order.vendor}</p>
-              <p className={styles.orderMeta}>
-                {order.products} producto{order.products > 1 ? "s" : ""}
-              </p>
-              <p className={styles.orderMeta}>
-                Fecha de realizacion: {order.date}
-              </p>
-            </div>
-            <div className={styles.orderRight}>
-              <p className={styles.orderTotal}>
-                ${order.total.toLocaleString("es-AR")}
-              </p>
-              <Link
-                href={`/cliente/detalle-pedido/${order.id}`}
-                className={styles.detailLink}
-              >
-                ver el detalle del pedido {order.id}
-              </Link>
-            </div>
+        {loading ? (
+          <div style={{textAlign: 'center', padding: '2rem', color: '#666'}}>Cargando pedidos...</div>
+        ) : orders.length === 0 ? (
+          <div style={{textAlign: 'center', padding: '2rem', color: '#666'}}>No se encontraron pedidos.</div>
+        ) : (
+          <div className={styles.orderList}>
+            {orders.map((order) => (
+              <div key={order.id} className={styles.orderCard} style={{ alignItems: 'stretch' }}>
+                <div className={styles.vendorLogoWrapper}>
+                  {order.logo ? (
+                    <Image
+                      src={order.logo}
+                      alt={order.nombreLocal || "Vendedor"}
+                      width={64}
+                      height={64}
+                      className={styles.vendorLogo}
+                    />
+                  ) : (
+                    <div style={{width: 64, height: 64, background: '#eee', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#999'}}>
+                      Sin logo
+                    </div>
+                  )}
+                </div>
+                
+                <div className={styles.orderInfo}>
+                  <span
+                    className={`${styles.statusBadge} ${getStatusClass(order.estado)}`}
+                  >
+                    {order.estado ? order.estado.replace(/_/g, ' ') : 'DESCONOCIDO'}
+                  </span>
+                  <p className={styles.vendorName}>{order.nombreLocal}</p>
+                  <p className={styles.orderMeta}>
+                    {order.cantidadProductos || 0} producto{(order.cantidadProductos !== 1) ? "s" : ""}
+                  </p>
+                  <p className={styles.orderMeta}>
+                    Fecha de realización: {order.fechaCreacion ? new Date(order.fechaCreacion).toLocaleDateString() : '-'}
+                  </p>
+                </div>
+                <div className={styles.orderRight} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                  <div></div>
+                  <p className={styles.orderTotal}>
+                    ${order.montoTotal ? order.montoTotal.toLocaleString("es-AR") : "0"}
+                  </p>
+                  <Link
+                    href={`/cliente/detalle-pedido/${order.id}`}
+                    className={styles.detailLink}
+                  >
+                    ver detalle del pedido {order.id}
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        )}
 
-      {showFilters && (
+        {showFilters && (
         <div
           className={styles.modalOverlay}
           onClick={() => setShowFilters(false)}
@@ -226,9 +301,9 @@ export default function MisPedidosPage() {
             </div>
           </div>
         </div>
-      )}
+        )}
+      </main>
+      <Footer />
     </div>
-    <Footer />
-</div>
   );
 }
