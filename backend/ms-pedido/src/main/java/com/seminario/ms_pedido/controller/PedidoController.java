@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_pedido.dto.ConfirmarEnvioRequestDTO;
+import com.seminario.ms_pedido.dto.PedidoDetalleDTO;
 import com.seminario.ms_pedido.dto.PedidoListadoDTO;
 import com.seminario.ms_pedido.dto.PedidoResponseDTO;
 import com.seminario.ms_pedido.service.PedidoService;
@@ -79,6 +80,12 @@ public class PedidoController {
     public ResponseEntity<Void> confirmarPago(@PathVariable String id) {
         pedidoService.marcarComoPagado(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/detalle-pedido/{pedidoId}")
+    @Operation(summary = "Obtiene los detalles de un pedido específico del cliente autenticado")    
+    public ResponseEntity<PedidoDetalleDTO> obtenerDetallePedidoPorId(@PathVariable String pedidoId, Authentication auth) {
+        return ResponseEntity.ok(pedidoService.obtenerDetallePedidoPorId(pedidoId, auth.getName()));
     }
 
 }

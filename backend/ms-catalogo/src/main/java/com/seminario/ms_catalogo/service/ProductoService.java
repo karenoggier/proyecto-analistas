@@ -1,16 +1,13 @@
 package com.seminario.ms_catalogo.service;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.seminario.ms_catalogo.dto.ProductoResponseDTO;
 import com.seminario.ms_catalogo.dto.consultas_ms_pedido.ProductoResumidoDTO;
 import com.seminario.ms_catalogo.exception.RequestException;
 import com.seminario.ms_catalogo.mapper.ProductoMapper;
-import com.seminario.ms_catalogo.model.Categoria;
-import com.seminario.ms_catalogo.model.Estado;
-import com.seminario.ms_catalogo.model.Producto;
-import com.seminario.ms_catalogo.model.Subcategoria;
 import com.seminario.ms_catalogo.model.Vendedor;
 
 import lombok.RequiredArgsConstructor;
@@ -56,7 +53,15 @@ public class ProductoService {
         .orElseThrow(() -> new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado"));
     }
 
+    public List<String> getNombreImagenProducto(String productoId, String vendedorId) {
+        Vendedor vendedor = vendedorService.usuarioExistente(vendedorId);
+        return vendedor.getProductos().stream()
+                .filter(p -> p.getId().equals(productoId))
+                .findFirst()
+                .map(p -> List.of(p.getNombre(), p.getImagen()))
+                .orElseThrow(() -> new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Producto no encontrado"));
+    }
+
 
     
-
 }

@@ -1,7 +1,10 @@
 package com.seminario.ms_catalogo.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,6 +55,13 @@ public class ProductoController {
 
         return ResponseEntity.ok(productoService.getProductoResumido(productoId, vendedorId));
     }
-        
+
+    @GetMapping("/nombre-imagen/{productoId}/{vendedorId}")
+    @Operation(summary = "Obtiene el nombre y la imagen de un producto. Llamado internamente por ms-pedido")
+    public ResponseEntity<List<String>> getNombreImagenProducto(
+        @PathVariable String productoId,
+        @PathVariable String vendedorId) {
+        return ResponseEntity.ok(productoService.getNombreImagenProducto(productoId, vendedorId));
+    }
 
 }

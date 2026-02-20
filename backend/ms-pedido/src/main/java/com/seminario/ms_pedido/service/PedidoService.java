@@ -14,9 +14,11 @@ import com.seminario.ms_pedido.client.CatalogoClient;
 import com.seminario.ms_pedido.client.UsuarioClient;
 import com.seminario.ms_pedido.dto.CarritoResponseDTO;
 import com.seminario.ms_pedido.dto.ConfirmarEnvioRequestDTO;
+import com.seminario.ms_pedido.dto.PedidoDetalleDTO;
 import com.seminario.ms_pedido.dto.PedidoListadoDTO;
 import com.seminario.ms_pedido.dto.PedidoResponseDTO;
 import com.seminario.ms_pedido.exception.RequestException;
+import com.seminario.ms_pedido.mapper.ClienteMapper;
 import com.seminario.ms_pedido.mapper.PedidoMapper;
 import com.seminario.ms_pedido.model.Cliente;
 import com.seminario.ms_pedido.model.DetallePedido;
@@ -37,6 +39,7 @@ public class PedidoService {
     private final CarritoService carritoService;
     private final ClienteService clienteService;
     private final PedidoMapper pedidoMapper;
+    private final ClienteMapper clienteMapper;
     private final CatalogoClient catalogoClient;
     private final UsuarioClient usuarioClient;
 
@@ -197,6 +200,19 @@ public class PedidoService {
         pedidoRepository.save(pedido);
         
         log.info("Pedido {} pagado exitosamente. Estado actualizado a REALIZADO.", id);
+    }
+
+    public PedidoDetalleDTO obtenerDetallePedidoPorId(String pedidoId, String emailCliente) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Pedido no encontrado"));
+        
+        Cliente cliente = clienteService.obtenerClientePorEmail(emailCliente);
+        if (!pedido.getClienteId().equals(cliente.getId())) {
+            throw new RequestException("PED", 403, HttpStatus.FORBIDDEN, "No tiene permiso para ver este pedido");
+        }
+        //se sacan las direcciones que no son la misma que el pedido
+        cliente.setDireccion(List.of(pedido.getDireccion() != null ? pedido.getDireccion() : new Direccion()));
+        return pedidoMapper.toDetalleDTO(pedido, clienteMapper.toResponseDTO(cliente));
     }
 
 }

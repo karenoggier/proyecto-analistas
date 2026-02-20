@@ -40,4 +40,10 @@ public interface CatalogoClient {
 
     @GetExchange("/vendedores/nombre-logo/{vendedorId}")
     @NonNull List<String> obtenerDatosVendedor(@PathVariable("vendedorId") @NonNull String vendedorId);
+
+    @GetExchange("/productos/nombre-imagen/{productoId}/{vendedorId}")
+    @NonNull List<String> obtenerDatosProducto(
+        @PathVariable("productoId") @NonNull String productoId,
+        @PathVariable("vendedorId") @NonNull String vendedorId
+    );
 }
