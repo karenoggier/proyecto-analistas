@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.seminario.ms_pedido.client.CatalogoClient;
 import com.seminario.ms_pedido.dto.CarritoResponseDTO;
+import com.seminario.ms_pedido.dto.ItemCarritoRequestDTO;
 import com.seminario.ms_pedido.dto.ProductoResumidoDTO;
+import com.seminario.ms_pedido.dto.VendedorResumidoDTO;
 import com.seminario.ms_pedido.exception.RequestException;
 import com.seminario.ms_pedido.mapper.CarritoMapper;
 import com.seminario.ms_pedido.model.Carrito;
@@ -96,12 +98,23 @@ public class CarritoService {
         Cliente cliente = buscarClientePorEmail(email);
         List<Carrito> carritos = carritoRepository.findByClienteId(cliente.getId());
         
-        return carritos.stream()
-            .map(carrito -> {
-                carrito.calcularMontosTotales(); // Recalculamos antes de responder
-                return carritoMapper.toResponseDTO(carrito);
-            })
-            .toList();
+        return carritos.stream().map(carrito -> {
+        carrito.calcularMontosTotales();
+        CarritoResponseDTO dto = carritoMapper.toResponseDTO(carrito);
+        
+        try {
+            VendedorResumidoDTO infoVendedor = catalogoClient.obtenerDatosVendedor(carrito.getVendedorId());
+            
+            dto.setNombreVendedor(infoVendedor.getNombreNegocio());
+            dto.setRealizaEnvios(infoVendedor.getRealizaEnvios());
+            
+        } catch (Exception e) {
+            dto.setNombreVendedor("Local no disponible");
+            dto.setRealizaEnvios(false);
+        }
+        
+        return dto;
+    }).toList();
     }
 
     // DELETE: Borrar uno o más ítems
@@ -150,5 +163,23 @@ public class CarritoService {
         }
     }
 
+    @Transactional
+    public CarritoResponseDTO actualizarCantidad(String email, ItemCarritoRequestDTO request) {
+        Cliente cliente = buscarClientePorEmail(email);
+
+        Carrito carrito = carritoRepository.findByClienteIdAndVendedorId(cliente.getId(),request.getVendedorId())
+                .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Carrito no encontrado"));
+
+        DetalleCarrito detalle = carrito.getDetallesCarrito().stream()
+                .filter(d -> d.getProductoId().equals(request.getProductoId()) && 
+                            Objects.equals(d.getObservaciones(), request.getObservaciones()))
+                .findFirst()
+                .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "El producto no está en el carrito"));
+
+        detalle.setCantidad(request.getCantidad());
+
+        carrito.calcularMontosTotales();
+        return carritoMapper.toResponseDTO(carritoRepository.save(carrito));
+    }
 
 }

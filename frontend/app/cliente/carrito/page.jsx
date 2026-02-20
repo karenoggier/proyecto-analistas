@@ -67,26 +67,7 @@ export default function CarritoPage() {
 
       if (res.ok) {
         const data = await res.json();
-        
-        const enrichedCarts = await Promise.all(data.map(async (cart) => {
-          let vendorName = "Vendedor";
-          let realizaEnvios = false;
-          try {
-            const vRes = await fetch(`/catalogoMs/api/vendedores/perfil-publico/${cart.vendedorId}`, {
-               headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (vRes.ok) {
-              const vData = await vRes.json();
-              vendorName = vData.nombreNegocio;
-              realizaEnvios = vData.realizaEnvios;
-            }
-          } catch (e) {
-            console.error("Error fetching vendor:", e);
-          }
-          return { ...cart, vendorName, realizaEnvios };
-        }));
-
-        setCarts(enrichedCarts);
+        setCarts(data);
       }
     } catch (error) {
       console.error("Error fetching carts:", error);
@@ -97,68 +78,35 @@ export default function CarritoPage() {
 
   const updateQty = async (cart, item, delta) => {
     const newQty = item.cantidad + delta;
-    
+    const token = sessionStorage.getItem("token");
+
     if (newQty <= 0) {
       await removeItem(cart, item);
       return;
     }
 
     try {
-      const token = sessionStorage.getItem("token");
-      
-      if (delta < 0) {
-        const deleteRes = await fetch('/pedidoMs/carrito/items', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            vendedorId: cart.vendedorId,
-            itemsIds: [item.idItem]
-          })
-        });
+      const response = await fetch('/pedidoMs/carrito/items/cantidad', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          vendedorId: cart.vendedorId,
+          productoId: item.productoId,
+          cantidad: newQty, 
+          observaciones: item.observaciones
+        })
+      });
 
-        if (!deleteRes.ok) return;
-
-        const rePostRes = await fetch('/pedidoMs/carrito/items', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            vendedorId: cart.vendedorId,
-            productoId: item.productoId,
-            cantidad: newQty,
-            observaciones: item.observaciones
-          })
-        });
-
-        if (rePostRes.ok) {
-          await fetchCarts();
-        }
+      if (response.ok) {
+        await fetchCarts();
       } else {
-        const res = await fetch('/pedidoMs/carrito/items', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            vendedorId: cart.vendedorId,
-            productoId: item.productoId,
-            cantidad: delta,
-            observaciones: item.observaciones
-          })
-        });
-
-        if (res.ok) {
-          await fetchCarts();
-        }
+        console.error("No se pudo actualizar la cantidad en el servidor");
       }
     } catch (error) {
-      console.error("Error updating quantity:", error);
+      console.error("Error de red al actualizar cantidad:", error);
     }
   };
 
@@ -230,7 +178,7 @@ export default function CarritoPage() {
                         onChange={() => {}}
                         style={{ marginRight: '10px', accentColor: '#e84c6a', width: '20px', height: '20px', cursor: 'pointer' }}
                       />
-                      <h2 className={styles.vendorName}>Productos de {cart.vendorName}</h2>
+                      <h2 className={styles.vendorName}>Productos de {cart.nombreVendedor}</h2>
                     </div>
 
                     <div className={styles.itemList}>

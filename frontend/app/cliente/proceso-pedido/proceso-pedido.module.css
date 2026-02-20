@@ -346,35 +346,24 @@
   font-weight: 600;
 }
 
-.mercadoPagoBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
-  background: #FFE600;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #003087;
-  cursor: pointer;
-  margin-top: 5px;
-}
-
-.mercadoPagoBtn:hover {
-  background: #ffd900;
-}
-
-.mercadoPagoBtnImg {
-  height: 20px;
-  width: auto;
-  object-fit: contain;
-}
-
 .paymentSecure {
   font-size: 11px;
   color: #888;
   margin-top: 4px;
+}
+
+.btnContainer {
+  display: flex;          
+  justify-content: center; 
+  align-items: center;    
+  width: 100%;          
+  margin-top: 10px;      
+}
+
+.btnContainer > div {
+  width: auto;            
+  min-width: 280px;       
+  max-width: 400px;       
 }
 
 /* Continue Button */
@@ -521,12 +510,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 20px 20px;
   text-align: center;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 /* Imagen y estados visuales */
@@ -556,7 +545,7 @@
 .errorTitle {
   font-size: 24px;
   font-weight: 700;
-  color: #e84c6a; /* El color rojo de tu marca */
+  color: #e84c6a; 
   margin-bottom: 8px;
 }
 
@@ -593,7 +582,7 @@
 
 .successTimeText {
   font-size: 14px;
-  color: #e84c6a;
+  color: #ff4b7e;
   font-weight: 500;
   line-height: 1.4;
   text-align: left;
@@ -602,20 +591,23 @@
 /* Botones de acción */
 .successActions {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  gap: 16px;
   width: 100%;
-  max-width: 300px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .successPrimaryBtn {
-  background-color: #e84c6a;
+  background-color: #ff4b7e;
   color: white;
   padding: 14px;
   border-radius: 25px;
   font-weight: 600;
   text-decoration: none;
   transition: background-color 0.2s;
+  min-width: 250px;
+  text-align: center;
 }
 
 .successPrimaryBtn:hover {
@@ -631,9 +623,69 @@
   text-decoration: none;
   border: 1px solid #ddd;
   transition: all 0.2s;
+  min-width: 250px;
+  text-align: center;
 }
 
 .successSecondaryBtn:hover {
   background-color: #f5f5f5;
   border-color: #ccc;
+}
+
+/* Estilos para el listado de direcciones en Paso 2 */
+.addressList {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.addressOptionItem {
+  border: none;
+  margin-bottom: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.divider {
+  height: 1px;
+  background-color: #e5e7eb;
+  width: 100%;
+}
+
+.emptyAddressMsg {
+  padding: 1rem;
+  color: #666;
+  font-size: 14px;
+}
+
+.addAddressLink {
+  text-decoration: none;
+  border: none;
+  margin-bottom: 0;
+  border-radius: 0;
+  color: #ff4b7e;
+}
+
+/* Estilos para alertas y avisos */
+.warningAlert {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background-color: #ffe9cd;
+  color: #ff4b7e;
+  border: 1px solid #ffe9cd;
+  border-radius: 0.25rem;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.warningIcon {
+  flex-shrink: 0;
+}
+
+.pickupLabelText {
+  font-size: 14px;
+  color: #222;
 }

@@ -18,22 +18,33 @@ export default function Paso3Page() {
     
   useEffect(() => {
     fetchPerfil();
-  }, []);
-
-  useEffect(() => {
-    // Cargar pedido desde sessionStorage
-    const pedidoStr = sessionStorage.getItem("currentPedido");
-    if (pedidoStr) {
-      try {
-        const pedidoData = JSON.parse(pedidoStr);
-        console.log("Pedido cargado en paso 3:", pedidoData);
-        setPedido(pedidoData);
-      } catch (e) {
-        console.error("Error parseando pedido de sessionStorage:", e);
-      }
+    const pedidoId = sessionStorage.getItem("currentPedidoId");
+  
+    if (pedidoId) {
+      fetchPedido(pedidoId);
+    } else {
+      router.push('/cliente/carrito');
     }
   }, []);
+
+  const fetchPedido = async (id) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch(`/pedidoMs/pedidos/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       
+      if (res.ok) {
+        const data = await res.json();
+        setPedido(data);
+      } else {
+        console.error("No se pudo recuperar el pedido");
+      }
+    } catch (error) {
+      console.error("Error de red:", error);
+    }
+  };
+
   const fetchPerfil = async () => {
     const token = sessionStorage.getItem("token")
     const rol = sessionStorage.getItem("rol")
@@ -106,11 +117,11 @@ export default function Paso3Page() {
             </div>
           </div>
           <ResumenCompra 
-            realizaEnvios={!(pedido?.costoEnvio === 0 || pedido?.costoEnvio === null || pedido?.metodoEnvio === 'RETIRO_EN_LOCAL')}
-            subtotal={pedido?.montoTotalProductos ? parseFloat(pedido.montoTotalProductos) : 0}
-            comisionApp={pedido?.comisionApp ? parseFloat(pedido.comisionApp) : 0}
-            costoEnvio={pedido?.costoEnvio ? parseFloat(pedido.costoEnvio) : 0}
-            items={pedido?.detalles && Array.isArray(pedido.detalles) ? pedido.detalles.reduce((acc, item) => acc + (item.cantidad || 0), 0) : 0}
+            realizaEnvios={pedido?.metodoEnvio === 'ENVIO_A_DOMICILIO'} 
+            subtotal={pedido?.montoTotalProductos || 0}
+            comisionApp={pedido?.comisionApp || 0}
+            costoEnvio={pedido?.costoEnvio || 0}
+            items={pedido?.detalles?.reduce((acc, item) => acc + item.cantidad, 0) || 0}
           />
         </div>
 

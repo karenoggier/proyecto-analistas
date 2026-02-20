@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,35 +75,16 @@ public class CarritoController {
         return ResponseEntity.ok(resultado);
     }
 
-    
+    @PatchMapping("/items/cantidad")
+    @Operation(summary = "Actualiza la cantidad de un item específico (sobrescribe)")
+    public ResponseEntity<CarritoResponseDTO> actualizarCantidad(
+            @Valid @RequestBody ItemCarritoRequestDTO request, 
+            Authentication auth) {
+        
+        CarritoResponseDTO resultado = carritoService.actualizarCantidad(auth.getName(), request);
 
-    /*@GetMapping("/view")
-    public ResponseEntity<ArrayList<CarritoDTO>> viewCarrito(Authentication authentication) {
-        String email = authentication.getName(); // Obtener el email del cliente logueado
-
-        ArrayList<Carrito> carritos = carritoService.getCarritoByClienteEmail(email);
-        if (carritos == null || carritos.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        ArrayList<CarritoDTO> carritoDTOs = new ArrayList<>();
-        for (Carrito carrito : carritos) {
-            carritoDTOs.add(CarritoMapper.toDTO(carrito));
-        }
-        return ResponseEntity.ok(carritoDTOs);
+        return ResponseEntity.ok(resultado);
     }
 
-    @PutMapping("/modificarItem")
-    public ResponseEntity<CarritoDTO> modificarItem(@RequestBody ModificarItemCarritoDTO dto, Authentication authentication) {
-        System.out.println(((JwtAuthenticationToken) authentication)
-                    .getToken()
-                    .getTokenValue()); 
 
-        return ResponseEntity.ok(CarritoMapper.toDTO(carritoService.modificarItem(authentication.getName(), dto.getVendedorId(), dto.getProductoId(), dto.getCantidad())));
-    }
-
-    @DeleteMapping("/eliminarItem")
-    public ResponseEntity<Void> eliminarItem(@RequestBody DeleteItemDTO dto, Authentication authentication) {
-        carritoService.deleteItem(authentication.getName(), dto.getVendedorId(), dto.getProductoId());
-        return ResponseEntity.ok().build();
-    }*/
 }

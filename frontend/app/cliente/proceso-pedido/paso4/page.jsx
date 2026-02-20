@@ -15,7 +15,7 @@ export default function Paso4Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [preferenceId, setPreferenceId] = useState('3211823743-f8d0566b-d329-474a-887a-756803e7f88e');
+  const [preferenceId, setPreferenceId] = useState(null);
   const [loading, setLoading] = useState(false);
   
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
@@ -25,22 +25,49 @@ export default function Paso4Page() {
   
   useEffect(() => {
     fetchPerfil();
-  }, []);
-
-  useEffect(() => {
-    // Cargar pedido desde sessionStorage
-    const pedidoStr = sessionStorage.getItem("currentPedido");
-    if (pedidoStr) {
-      try {
-        const pedidoData = JSON.parse(pedidoStr);
-        console.log("Pedido cargado en paso 4:", pedidoData);
-        setPedido(pedidoData);
-      } catch (e) {
-        console.error("Error parseando pedido de sessionStorage:", e);
-      }
+    const pedidoId = sessionStorage.getItem("currentPedidoId");
+    if (pedidoId) {
+      fetchPedido(pedidoId);
+      crearPreferenciaPago(pedidoId);
+    } else {
+      router.push('/cliente/carrito');
     }
   }, []);
-    
+
+  const fetchPedido = async (id) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch(`/pedidoMs/pedidos/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPedido(data);
+      }
+    } catch (error) {
+      console.error("Error cargando pedido:", error);
+    }
+  };
+
+  const crearPreferenciaPago = async (pedidoId) => {
+    setLoading(true);
+    try {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch(`/pagoMs/api/pagos/create-preference/${pedidoId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPreferenceId(data.preferenceId); 
+      }
+    } catch (error) {
+      console.error("Error creando preferencia:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchPerfil = async () => {
     const token = sessionStorage.getItem("token")
     const rol = sessionStorage.getItem("rol")
@@ -127,7 +154,9 @@ export default function Paso4Page() {
                     forma segura. Una vez finalizado, volveras
                     automaticamente a nuestra aplicacion.
                   </p>
-                  <BtnMercadoPago preferenceId={preferenceId} />
+                  <div className={styles.btnContainer}>
+                    {preferenceId && <BtnMercadoPago preferenceId={preferenceId} />}
+                  </div>
                 </div>
                 <Image
                   src="/cliente/mercado-pago.png"
@@ -140,11 +169,11 @@ export default function Paso4Page() {
             </div>
           </div>
           <ResumenCompra 
-            realizaEnvios={!(pedido?.costoEnvio === 0 || pedido?.costoEnvio === null || pedido?.metodoEnvio === 'RETIRO_EN_LOCAL')}
-            subtotal={pedido?.montoTotalProductos ? parseFloat(pedido.montoTotalProductos) : 0}
-            comisionApp={pedido?.comisionApp ? parseFloat(pedido.comisionApp) : 0}
-            costoEnvio={pedido?.costoEnvio ? parseFloat(pedido.costoEnvio) : 0}
-            items={pedido?.detalles && Array.isArray(pedido.detalles) ? pedido.detalles.reduce((acc, item) => acc + (item.cantidad || 0), 0) : 0}
+            realizaEnvios={pedido?.metodoEnvio === 'ENVIO_A_DOMICILIO'} 
+            subtotal={pedido?.montoTotalProductos || 0}
+            comisionApp={pedido?.comisionApp || 0}
+            costoEnvio={pedido?.costoEnvio || 0}
+            items={pedido?.detalles?.reduce((acc, item) => acc + item.cantidad, 0) || 0}
           />
         </div>
       </main>

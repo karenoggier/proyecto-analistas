@@ -9,6 +9,7 @@ import com.seminario.ms_pedido.dto.ClienteResponseDTO;
 import com.seminario.ms_pedido.dto.PedidoDetalleDTO;
 import com.seminario.ms_pedido.dto.PedidoListadoDTO;
 import com.seminario.ms_pedido.dto.PedidoResponseDTO;
+import com.seminario.ms_pedido.dto.VendedorResumidoDTO;
 import com.seminario.ms_pedido.model.Pedido;
 
 import lombok.RequiredArgsConstructor;
@@ -22,12 +23,14 @@ public class PedidoMapper {
 
     public PedidoResponseDTO toResponseDTO(Pedido pedido) {
         if (pedido == null) return null;
-        List<String> datosVendedor = obtenerDatosVendedor(pedido.getVendedorId());
+        VendedorResumidoDTO datosVendedor = obtenerDatosVendedor(pedido.getVendedorId());
 
         return PedidoResponseDTO.builder()
                 .id(pedido.getId())
-                .nombreLocal(datosVendedor.get(0))
-                .logo(datosVendedor.get(1))
+                .nombreLocal(datosVendedor.getNombreNegocio())
+                .logo(datosVendedor.getLogoUrl())
+                .realizaEnvios(datosVendedor.getRealizaEnvios())
+                .localidadVendedor(datosVendedor.getLocalidad())
                 //.clienteId(pedido.getClienteId())
                 //.vendedorId(pedido.getVendedorId())
                 .fechaCreacion(pedido.getFechaCreacion())
@@ -47,10 +50,10 @@ public class PedidoMapper {
     public PedidoListadoDTO toListadoDTO(Pedido pedido) {
         if (pedido == null) return null;
         //el primer string es el nombre del local, el segundo el logo
-        List<String> datosVendedor = obtenerDatosVendedor(pedido.getVendedorId());
+        VendedorResumidoDTO datosVendedor = obtenerDatosVendedor(pedido.getVendedorId());
 
-        String nombreLocal = datosVendedor.get(0);
-        String logo = datosVendedor.get(1);
+        String nombreLocal = datosVendedor.getNombreNegocio();
+        String logo = datosVendedor.getLogoUrl();
 
         return PedidoListadoDTO.builder()
                 .id(pedido.getId())
@@ -65,11 +68,11 @@ public class PedidoMapper {
 
     public PedidoDetalleDTO toDetalleDTO(Pedido pedido, ClienteResponseDTO cliente) {
         if (pedido == null) return null;
-        List<String> datosVendedor = obtenerDatosVendedor(pedido.getVendedorId());
+        VendedorResumidoDTO datosVendedor = obtenerDatosVendedor(pedido.getVendedorId());
 
         return PedidoDetalleDTO.builder()
                 .id(pedido.getId())
-                .nombreLocal(datosVendedor.get(0))
+                .nombreLocal(datosVendedor.getNombreNegocio())
                 .fechaCreacion(pedido.getFechaCreacion())
                 .estado(pedido.getEstado() != null ? pedido.getEstado().name() : null)
                 .cantidadProductos(pedido.getDetalles() != null ? pedido.getDetalles().size() : 0)
@@ -85,7 +88,7 @@ public class PedidoMapper {
     }
 
    // Método para obtener datos del vendedor desde el ms-catalogo ([0] nombre del local, [1] logo) 
-    public List<String> obtenerDatosVendedor(String vendedorId) {
+    public VendedorResumidoDTO obtenerDatosVendedor(String vendedorId) {
         return catalogoClient.obtenerDatosVendedor(vendedorId);
     }
 

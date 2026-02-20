@@ -135,14 +135,24 @@ public class PedidoService {
             
         }
 
-        // 2. Vincular dirección mediante el Service
-        Direccion dir = direccionService.obtenerEntidadPorId(dto.getIdDireccion());
-        pedido.setDireccion(dir);
-        pedido.setMetodoEnvio(dto.getMetodoEnvio());
+        // 2. Vincular dirección 
+        if ("ENVIO_A_DOMICILIO".equals(dto.getMetodoEnvio().name())) {
+            if (dto.getIdDireccion() == null) {
+                throw new RequestException("PED", 400, HttpStatus.BAD_REQUEST, "Debe seleccionar una dirección");
+            }
+            Direccion dir = direccionService.obtenerEntidadPorId(dto.getIdDireccion());
+            pedido.setDireccion(dir);
+            
+            // Cálculo de costo real para envío
+            BigDecimal costoEnvio = calcularCostoEnvio(dto.getVendedorId(), dto.getIdDireccion(), auth);
+            pedido.setCostoEnvio(costoEnvio);
+        } else {
+            // Es RETIRO_EN_LOCAL
+            pedido.setDireccion(null);
+            pedido.setCostoEnvio(BigDecimal.ZERO);
+        }
 
-        // 3. Cálculo de montos
-        BigDecimal costoEnvio = calcularCostoEnvio(dto.getVendedorId(), String.valueOf(dto.getIdDireccion()), auth);
-        pedido.setCostoEnvio(costoEnvio);
+        pedido.setMetodoEnvio(dto.getMetodoEnvio());
    
         pedido.setMontoTotal(pedido.getMontoTotalProductos()
                 .add(pedido.getComisionApp())

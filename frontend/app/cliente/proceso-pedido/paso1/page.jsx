@@ -51,7 +51,7 @@ export default function Paso1Page() {
           const dataPerfil = await perfilRes.json();
           setClientProfile(dataPerfil);
         } else {
-            console.error("✗ Error al obtener perfil del cliente:", perfilRes.status);
+            console.error("Error al obtener perfil del cliente:", perfilRes.status);
         }
     
         } catch (error) {
@@ -63,10 +63,8 @@ export default function Paso1Page() {
     try {
       const token = sessionStorage.getItem("token");
       const vendedorId = searchParams.get("vendedorId");
-      
 
       if (!token || !vendedorId) {
-        console.warn("✗ No hay token o vendedorId. No se carga carrito.");
         setLoading(false);
         return;
       }
@@ -77,29 +75,10 @@ export default function Paso1Page() {
 
       if (res.ok) {
         const data = await res.json();
-        
-        // Obtener nombre y datos del vendedor
-        let vendorName = "Vendedor";
-        let realizaEnvios = false;
-        try {
-          const vRes = await fetch(`/catalogoMs/api/vendedores/perfil-publico/${vendedorId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (vRes.ok) {
-            const vData = await vRes.json();
-            vendorName = vData.nombreNegocio;
-            realizaEnvios = vData.realizaEnvios;
-          }
-        } catch (e) {
-          console.error("Error fetching vendor:", e);
-        }
-        
-        setCart({ ...data, vendorName, realizaEnvios });
-      } else {
-        console.error("✗ Error fetching cart:", res.status);
+        setCart(data);
       }
     } catch (error) {
-      console.error("✗ Error fetching cart:", error);
+      console.error("Error fetching cart:", error);
     } finally {
       setLoading(false);
     }
@@ -109,65 +88,30 @@ export default function Paso1Page() {
     if (!cart) return;
 
     const newQty = item.cantidad + delta;
-    
+    const token = sessionStorage.getItem("token");
+
     if (newQty <= 0) {
       await removeItem(item);
       return;
     }
 
     try {
-      const token = sessionStorage.getItem("token");
-      
-      if (delta < 0) {
-        const deleteRes = await fetch('/pedidoMs/carrito/items', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            vendedorId: cart.vendedorId,
-            itemsIds: [item.idItem]
-          })
-        });
+      const response = await fetch('/pedidoMs/carrito/items/cantidad', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          vendedorId: cart.vendedorId,
+          productoId: item.productoId,
+          cantidad: newQty,
+          observaciones: item.observaciones
+        })
+      });
 
-        if (!deleteRes.ok) return;
-
-        const rePostRes = await fetch('/pedidoMs/carrito/items', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            vendedorId: cart.vendedorId,
-            productoId: item.productoId,
-            cantidad: newQty,
-            observaciones: item.observaciones
-          })
-        });
-
-        if (rePostRes.ok) {
-          await fetchCart();
-        }
-      } else {
-        const res = await fetch('/pedidoMs/carrito/items', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            vendedorId: cart.vendedorId,
-            productoId: item.productoId,
-            cantidad: delta,
-            observaciones: item.observaciones
-          })
-        });
-
-        if (res.ok) {
-          await fetchCart();
-        }
+      if (response.ok) {
+        await fetchCart();
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
@@ -206,13 +150,6 @@ export default function Paso1Page() {
   };
 
   const handleContinue = async () => {
-    console.log("handleContinue debug:", {
-      clientProfile,
-      clientProfileId: clientProfile?.id,
-      cart,
-      cartVendedorId: cart?.vendedorId
-    });
-    
     setProcessing(true);
     try {
       const token = sessionStorage.getItem("token");
@@ -222,42 +159,25 @@ export default function Paso1Page() {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          clienteId: clientProfile.id
-        })
+        }
       });
 
-      const resText = await res.text();
-
       if (res.ok) {
-        try {
-          const pedido = JSON.parse(resText);
-          console.log("Pedido recibido completo:", pedido);
-          
-          const pedidoId = pedido.id || pedido.pedidoId;
-          if (!pedidoId) {
-            alert("Error: No se pudo obtener el ID del pedido. Intenta de nuevo.");
-            setProcessing(false);
-            return;
-          }
-          
-          sessionStorage.setItem("currentPedidoId", pedidoId);
-          // Guardar pedido completo para reutilizar en paso 2
-          sessionStorage.setItem("currentPedido", JSON.stringify(pedido));
-          router.push(`/cliente/proceso-pedido/paso2?vendedorId=${cart.vendedorId}`);
-        } catch (parseError) {
-          console.error("Error parseando JSON:", parseError);
-          alert("Error procesando la respuesta del servidor.");
-          setProcessing(false);
-        }
+        const pedido = await res.json();
+        console.log("Pedido iniciado con éxito:", pedido);
+        
+        const pedidoId = pedido.id;
+        sessionStorage.setItem("currentPedidoId", pedidoId);
+        
+        router.push(`/cliente/proceso-pedido/paso2?vendedorId=${cart.vendedorId}`);
       } else {
-        alert(`Error al iniciar checkout. Status: ${res.status}. Revisa la consola.`);
-        setProcessing(false);
+        const errorData = await res.json().catch(() => ({}));
+        alert(`Error: ${errorData.message || 'No se pudo iniciar el checkout'}`);
       }
     } catch (error) {
       console.error("Error de red:", error);
       alert("Error de conexión. Intenta de nuevo.");
+    } finally {
       setProcessing(false);
     }
   };
@@ -267,7 +187,7 @@ export default function Paso1Page() {
       <div className={styles.page}>
         <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile}/>
         <main className={styles.main}>
-          <div style={{textAlign: 'center', padding: '2rem'}}>Cargando carrito...</div>
+          <div style={{textAlign: 'center', padding: '2rem'}}>Cargando...</div>
         </main>
         <Footer />
       </div>
@@ -307,7 +227,7 @@ export default function Paso1Page() {
 
         <div className={styles.contentRow}>
           <div className={styles.contentLeft}>
-            <h2 className={styles.vendorTitle}>Productos de {cart.vendorName || 'Vendedor'}</h2>
+            <h2 className={styles.vendorTitle}>Productos de {cart.nombreVendedor || 'Vendedor'}</h2>
             <div className={styles.itemList}>
               {cart.items.map((item) => (
                 <div key={item.idItem} className={styles.productItem}>

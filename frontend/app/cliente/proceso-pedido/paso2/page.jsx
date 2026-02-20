@@ -17,72 +17,30 @@ export default function Paso2Page() {
   const [clientProfile, setClientProfile] = useState(null);
   const [direcciones, setDirecciones] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
-  const [costoEnvio, setCostoEnvio] = useState(null);
-  const [vendorRealizaEnvios, setVendorRealizaEnvios] = useState(true);
+  const [costoEnvio, setCostoEnvio] = useState(0);
   const [saving, setSaving] = useState(false);
   const [pedido, setPedido] = useState(null);
 
   useEffect(() => {
-    const paramId = searchParams.get('vendedorId');
-    if (paramId) {
-      setVendedorId(paramId);
-      sessionStorage.setItem("currentVendedorId", paramId);
-    } else {
-      const stored = sessionStorage.getItem("currentVendedorId");
-      if (stored) setVendedorId(stored);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
     fetchPerfil();
-  }, []);
-
-  useEffect(() => {
     const pedidoId = sessionStorage.getItem("currentPedidoId");
-    const pedidoStr = sessionStorage.getItem("currentPedido");
-    
-    // Cargar pedido desde sessionStorage
-    if (pedidoStr) {
-      try {
-        const pedidoData = JSON.parse(pedidoStr);
-        console.log("Pedido cargado desde sessionStorage:", pedidoData);
-        setPedido(pedidoData);
-      } catch (e) {
-        console.error("Error parseando pedido de sessionStorage:", e);
-        // Si falla, intenta cargar por ID
-        if (pedidoId) fetchPedido(pedidoId);
-      }
-    } else if (pedidoId) {
-      // Si no hay en sessionStorage, intenta cargar por ID (fallback)
+    if (pedidoId) {
       fetchPedido(pedidoId);
+    } else {
+      router.push('/cliente/carrito');
     }
   }, []);
 
   useEffect(() => {
     if (pedido) {
-      console.log("Estado de pedido actualizado:", {
-        montoTotalProductos: pedido.montoTotalProductos,
-        comisionApp: pedido.comisionApp,
-        detalles: pedido.detalles,
-        cantidadTotal: pedido.detalles?.reduce((acc, item) => acc + item.cantidad, 0) || 0
-      });
+      if (pedido.realizaEnvios) {
+        fetchDireccionesValidas();
+      } else {
+        setDeliveryType('pickup');
+        setCostoEnvio(0);
+      }
     }
   }, [pedido]);
-
-  useEffect(() => {
-    if (clientProfile && vendedorId) {
-      fetchDireccionesValidas();
-    }
-  }, [clientProfile, vendedorId]);
-    
-  useEffect(() => {
-    if (deliveryType === 'pickup') {
-      setCostoEnvio(0);
-    } else if (deliveryType === 'address' && selectedAddressId && vendedorId) {
-      setCostoEnvio(null); 
-      fetchCostoEnvio();
-    }
-  }, [deliveryType, selectedAddressId, vendedorId]);
 
   const fetchPerfil = async () => {
     const token = sessionStorage.getItem("token")
@@ -127,11 +85,8 @@ export default function Paso2Page() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
-        const dataPedido = await res.json();
-        console.log("Pedido cargado en paso 2:", dataPedido);
-        setPedido(dataPedido);
-      } else {
-        console.error("Error fetching pedido, status:", res.status);
+        const data = await res.json();
+        setPedido(data);
       }
     } catch (error) {
       console.error("Error fetching pedido:", error);
@@ -140,40 +95,16 @@ export default function Paso2Page() {
 
   const fetchDireccionesValidas = async () => {
     try {
-      const token = sessionStorage.getItem("token");
-      
-      const resVendedor = await fetch(`/catalogoMs/api/vendedores/perfil-publico/${vendedorId}`, {
-         headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!resVendedor.ok) {
-        console.error("Error al obtener datos del vendedor");
-        return;
-      }
-      const dataVendedor = await resVendedor.json();
-      
-      setVendorRealizaEnvios(dataVendedor.realizaEnvios);
-      if (!dataVendedor.realizaEnvios) {
-        setDeliveryType('pickup');
-        return;
-      }
-
-      let localidadRaw = dataVendedor.direccion?.localidad;
-      let nombreLocalidad = "";
-
-      if (typeof localidadRaw === 'string') {
-        nombreLocalidad = localidadRaw;
-      } else if (typeof localidadRaw === 'object' && localidadRaw !== null) {
-        nombreLocalidad = localidadRaw.nombre || localidadRaw.localidad || "";
-      }
+      const nombreLocalidad = pedido?.localidadVendedor;
 
       if (!nombreLocalidad || !nombreLocalidad.trim()) {
         console.warn("El vendedor no tiene localidad definida o válida.");
         return;
       }
-      nombreLocalidad = nombreLocalidad.trim();
+      
+      const token = sessionStorage.getItem("token");
 
-      const resDir = await fetch(`/pedidoMs/direcciones/filtrar?localidad=${encodeURIComponent(nombreLocalidad)}`, {
+      const resDir = await fetch(`/pedidoMs/direcciones/filtrar?localidad=${encodeURIComponent(nombreLocalidad.trim())}`, {
           headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -190,6 +121,7 @@ export default function Paso2Page() {
               handleSelectAddress(newDefault.id);
           } else if (isValid) {
               setSelectedAddressId(currentId);
+              fetchCostoEnvio(currentId);
           }
       }
     } catch (error) {
@@ -197,10 +129,11 @@ export default function Paso2Page() {
     }
   };
 
-  const fetchCostoEnvio = async () => {
+  const fetchCostoEnvio = async (addressId) => {
+    if (!vendedorId || !addressId) return;
     try {
       const token = sessionStorage.getItem("token");
-      const res = await fetch(`/pedidoMs/pedidos/costo-envio/${vendedorId}/${selectedAddressId}`, {
+      const res = await fetch(`/pedidoMs/pedidos/costo-envio/${vendedorId}/${addressId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -223,12 +156,11 @@ export default function Paso2Page() {
     setDeliveryType('address');
     setSelectedAddressId(id);
     sessionStorage.setItem("selectedAddressId", id);
-    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event("storage"));
+    fetchCostoEnvio(id);
   };
 
   const handleContinue = async () => {
-
-    // Si es entrega a domicilio, validar que haya dirección seleccionada
     if (deliveryType === 'address' && !selectedAddressId) {
       alert("Por favor selecciona una dirección");
       return;
@@ -258,33 +190,17 @@ export default function Paso2Page() {
         })
       });
 
-      if (!res.ok) {
-        console.error("Error al guardar envío:", res.status);
-        alert("Error al guardar dirección");
-        setSaving(false);
-        return;
+      if (res.ok) {
+        const pedidoActualizado = await res.json();
+        sessionStorage.setItem("currentPedidoId", pedidoActualizado.id);
+        router.push(`/cliente/proceso-pedido/paso3?vendedorId=${vendedorId}`);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(`Error: ${errorData.message || 'No se pudo confirmar el envío'}`);
       }
-
-      const pedidoData = await res.json();
-      console.log("Pedido actualizado con envío:", pedidoData);
-      
-      // Asegurar que el costo de envío esté incluido
-      const pedidoConCosto = {
-        ...pedidoData,
-        costoEnvio: deliveryType === 'address' ? (costoEnvio || 0) : 0,
-        metodoEnvio: deliveryType === 'address' ? 'ENVIO_A_DOMICILIO' : 'RETIRO_EN_LOCAL'
-      };
-      
-      console.log("Pedido con costo agregado:", pedidoConCosto);
-      
-      // Guardar pedido actualizado para paso 3
-      sessionStorage.setItem("currentPedido", JSON.stringify(pedidoConCosto));
-
-      // Navegar al paso siguiente
-      router.push(`/cliente/proceso-pedido/paso3?vendedorId=${vendedorId}`);
     } catch (error) {
-      console.error("Error de red:", error);
-      alert("Error de conexión. Intenta de nuevo.");
+      console.error("Error al confirmar envío:", error);
+    } finally {
       setSaving(false);
     }
   };
@@ -310,19 +226,19 @@ export default function Paso2Page() {
 
         <div className={styles.contentRow}>
           <div className={styles.contentLeft}>
-            {vendorRealizaEnvios ? (
+            <h2 className={styles.sectionTitle}>Direccion de entrega</h2>
+            
+            {pedido?.realizaEnvios && (
               <>
-                <h2 className={styles.sectionTitle}>Direccion de entrega</h2>
                 <p className={styles.sectionSubtitle}>Elija una direccion...</p>
 
-                <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', marginBottom: '1rem', overflow: 'hidden' }}>
+                <div className={styles.addressList}>
                   {direcciones.length > 0 ? (
                     direcciones.map((dir, index) => (
                       <div key={dir.id}>
                         <label 
-                          className={styles.addressOption} 
+                          className={`${styles.addressOption} ${styles.addressOptionItem}`} 
                           onClick={() => handleSelectAddress(dir.id)} 
-                          style={{ border: 'none', marginBottom: 0, borderRadius: 0, cursor: 'pointer' }}
                         >
                           <input
                             type="radio"
@@ -336,55 +252,54 @@ export default function Paso2Page() {
                             <span>CP: {dir.codigoPostal} - {dir.localidad}, {dir.provincia}</span>
                           </div>
                         </label>
-                        {index < direcciones.length - 1 && <div style={{ height: '1px', backgroundColor: '#e5e7eb', width: '100%' }}></div>}
+                        {index < direcciones.length - 1 && <div className={styles.divider}></div>}
                       </div>
                     ))
                   ) : (
-                    <div style={{ padding: '1rem', color: '#666', fontSize: '14px' }}>
+                    <div className={styles.emptyAddressMsg}>
                       No tienes direcciones registradas en la localidad del vendedor.
                     </div>
                   )}
-                  <div style={{ height: '1px', backgroundColor: '#e5e7eb', width: '100%' }}></div>
-                  <Link href="/cliente/direcciones" className={styles.addressOption} style={{ textDecoration: 'none', border: 'none', marginBottom: 0, borderRadius: 0, color: '#e84c6a' }}>
+                  <div className={styles.divider}></div>
+                  <Link href="/cliente/direcciones" className={`${styles.addressOption} ${styles.addAddressLink}`}>
                     <div className={styles.addressInfo}>
                       <p>+ Añadir dirección</p>
                     </div>
                   </Link>
                 </div>
-
-                <label className={styles.retiroOption} onClick={() => setDeliveryType('pickup')}>
-                  <input
-                    type="radio"
-                    name="delivery"
-                    value="pickup"
-                    checked={deliveryType === 'pickup'}
-                    onChange={() => setDeliveryType('pickup')}
-                    className={styles.addressRadio}
-                  />
-                  <span style={{ fontSize: '14px', color: '#222' }}>Retiro en local</span>
-                </label>
-              </>
-            ) : (
-              <>
-                <h2 className={styles.sectionTitle}>Modo de entrega</h2>
-                <div className={styles.retiroOption} style={{ cursor: 'default', backgroundColor: '#fef0f2', borderColor: '#ff4b7e' }}>
-                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2" style={{marginRight: '10px'}}>
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                      <circle cx="12" cy="10" r="3" />
-                   </svg>
-                   <span style={{ fontSize: '14px', color: '#222' }}>
-                     Este vendedor solo admite <strong>Retiro en local</strong>.
-                   </span>
-                </div>
               </>
             )}
+
+            {!pedido?.realizaEnvios && (
+              <div className={styles.warningAlert}>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" className={styles.warningIcon}>
+                  <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+                <span>Este vendedor solo admite retiro en el local.</span>
+              </div>
+            )}
+
+            <label className={styles.retiroOption} onClick={() => {
+              setDeliveryType('pickup');
+              setCostoEnvio(0);
+            }}>
+              <input
+                type="radio"
+                name="delivery"
+                value="pickup"
+                checked={deliveryType === 'pickup'}
+                onChange={() => setDeliveryType('pickup')}
+                className={styles.addressRadio}
+              />
+              <span className={styles.pickupLabelText}>Retiro en local</span>
+            </label>
           </div>
           <ResumenCompra 
             realizaEnvios={deliveryType === 'address'} 
-            costoEnvio={costoEnvio || 0} 
-            subtotal={pedido?.montoTotalProductos ? parseFloat(pedido.montoTotalProductos) : 0}
-            comisionApp={pedido?.comisionApp ? parseFloat(pedido.comisionApp) : 0}
-            items={pedido?.detalles && Array.isArray(pedido.detalles) ? pedido.detalles.reduce((acc, item) => acc + (item.cantidad || 0), 0) : 0}
+            costoEnvio={costoEnvio} 
+            subtotal={pedido?.montoTotalProductos || 0}
+            comisionApp={pedido?.comisionApp || 0}
+            items={pedido?.detalles?.reduce((acc, item) => acc + item.cantidad, 0) || 0}
           />
         </div>
 

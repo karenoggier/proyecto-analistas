@@ -22,6 +22,7 @@ import com.seminario.ms_catalogo.dto.VendedorRequestDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseBusquedaDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponseDTO;
 import com.seminario.ms_catalogo.dto.VendedorResponsePublicDTO;
+import com.seminario.ms_catalogo.dto.VendedorResumidoDTO;
 import com.seminario.ms_catalogo.dto.eventos_ms_usuarios.VendedorRegistradoEvent;
 import com.seminario.ms_catalogo.service.VendedorService;
 
@@ -163,9 +164,9 @@ public class VendedorController {
         return ResponseEntity.ok(vendedorService.obtenerIdUsuarioPorVendedorId(id));
     }
 
-    @GetMapping("/nombre-logo/{id}")
-    @Operation(summary = "Obtiene el nombre y logo de un local por su ID")
-    public ResponseEntity<List<String>> obtenerDatosVendedor(@PathVariable String id) {
+    @GetMapping("/resumen/{id}")
+    @Operation(summary = "Obtiene el nombre, logo, localidad y si realiza envios de un local por su ID")
+    public ResponseEntity<VendedorResumidoDTO> obtenerDatosVendedor(@PathVariable String id) {
         return ResponseEntity.ok(vendedorService.obtenerDatosVendedor(id));
     }
 }

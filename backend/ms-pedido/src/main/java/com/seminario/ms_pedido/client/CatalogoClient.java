@@ -9,6 +9,7 @@ import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 
 import com.seminario.ms_pedido.dto.ProductoResumidoDTO;
+import com.seminario.ms_pedido.dto.VendedorResumidoDTO;
 /**
  * Cliente HTTP declarativo para el microservicio de Catálogo.
  * 
@@ -38,8 +39,8 @@ public interface CatalogoClient {
     @GetExchange("/vendedores/id-usuario/{vendedorId}")
     @NonNull String obtenerIdUsuarioPorVendedorId(@PathVariable("vendedorId") @NonNull String vendedorId);
 
-    @GetExchange("/vendedores/nombre-logo/{vendedorId}")
-    @NonNull List<String> obtenerDatosVendedor(@PathVariable("vendedorId") @NonNull String vendedorId);
+    @GetExchange("/vendedores/resumen/{vendedorId}")
+    @NonNull VendedorResumidoDTO obtenerDatosVendedor(@PathVariable("vendedorId") @NonNull String vendedorId);
 
     @GetExchange("/productos/nombre-imagen/{productoId}/{vendedorId}")
     @NonNull List<String> obtenerDatosProducto(

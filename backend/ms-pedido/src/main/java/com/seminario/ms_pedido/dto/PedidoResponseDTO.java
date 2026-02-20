@@ -17,6 +17,8 @@ public class PedidoResponseDTO {
     private String id;
     private String nombreLocal;
     private String logo;
+    private Boolean realizaEnvios;
+    private String localidadVendedor;
     private LocalDateTime fechaCreacion;
     private String estado; 
     

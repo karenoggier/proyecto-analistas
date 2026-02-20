@@ -12,17 +12,13 @@ import Stepper from '../../components/Stepper';
 import styles from '../proceso-pedido.module.css';
 
 function Paso5Content() {
-    const [clientProfile, setClientProfile] = useState(null);
     const searchParams = useSearchParams();
     
-    // Capturamos los datos de Mercado Pago de la URL
-    const status = searchParams.get('status'); // approved, pending, failure
+    const status = searchParams.get('status'); 
     const paymentId = searchParams.get('payment_id');
-    const externalReference = searchParams.get('external_reference'); // Es tu pedidoId
+    const externalReference = searchParams.get('external_reference'); 
 
     useEffect(() => {
-        fetchPerfil();
-        // Si el pago fue exitoso, tiramos confeti
         if (status === 'approved') {
             dispararConfeti();
         }
@@ -37,21 +33,6 @@ function Paso5Content() {
         });
     };
 
-    const fetchPerfil = async () => {
-        const token = sessionStorage.getItem("token");
-        if (!token) return;
-        try {
-            const res = await fetch('/pedidoMs/clientes/perfil', {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) setClientProfile(await res.json());
-        } catch (error) {
-            console.error("Error al obtener perfil:", error);
-        }
-    };
-
-    // Lógica de renderizado según el estado
     const renderStatusContent = () => {
         switch (status) {
             case 'approved':
@@ -60,9 +41,6 @@ function Paso5Content() {
                         <Image src="/cliente/chica-ok.png" alt="Éxito" width={240} height={240} className={styles.successImg} />
                         <h2 className={styles.successTitle}>¡Pago aprobado!</h2>
                         <p className={styles.successSubtitle}>Tu pedido <b>#{externalReference}</b> ya se está preparando.</p>
-                        <div className={styles.successTimeCard}>
-                            <div className={styles.successTimeText}>Llegará en aproximadamente<br />30-45 min</div>
-                        </div>
                     </>
                 );
             case 'pending':
@@ -80,10 +58,7 @@ function Paso5Content() {
                     <>
                         <div className={styles.errorIcon}>❌</div>
                         <h2 className={styles.errorTitle}>No pudimos procesar el pago</h2>
-                        <p className={styles.successSubtitle}>Hubo un error con tu tarjeta o la operación fue cancelated.</p>
-                        <Link href="/cliente/proceso-pedido/paso4" className={styles.successPrimaryBtn}>
-                            Intentar con otro método
-                        </Link>
+                        <p className={styles.successSubtitle}>Hubo un error con tu tarjeta o la operación fue cancelada.</p>
                     </>
                 );
         }
@@ -94,7 +69,11 @@ function Paso5Content() {
             {renderStatusContent()}
             
             <div className={styles.successActions}>
-                <Link href="/cliente/pedidos" className={styles.successPrimaryBtn}>Ir a mis pedidos</Link>
+                {status !== 'approved' && status !== 'pending' ? (
+                    <Link href="/cliente/proceso-pedido/paso4" className={styles.successPrimaryBtn}>Intentar nuevamente</Link>
+                ) : (
+                    <Link href="/cliente/pedidos" className={styles.successPrimaryBtn}>Ir a mis pedidos</Link>
+                )}
                 <Link href="/cliente" className={styles.successSecondaryBtn}>Volver al inicio</Link>
             </div>
         </div>
@@ -102,9 +81,41 @@ function Paso5Content() {
 }
 
 export default function Paso5Page() {
+    const [clientProfile, setClientProfile] = useState(null);
+
+    useEffect(() => {
+        fetchPerfil();
+    }, []);
+
+    const fetchPerfil = async () => {
+        const token = sessionStorage.getItem("token");
+        const rol = sessionStorage.getItem("rol");
+        
+        if (!token || rol !== "CLIENTE") {
+            window.location.href = "/login";
+            return;
+        }
+
+        try {
+            const res = await fetch('/pedidoMs/clientes/perfil', { 
+                headers: { 'Authorization': `Bearer ${token}` } 
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setClientProfile(data);
+            }
+        } catch (error) {
+            console.error("Error de red:", error);
+        }
+    };
+
+    const handleRefreshProfile = () => {
+        fetchPerfil();
+    };
+    
     return (
         <div className={styles.page}>
-            <Navbar disableAddressModal={true} />
+            <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} disableAddressModal={true}/>
             <main className={styles.main}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>ESTADO DEL PEDIDO</h1>
