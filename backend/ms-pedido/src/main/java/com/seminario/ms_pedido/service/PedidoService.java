@@ -198,9 +198,14 @@ public class PedidoService {
         
         pedido.setEstado(EstadoPedido.REALIZADO);
         pedidoRepository.save(pedido);
+
+        String emailCliente = pedido.getCliente().getEmail(); 
+        String vendedorId = pedido.getVendedorId();
         
-        log.info("Pedido {} pagado exitosamente. Estado actualizado a REALIZADO.", id);
-    }
+        carritoService.eliminarCarritoPorVendedorYCliente(emailCliente, vendedorId);
+
+        log.info("Pedido {} pagado. Estado: REALIZADO y Carrito vaciado para cliente: {}", id, pedido.getClienteId());
+        }
 
     public PedidoDetalleDTO obtenerDetallePedidoPorId(String pedidoId, String emailCliente) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
