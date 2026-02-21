@@ -264,7 +264,7 @@ export default function DetallePedidoPage({ params }) {
                     )}
                   </div>
                   <span className={styles.productPrice}>
-                    $ {item.montoUnitario?.toLocaleString("es-AR")}
+                    $ {item.subtotal?.toLocaleString("es-AR")}
                   </span>
                 </div>
               ))}

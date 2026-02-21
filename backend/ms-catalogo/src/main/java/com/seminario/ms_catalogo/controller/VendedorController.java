@@ -165,8 +165,17 @@ public class VendedorController {
     }
 
     @GetMapping("/resumen/{id}")
-    @Operation(summary = "Obtiene el nombre, logo, localidad y si realiza envios de un local por su ID")
+    @Operation(summary = "Obtiene el nombre, logo, localidad y si realiza envios de un local por su ID. Llamado internamente por ms-pedido")
     public ResponseEntity<VendedorResumidoDTO> obtenerDatosVendedor(@PathVariable String id) {
         return ResponseEntity.ok(vendedorService.obtenerDatosVendedor(id));
     }
+
+    @GetMapping("/buscar-id/{email}")
+    @Operation(summary = "Obtiene el id del vendedor por su email. Llamado internamente por ms-pedido")
+    public ResponseEntity<String> buscarIdPorEmail(@PathVariable String email) {
+        String idVendedor = vendedorService.obtenerIdPorEmail(email);
+        return ResponseEntity.ok(idVendedor);
+    }
+
+
 }

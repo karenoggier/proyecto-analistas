@@ -7,6 +7,7 @@ import VendedorNavbar from "./components/vendedor-navbar"
 export default function VendedorPage() {
   const [isProfileComplete, setIsProfileComplete] = useState(false)
   const [vendedorProfile, setVendedorProfile] = useState(null);
+  const [contadores, setContadores] = useState({ pendientes: 0, preparacion: 0, entregados: 0 });
 
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -65,6 +66,42 @@ export default function VendedorPage() {
     fetchPerfil();
 
   }, [])
+
+  useEffect(() => {
+    if (!isProfileComplete) return;
+
+    const fetchContadores = async () => {
+      try {
+        const token = sessionStorage.getItem("token");
+        if (!token) return;
+
+        const res = await fetch("/pedidoMs/pedidos/vendedor/contadores", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setContadores({
+            pendientes: data.pendientes || 0,
+            preparacion: data.preparacion || 0,
+            entregados: data.entregados || 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching counters:", error);
+      }
+    };
+
+    fetchContadores();
+    // Actualizar cada 30 segundos
+    const interval = setInterval(fetchContadores, 30000);
+
+    return () => clearInterval(interval);
+  }, [isProfileComplete])
 
   const handleLogout = () => {
     sessionStorage.clear()
@@ -256,19 +293,19 @@ export default function VendedorPage() {
               className={`${styles.orderCard} ${styles.orderCardPending} ${!isProfileComplete ? styles.orderCardDisabled : ""}`}
             >
               <span className={styles.orderLabel}>PENDIENTES</span>
-              <span className={styles.orderCount}>0</span>
+              <span className={styles.orderCount}>{contadores.pendientes}</span>
             </div>
             <div
               className={`${styles.orderCard} ${styles.orderCardPrep} ${!isProfileComplete ? styles.orderCardDisabled : ""}`}
             >
               <span className={styles.orderLabel}>EN PREPARACIÓN</span>
-              <span className={styles.orderCount}>0</span>
+              <span className={styles.orderCount}>{contadores.preparacion}</span>
             </div>
             <div
               className={`${styles.orderCard} ${styles.orderCardDelivered} ${!isProfileComplete ? styles.orderCardDisabled : ""}`}
             >
               <span className={styles.orderLabel}>ENTREGADOS</span>
-              <span className={styles.orderCount}>0</span>
+              <span className={styles.orderCount}>{contadores.entregados}</span>
             </div>
           </div>
 

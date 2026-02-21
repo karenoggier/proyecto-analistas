@@ -1,9 +1,13 @@
 package com.seminario.ms_pedido.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -17,6 +21,7 @@ import com.seminario.ms_pedido.dto.ConfirmarEnvioRequestDTO;
 import com.seminario.ms_pedido.dto.PedidoDetalleDTO;
 import com.seminario.ms_pedido.dto.PedidoListadoDTO;
 import com.seminario.ms_pedido.dto.PedidoResponseDTO;
+import com.seminario.ms_pedido.dto.PedidoVendedorResponseDTO;
 import com.seminario.ms_pedido.exception.RequestException;
 import com.seminario.ms_pedido.mapper.ClienteMapper;
 import com.seminario.ms_pedido.mapper.PedidoMapper;
@@ -228,6 +233,62 @@ public class PedidoService {
         //se sacan las direcciones que no son la misma que el pedido
         cliente.setDireccion(List.of(pedido.getDireccion() != null ? pedido.getDireccion() : new Direccion()));
         return pedidoMapper.toDetalleDTO(pedido, clienteMapper.toResponseDTO(cliente));
+    }
+
+    public Map<String, Long> obtenerContadoresVendedor(Authentication auth) {
+        String emailVendedor = auth.getName();
+        String vendedorId = catalogoClient.obtenerIdPorEmail(emailVendedor);
+        
+        LocalDateTime inicioDia = LocalDate.now().atStartOfDay();
+        LocalDateTime finDia = LocalDate.now().atTime(LocalTime.MAX); 
+
+        Map<String, Long> contadores = new HashMap<>();
+        
+        contadores.put("pendientes", pedidoRepository.countByVendedorIdAndEstadoAndFechaCreacionBetween(
+                vendedorId, EstadoPedido.REALIZADO, inicioDia, finDia));
+                
+        contadores.put("preparacion", pedidoRepository.countByVendedorIdAndEstadoAndFechaCreacionBetween(
+                vendedorId, EstadoPedido.EN_PREPARACION, inicioDia, finDia));
+                
+        contadores.put("entregados", pedidoRepository.countByVendedorIdAndEstadoAndFechaCreacionBetween(
+                vendedorId, EstadoPedido.ENTREGADO, inicioDia, finDia));
+        
+        return contadores;
+    }
+
+    public List<PedidoVendedorResponseDTO> listarPedidosVendedor(Authentication auth, LocalDate inicio, LocalDate fin, EstadoPedido estado) {
+        String emailVendedor = auth.getName();
+        String vendedorId = catalogoClient.obtenerIdPorEmail(emailVendedor);
+
+        // Si no hay fechas, por defecto es HOY
+        LocalDateTime start = (inicio != null) ? inicio.atStartOfDay() : LocalDate.now().atStartOfDay();
+        LocalDateTime end = (fin != null) ? fin.atTime(LocalTime.MAX) : LocalDate.now().atTime(LocalTime.MAX);
+
+        if (estado != null) {
+            return pedidoRepository.findByVendedorIdAndEstadoAndFechaCreacionBetween(vendedorId, estado, start, end)
+                    .stream().map(pedidoMapper::toVendedorResponseDTO).toList();
+        }
+        
+        return pedidoRepository.findByVendedorIdAndFechaCreacionBetween(vendedorId, start, end)
+                .stream().map(pedidoMapper::toVendedorResponseDTO).toList();
+    }
+
+    @Transactional
+    public PedidoResponseDTO actualizarEstado(String pedidoId, EstadoPedido nuevoEstado, Authentication auth) {
+        String emailVendedor = auth.getName(); 
+        String vendedorIdAutenticado = catalogoClient.obtenerIdPorEmail(emailVendedor);
+
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Pedido no encontrado"));
+
+        if (!pedido.getVendedorId().equals(vendedorIdAutenticado)) {
+            throw new RequestException("PED", 403, HttpStatus.FORBIDDEN, "No tienes permiso para modificar este pedido");
+        }
+
+        pedido.setEstado(nuevoEstado);
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+        
+        return pedidoMapper.toResponseDTO(pedidoGuardado);
     }
 
 }

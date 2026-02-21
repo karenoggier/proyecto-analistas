@@ -1,10 +1,14 @@
 package com.seminario.ms_pedido.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +23,8 @@ import com.seminario.ms_pedido.dto.ConfirmarEnvioRequestDTO;
 import com.seminario.ms_pedido.dto.PedidoDetalleDTO;
 import com.seminario.ms_pedido.dto.PedidoListadoDTO;
 import com.seminario.ms_pedido.dto.PedidoResponseDTO;
+import com.seminario.ms_pedido.dto.PedidoVendedorResponseDTO;
+import com.seminario.ms_pedido.model.EstadoPedido;
 import com.seminario.ms_pedido.service.PedidoService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -86,6 +92,41 @@ public class PedidoController {
     @Operation(summary = "Obtiene los detalles de un pedido específico del cliente autenticado")    
     public ResponseEntity<PedidoDetalleDTO> obtenerDetallePedidoPorId(@PathVariable String pedidoId, Authentication auth) {
         return ResponseEntity.ok(pedidoService.obtenerDetallePedidoPorId(pedidoId, auth.getName()));
+    }
+
+    @GetMapping("/vendedor/contadores")
+    @PreAuthorize("hasRole('VENDEDOR')") 
+    @Operation(summary = "Obtiene los contadores de un vendedor logueado")  
+    public ResponseEntity<Map<String, Long>> getContadoresVendedor(Authentication auth) {
+        Map<String, Long> stats = pedidoService.obtenerContadoresVendedor(auth);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/vendedor/listado")
+    @PreAuthorize("hasRole('VENDEDOR')") 
+    @Operation(summary = "Obtiene los pedidos de un vendedor con una fecha y estado determinado")  
+    public ResponseEntity<List<PedidoVendedorResponseDTO>> listarParaVendedor(
+        Authentication auth,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+        @RequestParam(required = false) EstadoPedido estado
+    ) {
+        return ResponseEntity.ok(pedidoService.listarPedidosVendedor(auth, fechaInicio, fechaFin, estado));
+    }
+
+    @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasRole('VENDEDOR')")
+    @Operation(summary = "Permite a un vendedor actualizar el estado de un pedido")
+    public ResponseEntity<PedidoResponseDTO> cambiarEstado(
+        @PathVariable String id, 
+        @RequestBody String nuevoEstado,
+        Authentication auth 
+    ) {
+        String estadoLimpio = nuevoEstado.replace("\"", "").trim(); 
+        EstadoPedido estadoEnum = EstadoPedido.valueOf(estadoLimpio);
+        
+        PedidoResponseDTO actualizado = pedidoService.actualizarEstado(id, estadoEnum, auth);
+        return ResponseEntity.ok(actualizado);
     }
 
 }

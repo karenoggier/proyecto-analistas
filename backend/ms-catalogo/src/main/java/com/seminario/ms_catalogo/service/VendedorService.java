@@ -469,5 +469,11 @@ public class VendedorService {
             .build();  
     }
 
+    public String obtenerIdPorEmail(String email) {
+        return vendedorRepository.findByEmail(email)
+                .map(vendedor -> vendedor.getId()) 
+                .orElseThrow(() -> new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado con email: " + email));
+    }
+
 }
 

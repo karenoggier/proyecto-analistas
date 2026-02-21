@@ -223,36 +223,38 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .summaryLabel {
   font-size: 13px;
   color: #666;
+  font-weight: 500;
 }
 
 .summaryValue {
   font-size: 13px;
   color: #222;
   font-weight: 500;
+  text-align: right;
 }
 
 .summaryDivider {
   border: none;
   border-top: 1px solid #cdcdcd;
-  margin: 10px 0;
+  margin: 12px 0;
 }
 
 .summaryTotal .summaryLabel {
   font-weight: 700;
   color: #222;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .summaryTotal .summaryValue {
   font-weight: 700;
-  color: #222;
-  font-size: 15px;
+  color: #ff4b7e;
+  font-size: 18px;
 }
 
 .cancelBtn {

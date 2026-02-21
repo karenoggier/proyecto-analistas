@@ -5,94 +5,32 @@ import { useRouter } from "next/navigation"
 import styles from "./pedidos.module.css"
 import Link from "next/link"
 import Image from "next/image"
+import VendedorNavbar from "../components/vendedor-navbar"
 
 export default function VendedorPedidosPage() {
   const router = useRouter()
+  const [vendedorProfile, setVendedorProfile] = useState(null)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  
   const [selectedTab, setSelectedTab] = useState("todos")
   const [showOrderDetail, setShowOrderDetail] = useState(false)
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [rejectReason, setRejectReason] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(false)
 
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      numero: "Nro de pedido",
-      cliente: "Nombre del cliente",
-      fecha: "15/01/2026 - 14:30 hs",
-      items: [
-        { cantidad: "2x", nombre: "McPollo + Papas pequeñas", precio: 7000 },
-        { cantidad: "1x", nombre: "McFlurry Oreo", precio: 4000 },
-      ],
-      observaciones: "Sin pepinillos",
-      total: 18000,
-      estado: "Nuevo",
-      telefono: "+54 9 3496-511088",
-      direccion: "Av. Corrientes 1234, CABA",
-      motivoRechazo: "",
-    },
-    {
-      id: 2,
-      numero: "Nro de pedido",
-      cliente: "Nombre del cliente",
-      fecha: "15/01/2026 - 13:55 hs",
-      items: [{ cantidad: "1x", nombre: "Doble Carne Doble Queso", precio: 10000 }],
-      observaciones: "",
-      total: 10000,
-      estado: "En prep",
-      telefono: "+54 9 3496-511088",
-      direccion: "Av. Corrientes 1234, CABA",
-      motivoRechazo: "",
-    },
-    {
-      id: 3,
-      numero: "Nro de pedido",
-      cliente: "Nombre del cliente",
-      fecha: "15/01/2026 - 13:45 hs",
-      items: [
-        { cantidad: "2x", nombre: "McPollo + Papas pequeñas", precio: 7000 },
-        { cantidad: "1x", nombre: "McFlurry Oreo", precio: 4000 },
-      ],
-      observaciones: "",
-      total: 18000,
-      estado: "En viaje",
-      telefono: "+54 9 3496-511088",
-      direccion: "Av. Corrientes 1234, CABA",
-      motivoRechazo: "",
-    },
-    {
-      id: 4,
-      numero: "Nro de pedido",
-      cliente: "Nombre del cliente",
-      fecha: "15/01/2026 - 13:21 hs",
-      items: [
-        { cantidad: "2x", nombre: "McPollo + Papas pequeñas", precio: 7000 },
-        { cantidad: "1x", nombre: "McFlurry Oreo", precio: 4000 },
-      ],
-      observaciones: "Sin pepinillos",
-      total: 18000,
-      estado: "Entregado",
-      telefono: "+54 9 3496-511088",
-      direccion: "Av. Corrientes 1234, CABA",
-      motivoRechazo: "",
-    },
-    {
-      id: 5,
-      numero: "Nro de pedido",
-      cliente: "Nombre del cliente",
-      fecha: "15/01/2026 - 13:00 hs",
-      items: [{ cantidad: "1x", nombre: "Doble Carne Doble Queso", precio: 10000 }],
-      observaciones: "",
-      total: 10000,
-      estado: "Rechazado",
-      telefono: "+54 9 3496-511088",
-      direccion: "Av. Corrientes 1234, CABA",
-      motivoRechazo: "No tenemos más stock",
-    },
-  ])
+  // Filtros de fecha
+  const [dateRange, setDateRange] = useState("HOY") 
+  const [customStart, setCustomStart] = useState("")
+  const [customEnd, setCustomEnd] = useState("")
+  // Estados temporales para el modal
+  const [tempDateRange, setTempDateRange] = useState("HOY")
+  const [tempCustomStart, setTempCustomStart] = useState("")
+  const [tempCustomEnd, setTempCustomEnd] = useState("")
 
   useEffect(() => {
     const token = sessionStorage.getItem("token")
@@ -100,8 +38,124 @@ export default function VendedorPedidosPage() {
 
     if (!token || rol !== "VENDEDOR") {
       router.push("/login")
+      return
     }
+
+    const fetchPerfil = async () => {
+      try {
+        const res = await fetch('/catalogoMs/api/vendedores/perfil', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+
+        if (res.status === 401 || res.status === 403) {
+          sessionStorage.clear()
+          window.location.href = "/login?expired=true"
+          return
+        }
+
+        if (res.ok) {
+          const data = await res.json()
+          setVendedorProfile(data)
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error)
+      }
+    }
+    fetchPerfil()
+    fetchPedidos()
   }, [router])
+
+  useEffect(() => {
+    fetchPedidos()
+  }, [selectedTab, dateRange, customStart, customEnd])
+
+  const fetchPedidos = async () => {
+    setLoading(true)
+    try {
+      const token = sessionStorage.getItem("token")
+      if (!token) return
+
+      let inicio, fin
+      const hoy = new Date()
+      const hoyStr = hoy.toISOString().split('T')[0]
+
+      if (dateRange === 'HOY') {
+        inicio = hoyStr
+        fin = hoyStr
+      } else if (dateRange === 'AYER') {
+        const ayer = new Date(hoy)
+        ayer.setDate(ayer.getDate() - 1)
+        inicio = ayer.toISOString().split('T')[0]
+        fin = inicio
+      } else if (dateRange === 'ULTIMOS_7') {
+        const hace7 = new Date(hoy)
+        hace7.setDate(hace7.getDate() - 7)
+        inicio = hace7.toISOString().split('T')[0]
+        fin = hoyStr
+      } else if (dateRange === 'PERSONALIZADO') {
+        inicio = customStart
+        fin = customEnd
+      }
+
+      const params = new URLSearchParams()
+      if (inicio) params.append("fechaInicio", inicio)
+      if (fin) params.append("fechaFin", fin)
+
+      // Mapeo de tabs a estados del backend
+      let estadoParam = null
+      if (selectedTab === 'pendientes') estadoParam = 'REALIZADO' // Asumimos que REALIZADO es el estado inicial para el vendedor
+      else if (selectedTab === 'enpreparacion') estadoParam = 'EN_PREPARACION'
+      else if (selectedTab === 'espera') estadoParam = 'EN_ESPERA'
+      else if (selectedTab === 'enviaje') estadoParam = 'EN_ENVIO'
+      else if (selectedTab === 'entregados') estadoParam = 'ENTREGADO'
+      
+      if (estadoParam) params.append("estado", estadoParam)
+
+      const res = await fetch(`/pedidoMs/pedidos/vendedor/listado?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      if (res.status === 401 || res.status === 403) {
+        sessionStorage.clear()
+        window.location.href = "/login?expired=true"
+        return
+      }
+
+      if (res.ok) {
+        const data = await res.json()
+        const mappedOrders = data.map(o => ({
+          id: o.id,
+          numero: o.id.substring(0, 8),
+          cliente: (o.nombreCliente || o.apellidoCliente) ? `${o.nombreCliente || ''} ${o.apellidoCliente || ''}`.trim() : 'Cliente',
+          fecha: o.fechaCreacion ? new Date(o.fechaCreacion).toLocaleString() : '',
+          items: o.detalles ? o.detalles.map(d => ({
+            cantidad: `${d.cantidad}x`,
+            nombre: d.nombreProducto,
+            precio: d.montoUnitario,
+            subtotal: d.cantidad * d.montoUnitario,
+            imagen: d.imagen
+          })) : [],
+          observaciones: o.detalles ? o.detalles.map(d => d.observaciones).filter(Boolean).join(', ') : '',
+          total: o.montoTotal,
+          subtotalProductos: o.montoTotalProductos,
+          costoEnvio: o.costoEnvio,
+          estado: o.estado ? o.estado.charAt(0) + o.estado.slice(1).toLowerCase().replace('_', ' ') : '',
+          rawEstado: o.estado, // Guardamos el estado original para lógica
+          telefono: o.telefonoCliente || '',
+          direccion: o.metodoEnvio === 'ENVIO_A_DOMICILIO' && o.direccion 
+            ? `${o.direccion.calle} ${o.direccion.numero}, ${o.direccion.localidad}` 
+            : 'Retiro en local',
+          metodoEnvio: o.metodoEnvio,
+          motivoRechazo: ''
+        }))
+        setOrders(mappedOrders)
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -114,17 +168,21 @@ export default function VendedorPedidosPage() {
     return () => document.removeEventListener("click", handleClickOutside)
   }, [])
 
-  const getStatusClass = (estado) => {
-    switch (estado.toLowerCase()) {
-      case "nuevo":
+  const getStatusClass = (estadoRaw) => {
+    if (!estadoRaw) return ""
+    const s = estadoRaw.toUpperCase()
+    switch (s) {
+      case "REALIZADO": // Pendiente para el vendedor
         return styles.statusNuevo
-      case "en prep":
+      case "EN_ESPERA":
+        return styles.statusEnEspera
+      case "EN_PREPARACION":
         return styles.statusEnPrep
-      case "en viaje":
+      case "EN_ENVIO":
         return styles.statusEnViaje
-      case "entregado":
+      case "ENTREGADO":
         return styles.statusEntregado
-      case "rechazado":
+      case "RECHAZADO":
         return styles.statusRechazado
       default:
         return ""
@@ -136,62 +194,98 @@ export default function VendedorPedidosPage() {
     setShowOrderDetail(true)
   }
 
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const token = sessionStorage.getItem("token")
+      const res = await fetch(`/pedidoMs/pedidos/${orderId}/estado`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: newStatus, 
+      })
+
+      if (res.ok) {
+        const mappedStatus = newStatus.charAt(0) + newStatus.slice(1).toLowerCase().replace('_', ' ')
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, rawEstado: newStatus, estado: mappedStatus } : o)),
+        )
+        if (selectedOrder && selectedOrder.id === orderId) {
+          setSelectedOrder((prev) => ({ ...prev, rawEstado: newStatus, estado: mappedStatus }))
+        }
+        
+        // Cambiar a la pestaña del nuevo estado
+        const tabMap = {
+          'REALIZADO': 'pendientes',
+          'EN_ESPERA': 'espera',
+          'EN_PREPARACION': 'enpreparacion',
+          'EN_ENVIO': 'enviaje',
+          'ENTREGADO': 'entregados',
+          'RECHAZADO': 'todos'
+        }
+        const newTab = tabMap[newStatus] || 'todos'
+        setSelectedTab(newTab)
+      }
+    } catch (error) {
+      console.error("Error updating status:", error)
+    }
+  }
+
   const handleReject = (order) => {
     setSelectedOrder(order)
     setShowRejectModal(true)
   }
 
   const handleConfirmReject = () => {
-    setOrders(
-      orders.map((o) => (o.id === selectedOrder.id ? { ...o, estado: "Rechazado", motivoRechazo: rejectReason } : o)),
-    )
+    updateOrderStatus(selectedOrder.id, "RECHAZADO")
     setShowRejectModal(false)
     setRejectReason("")
   }
 
-  const handleAcceptOrder = (order) => {
-    setOrders(orders.map((o) => (o.id === order.id ? { ...o, estado: "En prep" } : o)))
-  }
-
-  const handlePrepareOrder = (order) => {
-    setOrders(orders.map((o) => (o.id === order.id ? { ...o, estado: "En prep" } : o)))
-  }
-
-  const handleMarkReady = (order) => {
-    setOrders(orders.map((o) => (o.id === order.id ? { ...o, estado: "En viaje" } : o)))
-  }
-
-  const handleConfirmDelivery = (order) => {
-    setOrders(orders.map((o) => (o.id === order.id ? { ...o, estado: "Entregado" } : o)))
-  }
-
   const renderActionButtons = (order) => {
-    switch (order.estado) {
-      case "Nuevo":
+    const isDelivery = order.metodoEnvio === 'ENVIO_A_DOMICILIO';
+
+    switch (order.rawEstado) {
+      case "REALIZADO":
         return (
           <>
-            <button className={styles.orderActionButtonAccept} onClick={() => handleAcceptOrder(order)}>
-              Aceptar pedido
+            <button className={styles.orderActionButtonAccept} onClick={() => updateOrderStatus(order.id, "EN_PREPARACION")}>
+              Pasar a preparación
             </button>
-            <button className={styles.orderActionButtonReject} onClick={() => handleReject(order)}>
+            {/* <button className={styles.orderActionButtonReject} onClick={() => handleReject(order)}>
               Rechazar pedido
-            </button>
+            </button> */}
           </>
         )
-      case "En prep":
+      case "EN_PREPARACION":
         return (
-          <button className={styles.orderActionButtonAccept} onClick={() => handleMarkReady(order)}>
-            Marcar listo
+          <button className={styles.orderActionButtonAccept} onClick={() => updateOrderStatus(order.id, "EN_ESPERA")}>
+            Pasar a listo
           </button>
         )
-      case "En viaje":
+      case "EN_ESPERA":
+        if (isDelivery) {
+          return (
+            <button className={styles.orderActionButtonAccept} onClick={() => updateOrderStatus(order.id, "EN_ENVIO")}>
+              Pasar a en viaje
+            </button>
+          )
+        } else {
+          return (
+            <button className={styles.orderActionButtonAccept} onClick={() => updateOrderStatus(order.id, "ENTREGADO")}>
+              Marcar como entregado
+            </button>
+          )
+        }
+      case "EN_ENVIO":
         return (
-          <button className={styles.orderActionButtonAccept} onClick={() => handleConfirmDelivery(order)}>
-            Confirmar entrega
+          <button className={styles.orderActionButtonAccept} onClick={() => updateOrderStatus(order.id, "ENTREGADO")}>
+            Marcar como entregado
           </button>
         )
-      case "Entregado":
-      case "Rechazado":
+      case "ENTREGADO":
+      case "RECHAZADO":
         return null
       default:
         return null
@@ -199,14 +293,31 @@ export default function VendedorPedidosPage() {
   }
 
   const filteredOrders = orders.filter((order) => {
-    if (selectedTab === "todos") return true
-    if (selectedTab === "pendientes") return order.estado === "Nuevo"
-    if (selectedTab === "enpreparacion") return order.estado === "En prep"
-    if (selectedTab === "enviaje") return order.estado === "En viaje"
-    if (selectedTab === "entregados") return order.estado === "Entregado"
-    if (selectedTab === "rechazados") return order.estado === "Rechazado"
-    return true
+    // El filtrado por estado (tab) ya lo hace el backend, excepto para 'todos' que trae todo lo del rango.
+    // Aquí filtramos por búsqueda de texto localmente
+    if (!searchQuery) return true
+    const q = searchQuery.toLowerCase()
+    return (
+      order.numero?.toLowerCase().includes(q) ||
+      order.cliente?.toLowerCase().includes(q) ||
+      order.id?.toLowerCase().includes(q) ||
+      order.items.some((item) => item.nombre.toLowerCase().includes(q))
+    )
   })
+
+  const handleApplyFilters = () => {
+    setDateRange(tempDateRange)
+    setCustomStart(tempCustomStart)
+    setCustomEnd(tempCustomEnd)
+    setShowFilters(false)
+  }
+
+  const openFilters = () => {
+    setTempDateRange(dateRange)
+    setTempCustomStart(customStart)
+    setTempCustomEnd(customEnd)
+    setShowFilters(true)
+  }
 
   const handleLogout = () => {
     sessionStorage.clear()
@@ -219,114 +330,7 @@ export default function VendedorPedidosPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      {/* NAVBAR */}
-      <nav className={styles.navbar}>
-        <div className={styles.navbarInner}>
-          <div className={styles.navbarLeft}>
-            <Link href="/vendedor" className={styles.logo}>
-              <Image src="/logo.png" alt="PediloYa Logo" width={50} height={60} className={styles.logo} priority />
-              <span className={styles.logoText}>PediloYa</span>
-            </Link>
-            <div className={styles.location}>
-              <Image src="/pin-de-ubicacion.png" alt="Pin de ubicación" width={30} height={40} />
-              <div className={styles.locationText}>
-                <span className={styles.locationLabel}>Ubicación</span>
-                <span className={styles.locationValue}>Mi dirección</span>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.navbarRight}>
-            <div className={styles.navbarIconWrapper}>
-              <button
-                className={styles.navbarIcon}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowNotifications(!showNotifications)
-                  setShowUserMenu(false)
-                }}
-              >
-                <Image src="/campana-de-notificacion.png" alt="Notificaciones" width={28} height={38} />
-              </button>
-              {showNotifications && (
-                <div className={styles.notificationPopover}>
-                  <div className={styles.notificationHeader}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#9ca3af">
-                      <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-                    </svg>
-                    <span>Notificaciones</span>
-                  </div>
-                  <div className={styles.notificationContent}>
-                    <p>No tenés notificaciones</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.navbarIconWrapper}>
-              <button
-                className={styles.userButton}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowUserMenu(!showUserMenu)
-                  setShowNotifications(false)
-                }}
-              >
-                <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
-                <span className={styles.userButtonText}>Local</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#374151">
-                  <path d="M7 10l5 5 5-5z" />
-                </svg>
-              </button>
-              {showUserMenu && (
-                <div className={styles.userPopover}>
-                  <div className={styles.userPopoverHeader}>
-                    <span>Local</span>
-                  </div>
-                  <div className={styles.userPopoverMenu}>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                      </svg>
-                      <span>Inicio</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/perfil")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                      </svg>
-                      <span>Mi perfil</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/productos")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z" />
-                      </svg>
-                      <span>Mis productos</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={() => handleNavigate("/vendedor/pedidos")}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                      </svg>
-                      <span>Pedidos</span>
-                    </button>
-                    <button className={styles.userPopoverItem}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
-                      </svg>
-                      <span>Cupones</span>
-                    </button>
-                    <button className={styles.userPopoverItem} onClick={handleLogout}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
-                      </svg>
-                      <span>Salir</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <VendedorNavbar profile={vendedorProfile} />
 
       {/* CONTENT */}
       <div className={styles.content}>
@@ -348,12 +352,6 @@ export default function VendedorPedidosPage() {
             Todos
           </button>
           <button
-            className={`${styles.tab} ${selectedTab === "nuevos" ? styles.tabActive : ""}`}
-            onClick={() => setSelectedTab("nuevos")}
-          >
-            Nuevos
-          </button>
-          <button
             className={`${styles.tab} ${selectedTab === "pendientes" ? styles.tabActive : ""}`}
             onClick={() => setSelectedTab("pendientes")}
           >
@@ -364,6 +362,12 @@ export default function VendedorPedidosPage() {
             onClick={() => setSelectedTab("enpreparacion")}
           >
             En preparación
+          </button>
+          <button
+            className={`${styles.tab} ${selectedTab === "espera" ? styles.tabActive : ""}`}
+            onClick={() => setSelectedTab("espera")}
+          >
+            En espera
           </button>
           <button
             className={`${styles.tab} ${selectedTab === "enviaje" ? styles.tabActive : ""}`}
@@ -377,12 +381,17 @@ export default function VendedorPedidosPage() {
           >
             Entregados
           </button>
-          <button
-            className={`${styles.tab} ${selectedTab === "rechazados" ? styles.tabActive : ""}`}
-            onClick={() => setSelectedTab("rechazados")}
-          >
-            Rechazados
-          </button>
+        </div>
+
+        {/* ACTIVE FILTER DISPLAY */}
+        <div className={styles.activeFilterDisplay}>
+          <span>Mostrando pedidos del:</span>
+          <span className={styles.activeFilterBadge}>
+            {dateRange === 'PERSONALIZADO' 
+              ? `${new Date(customStart).toLocaleDateString()} - ${new Date(customEnd).toLocaleDateString()}`
+              : (dateRange === 'HOY' ? 'Hoy' : (dateRange === 'AYER' ? 'Ayer' : 'Últimos 7 días'))
+            }
+          </span>
         </div>
 
         {/* SEARCH BAR */}
@@ -391,7 +400,7 @@ export default function VendedorPedidosPage() {
             <input
               type="text"
               className={styles.searchInput}
-              placeholder=""
+              placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -401,7 +410,7 @@ export default function VendedorPedidosPage() {
               </svg>
             </button>
           </div>
-          <button className={styles.filterBtn}>
+          <button className={styles.filterBtn} onClick={openFilters}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="#ff4b7e">
               <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
             </svg>
@@ -409,7 +418,9 @@ export default function VendedorPedidosPage() {
         </div>
 
         {/* ORDERS LIST */}
-        {filteredOrders.length === 0 ? (
+        {loading ? (
+          <div className={styles.emptyState}><p className={styles.emptyText}>Cargando pedidos...</p></div>
+        ) : filteredOrders.length === 0 ? (
           <div className={styles.emptyState}>
             <p className={styles.emptyText}>No hay pedidos</p>
           </div>
@@ -425,7 +436,7 @@ export default function VendedorPedidosPage() {
                   </div>
                   <div className={styles.orderMeta}>
                     <span className={styles.orderDate}>{order.fecha}</span>
-                    <span className={`${styles.orderStatus} ${getStatusClass(order.estado)}`}>{order.estado}</span>
+                    <span className={`${styles.orderStatus} ${getStatusClass(order.rawEstado)}`}>{order.estado}</span>
                   </div>
                 </div>
 
@@ -443,7 +454,7 @@ export default function VendedorPedidosPage() {
                 </div>
 
                 <div className={styles.orderFooter}>
-                  <p className={styles.orderTotal}>Total: ${order.total}</p>
+                  <p className={styles.orderTotal}>Total: ${(parseFloat(order.subtotalProductos || 0) + parseFloat(order.costoEnvio || 0)).toFixed(2)}</p>
                   <div className={styles.orderActions}>
                     <button className={styles.orderActionButton} onClick={() => handleViewDetail(order)}>
                       Ver detalle
@@ -478,7 +489,7 @@ export default function VendedorPedidosPage() {
             </div>
 
             <div className={styles.detailBody}>
-              <span className={`${styles.detailStatus} ${getStatusClass(selectedOrder.estado)}`}>
+              <span className={`${styles.detailStatus} ${getStatusClass(selectedOrder.rawEstado)}`}>
                 {selectedOrder.estado}
               </span>
 
@@ -495,13 +506,9 @@ export default function VendedorPedidosPage() {
                     <p>
                       <strong>Dirección:</strong> {selectedOrder.direccion}
                     </p>
-                  </div>
-                  <div className={styles.detailMap}>
-                    <div className={styles.mapPlaceholder}>
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="#ef4444">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                      </svg>
-                    </div>
+                    <p>
+                      <strong>Tipo de entrega:</strong> {selectedOrder.metodoEnvio === 'ENVIO_A_DOMICILIO' ? 'Envío a domicilio' : 'Retiro en local'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -513,7 +520,7 @@ export default function VendedorPedidosPage() {
                     <p>
                       {item.cantidad} {item.nombre}
                     </p>
-                    <p>${item.precio} c/u</p>
+                    <p>${item.subtotal}</p>
                   </div>
                 ))}
               </div>
@@ -526,14 +533,15 @@ export default function VendedorPedidosPage() {
               <div className={styles.detailTotals}>
                 <div className={styles.detailTotalRow}>
                   <span>Subtotal:</span>
-                  <span>${selectedOrder.total}</span>
+                  <span>${selectedOrder.subtotalProductos}</span>
                 </div>
                 <div className={styles.detailTotalRow}>
                   <span>Costo de envío:</span>
-                  <span>Gratis</span>
+                  <span>${selectedOrder.costoEnvio}</span>
                 </div>
                 <div className={styles.detailTotalRowFinal}>
-                  <span>Total: ${selectedOrder.total}</span>
+                  <span>Total: </span>
+                  <span>${(parseFloat(selectedOrder.subtotalProductos || 0) + parseFloat(selectedOrder.costoEnvio || 0)).toFixed(2)}</span>
                 </div>
               </div>
 
@@ -549,18 +557,18 @@ export default function VendedorPedidosPage() {
                   <button className={styles.detailActionButton} onClick={() => setShowOrderDetail(false)}>
                     Cerrar
                   </button>
-                  {selectedOrder.estado === "Nuevo" && (
+                  {selectedOrder.rawEstado === "REALIZADO" && (
                     <>
                       <button
                         className={styles.detailActionButtonAccept}
                         onClick={() => {
-                          handleAcceptOrder(selectedOrder)
+                          updateOrderStatus(selectedOrder.id, "EN_PREPARACION")
                           setShowOrderDetail(false)
                         }}
                       >
-                        Aceptar pedido
+                        Pasar a preparación
                       </button>
-                      <button
+                      {/* <button
                         className={styles.detailActionButtonReject}
                         onClick={() => {
                           setShowOrderDetail(false)
@@ -568,29 +576,41 @@ export default function VendedorPedidosPage() {
                         }}
                       >
                         Rechazar pedido
-                      </button>
+                      </button> */}
                     </>
                   )}
-                  {selectedOrder.estado === "En prep" && (
+                  {selectedOrder.rawEstado === "EN_PREPARACION" && (
                     <button
                       className={styles.detailActionButtonAccept}
                       onClick={() => {
-                        handleMarkReady(selectedOrder)
+                        updateOrderStatus(selectedOrder.id, "EN_ESPERA")
                         setShowOrderDetail(false)
                       }}
                     >
-                      Marcar listo
+                      Pasar a listo
                     </button>
                   )}
-                  {selectedOrder.estado === "En viaje" && (
+                  {selectedOrder.rawEstado === "EN_ESPERA" && (
                     <button
                       className={styles.detailActionButtonAccept}
                       onClick={() => {
-                        handleConfirmDelivery(selectedOrder)
+                        const nextStatus = selectedOrder.metodoEnvio === 'ENVIO_A_DOMICILIO' ? "EN_ENVIO" : "ENTREGADO";
+                        updateOrderStatus(selectedOrder.id, nextStatus)
                         setShowOrderDetail(false)
                       }}
                     >
-                      Confirmar entrega
+                      {selectedOrder.metodoEnvio === 'ENVIO_A_DOMICILIO' ? "Pasar a en viaje" : "Marcar como entregado"}
+                    </button>
+                  )}
+                  {selectedOrder.rawEstado === "EN_ENVIO" && (
+                    <button
+                      className={styles.detailActionButtonAccept}
+                      onClick={() => {
+                        updateOrderStatus(selectedOrder.id, "ENTREGADO")
+                        setShowOrderDetail(false)
+                      }}
+                    >
+                      Marcar como entregado
                     </button>
                   )}
                 </div>
@@ -625,6 +645,73 @@ export default function VendedorPedidosPage() {
               <button className={styles.rejectButton} onClick={handleConfirmReject}>
                 Aceptar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FILTERS MODAL */}
+      {showFilters && (
+        <div className={styles.modalOverlay} onClick={() => setShowFilters(false)}>
+          <div className={styles.filtersModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.filtersHeader}>
+              <h2>Filtrar pedidos</h2>
+              <button className={styles.modalClose} onClick={() => setShowFilters(false)}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className={styles.filterSection}>
+              <div className={styles.filterSectionHeader}>
+                <h3>Rango de fechas</h3>
+              </div>
+              <label className={styles.radioLabel}>
+                <input type="radio" className={styles.radioInput} checked={tempDateRange === 'HOY'} onChange={() => setTempDateRange('HOY')} />
+                Hoy
+              </label>
+              <label className={styles.radioLabel}>
+                <input type="radio" className={styles.radioInput} checked={tempDateRange === 'AYER'} onChange={() => setTempDateRange('AYER')} />
+                Ayer
+              </label>
+              <label className={styles.radioLabel}>
+                <input type="radio" className={styles.radioInput} checked={tempDateRange === 'ULTIMOS_7'} onChange={() => setTempDateRange('ULTIMOS_7')} />
+                Últimos 7 días
+              </label>
+              <label className={styles.radioLabel}>
+                <input type="radio" className={styles.radioInput} checked={tempDateRange === 'PERSONALIZADO'} onChange={() => setTempDateRange('PERSONALIZADO')} />
+                Personalizado
+              </label>
+
+              {tempDateRange === 'PERSONALIZADO' && (
+                <div className={styles.dateInputs}>
+                  <div className={styles.dateInputGroup}>
+                    <span className={styles.dateLabel}>Desde</span>
+                    <input 
+                      type="date" 
+                      className={styles.dateInput} 
+                      value={tempCustomStart} 
+                      onChange={(e) => setTempCustomStart(e.target.value)} 
+                    />
+                  </div>
+                  <div className={styles.dateInputGroup}>
+                    <span className={styles.dateLabel}>Hasta</span>
+                    <input 
+                      type="date" 
+                      className={styles.dateInput} 
+                      value={tempCustomEnd} 
+                      onChange={(e) => setTempCustomEnd(e.target.value)} 
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.filterActions}>
+              <button className={styles.filterCancelBtn} onClick={() => setShowFilters(false)}>Cancelar</button>
+              <button className={styles.filterApplyBtn} onClick={handleApplyFilters}>Aplicar filtros</button>
             </div>
           </div>
         </div>

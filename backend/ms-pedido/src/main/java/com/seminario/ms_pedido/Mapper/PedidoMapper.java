@@ -9,6 +9,7 @@ import com.seminario.ms_pedido.dto.ClienteResponseDTO;
 import com.seminario.ms_pedido.dto.PedidoDetalleDTO;
 import com.seminario.ms_pedido.dto.PedidoListadoDTO;
 import com.seminario.ms_pedido.dto.PedidoResponseDTO;
+import com.seminario.ms_pedido.dto.PedidoVendedorResponseDTO;
 import com.seminario.ms_pedido.dto.VendedorResumidoDTO;
 import com.seminario.ms_pedido.model.Pedido;
 
@@ -92,5 +93,30 @@ public class PedidoMapper {
         return catalogoClient.obtenerDatosVendedor(vendedorId);
     }
 
+
+    public PedidoVendedorResponseDTO toVendedorResponseDTO(Pedido pedido) {
+        if (pedido == null) return null;
+
+        return PedidoVendedorResponseDTO.builder()
+                .id(pedido.getId())
+                .fechaCreacion(pedido.getFechaCreacion())
+                .estado(pedido.getEstado() != null ? pedido.getEstado().name() : null)
+                
+                .nombreCliente(pedido.getCliente() != null ? pedido.getCliente().getNombre() : "N/A")
+                .apellidoCliente(pedido.getCliente() != null ? pedido.getCliente().getApellido() : "")
+                .emailCliente(pedido.getCliente() != null ? pedido.getCliente().getEmail() : "N/A")
+                .telefonoCliente(pedido.getCliente() != null ? pedido.getCliente().getTelefono() : "N/A")
+                
+                .montoTotalProductos(pedido.getMontoTotalProductos())
+                .costoEnvio(pedido.getCostoEnvio())
+                .montoTotal(pedido.getMontoTotal())
+                
+                .metodoEnvio(pedido.getMetodoEnvio() != null ? pedido.getMetodoEnvio().name() : null)
+                .direccion(pedido.getDireccion() != null ? 
+                                direccionMapper.toResponseDTO(pedido.getDireccion()) : null)
+                .detalles(pedido.getDetalles() != null ? 
+                                pedido.getDetalles().stream().map(detallePedidoMapper::toDTO).toList() : null)
+                .build();
+        }
     
 }
