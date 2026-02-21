@@ -73,7 +73,7 @@ export default function MisPedidosPage() {
 
       const params = new URLSearchParams();
       
-      // Mapeo de filtros UI -> Backend
+      
       if (selectedStatus) {
         const statusMap = { "Entregados": "ENTREGADO", "Cancelados": "CANCELADO" };
         if (statusMap[selectedStatus]) params.append("filtroEstado", statusMap[selectedStatus]);
@@ -118,11 +118,25 @@ export default function MisPedidosPage() {
   }
 
   const getStatusClass = (status) => {
-    if (!status) return styles.statusEnCurso;
+    if (!status) return styles.statusEnEspera;
     const s = status.toUpperCase();
-    if (s === 'ENTREGADO' || s === 'REALIZADO') return styles.statusEntregado;
-    if (s === 'CANCELADO') return styles.statusCancelado;
-    return styles.statusEnCurso; // Para EN_PREPARACION, EN_CAMINO, etc.
+    
+    switch(s) {
+      case 'ENTREGADO': 
+        return styles.statusEntregado;
+      case 'REALIZADO':
+      case 'ACEPTADO': 
+        return styles.statusRealizado;
+      case 'RECHAZADO':
+      case 'CANCELADO': 
+        return styles.statusCancelado;
+      case 'EN_PREPARACION':
+      case 'EN_ENVIO': 
+        return styles.statusEnCurso;
+      case 'EN_ESPERA':
+      default: 
+        return styles.statusEnEspera;
+    }
   };
 
   const handleRefreshProfile = () => {
@@ -182,13 +196,13 @@ export default function MisPedidosPage() {
                       className={styles.vendorLogo}
                     />
                   ) : (
-                    <div style={{width: 64, height: 64, background: '#eee', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#999'}}>
-                      Sin logo
+                    <div className={styles.vendorLogoPlaceholder}>
+                      Sin imagen
                     </div>
                   )}
                 </div>
                 
-                <div className={styles.orderInfo}>
+                {/*<div className={styles.orderInfo}>
                   <span
                     className={`${styles.statusBadge} ${getStatusClass(order.estado)}`}
                   >
@@ -201,7 +215,24 @@ export default function MisPedidosPage() {
                   <p className={styles.orderMeta}>
                     Fecha de realización: {order.fechaCreacion ? new Date(order.fechaCreacion).toLocaleDateString() : '-'}
                   </p>
+                </div>*/}
+                
+                <div className={styles.orderInfo}>
+                  {/* El badge ahora es lo primero que el ojo lee para saber el éxito de la operación */}
+                  <div className={`${styles.statusBadge} ${getStatusClass(order.estado)}`}>
+                    <span className={styles.statusDot}>●</span>
+                    {order.estado ? order.estado.replace(/_/g, ' ') : 'PENDIENTE'}
+                  </div>
+                  
+                  <p className={styles.vendorName}>{order.nombreLocal}</p>
+                  <p className={styles.orderMeta}>
+                    {order.cantidadProductos || 0} producto{(order.cantidadProductos !== 1) ? "s" : ""}
+                  </p>
+                  <p className={styles.orderMeta}>
+                    Fecha de realización: {order.fechaCreacion ? new Date(order.fechaCreacion).toLocaleDateString() : '-'}
+                  </p>
                 </div>
+
                 <div className={styles.orderRight} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                   <div></div>
                   <p className={styles.orderTotal}>

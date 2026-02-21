@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 public class DetallePedidoDTO {
     private String id; 
     private String productoId;
-    //private String nombreProducto;
-    //private String imagen;
+    private String nombreProducto;
+    private String imagen;
     private Integer cantidad;
     private BigDecimal montoUnitario;
     private String observaciones;

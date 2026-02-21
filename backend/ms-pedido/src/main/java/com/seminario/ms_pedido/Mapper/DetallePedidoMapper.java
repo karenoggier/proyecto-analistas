@@ -17,11 +17,11 @@ public class DetallePedidoMapper {
     private final CatalogoClient catalogoClient;
 
     public DetallePedidoDTO toDTO(DetallePedido detalle) {
-       //List<String> datosProducto = obtenerDatosProducto(detalle.getIdProducto(), detalle.getPedido().getVendedorId());
+       List<String> datosProducto = obtenerDatosProducto(detalle.getIdProducto(), detalle.getPedido().getVendedorId());
         return DetallePedidoDTO.builder()
                 .id(detalle.getId())
-                //.nombreProducto(datosProducto.get(0))
-                //.imagen(datosProducto.get(1))
+                .nombreProducto(datosProducto.get(0))
+                .imagen(datosProducto.get(1))
                 .productoId(detalle.getIdProducto())
                 .cantidad(detalle.getCantidad())
                 .montoUnitario(detalle.getMontoUnitario())
