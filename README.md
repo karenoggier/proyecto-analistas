@@ -85,12 +85,16 @@ Como Mercado Pago necesita enviar notificacionesa al servidor local (ya que no e
 1. **Instalar Ngrok:** Descargalo desde [ngrok.com](https://ngrok.com/download).
 2. **Crea una cuenta/Inicia Sesión en Ngrok**
 2. **Levantar el túnel:** Ejecutá el siguiente comando en la terminal de ngrok (ejecutándolo)
-   ngrok config add-authtoken 'AUTH_TOKEN'
+
+   ngrok config add-authtoken 'TU_AUTH_TOKEN'
+
    ngrok http 3000
 
 ### 4. Mercado Pago en el frontend
 Para que el botón de pago funcione, se necesita instalar la SDK de Mercado Pago en el proyecto de Next.js:
+
 cd frontend
+
 npm install @mercadopago/sdk-react
 
 ---
@@ -98,15 +102,20 @@ npm install @mercadopago/sdk-react
 
 ### 1. Infraestructura (Bases de datos):
 * Para levantarla:
+
 cd docker
+
 docker-compose up -d
 
 * Para bajarla:
+
 cd docker
+
 docker compose down
 
 ### 2. Ejecutar el frontend:
 cd frontend
+
 npm run dev
 
 ---
