@@ -1,8 +1,10 @@
 import styles from '../direcciones/direcciones.module.css';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAppDialog } from '../../../components/ui/app-dialog';
 
 export default function NewAddressModal({ isOpen, onClose, onSuccess }) {
+  const { showAlert } = useAppDialog();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   
@@ -96,7 +98,10 @@ export default function NewAddressModal({ isOpen, onClose, onSuccess }) {
             });
 
             if (res.ok) {
-              alert("¡Dirección registrada correctamente!")
+              await showAlert({
+                title: "Operación exitosa",
+                description: "¡Dirección registrada correctamente!",
+              })
 
               setForm({
                   provincia: "",

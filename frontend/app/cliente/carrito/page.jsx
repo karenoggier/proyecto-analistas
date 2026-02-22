@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import LoadingScreen from '../../../components/loading-screen';
 import styles from './carrito.module.css';
 
 export default function CarritoPage() {
@@ -139,6 +140,10 @@ export default function CarritoPage() {
     fetchPerfil();
   };
 
+  if (loading) {
+    return <LoadingScreen text="Cargando carritos..." />;
+  }
+
   return (
     <div className={styles.page}>
       <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} />
@@ -153,9 +158,7 @@ export default function CarritoPage() {
           <h1 className={styles.title}>MIS CARRITOS</h1>
         </div>
 
-        {loading ? (
-          <div style={{textAlign: 'center', padding: '2rem'}}>Cargando carritos...</div>
-        ) : carts.length === 0 ? (
+        {carts.length === 0 ? (
           <div style={{textAlign: 'center', padding: '2rem'}}>No tienes carritos activos.</div>
         ) : (
         <div className={styles.cartList}>

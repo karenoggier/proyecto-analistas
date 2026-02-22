@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import LoadingScreen from '../../../../components/loading-screen';
 import styles from '../local.module.css';
 
 export default function LocalPage() {
@@ -266,6 +267,10 @@ export default function LocalPage() {
     fetchPerfil();
   };
 
+  if (loading && !vendorProfile) {
+    return <LoadingScreen text="Cargando local..." />;
+  }
+
 
 
   return (
@@ -293,7 +298,7 @@ export default function LocalPage() {
           </div>
           <div className={styles.storeInfo}>
             <div className={styles.nameRow}>
-              <h1 className={styles.storeName}>{loading ? 'Cargando...' : (vendorProfile?.nombreNegocio || 'Local no disponible')}</h1>
+              <h1 className={styles.storeName}>{vendorProfile?.nombreNegocio || 'Local no disponible'}</h1>
               {!loading && vendorProfile && (
                 <div className={`${styles.statusBanner} ${isOpen ? styles.statusOpen : styles.statusClosed}`}>
                   <span className={styles.statusDot}></span>

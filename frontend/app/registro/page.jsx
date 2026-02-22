@@ -4,8 +4,10 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import styles from "./registro.module.css"
 import Image from "next/image";
+import { useAppDialog } from "../../components/ui/app-dialog";
 
 export default function RegistroPage() {
+  const { showAlert } = useAppDialog();
   const [activeTab, setActiveTab] = useState("cliente")
   const [showPassword, setShowPassword] = useState(false)
   const [showRepeatPassword, setShowRepeatPassword] = useState(false)
@@ -235,7 +237,10 @@ export default function RegistroPage() {
         }*/
 
         if (response.ok) { 
-          alert(data.message || "Registro exitoso");
+          await showAlert({
+            title: "Registro exitoso",
+            description: data.message || "Registro exitoso",
+          });
           window.location.href = "/login";
         } else {
             if (response.status === 400) {

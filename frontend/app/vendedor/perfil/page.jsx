@@ -6,12 +6,17 @@ import styles from "./perfil.module.css"
 import Link from "next/link"
 import Image from "next/image"
 import VendedorNavbar from "../components/vendedor-navbar"
+import LoadingScreen from "../../../components/loading-screen"
+import { useAppDialog } from "../../../components/ui/app-dialog"
 
 export default function VendedorPerfilPage() {
+  const { showAlert } = useAppDialog()
   const router = useRouter()
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState({})
 
   // Estado para previsualizar imágenes cargadas
@@ -131,6 +136,7 @@ export default function VendedorPerfilPage() {
         console.error("Error cargando datos:", error)
       } finally {
         setLoadingData(false)
+        setIsInitialLoading(false)
       }
     }
 
@@ -226,6 +232,7 @@ export default function VendedorPerfilPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsSaving(true)
     setLoadingData(true)
     setErrors({})
 
@@ -304,13 +311,20 @@ export default function VendedorPerfilPage() {
           return; 
       }
 
-      alert("¡Perfil actualizado correctamente!")
+      await showAlert({
+        title: "Operación exitosa",
+        description: "¡Perfil actualizado correctamente!",
+      })
 
     } catch (error) {
       console.error(error)
-      alert("Hubo un error al guardar los cambios: " + error.message)
+      await showAlert({
+        title: "Error",
+        description: "Hubo un error al guardar los cambios: " + error.message,
+      })
     } finally {
       setLoadingData(false)
+      setIsSaving(false)
     }
   }
 
@@ -343,7 +357,9 @@ export default function VendedorPerfilPage() {
       }
   }
 
-  //if (loadingData) return <div className={styles.loading}>Cargando perfil...</div>
+  if (isInitialLoading) {
+    return <LoadingScreen text="Cargando perfil..." />
+  }
 
   return (
     <div className={styles.pageWrapper}>
@@ -677,8 +693,8 @@ export default function VendedorPerfilPage() {
             )}
 
             {/* Submit Button */}
-            <button type="submit" className={styles.submitButton}>
-              Guardar Cambios
+            <button type="submit" className={styles.submitButton} disabled={isSaving}>
+              {isSaving ? "Cargando..." : "Guardar Cambios"}
             </button>
           </form>
         </div>

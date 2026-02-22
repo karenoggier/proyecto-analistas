@@ -7,9 +7,11 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
 import ResumenCompra from '../../components/ResumenCompra';
+import { useAppDialog } from '../../../../components/ui/app-dialog';
 import styles from '../proceso-pedido.module.css';
 
 export default function Paso2Page() {
+  const { showAlert } = useAppDialog();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [vendedorId, setVendedorId] = useState(searchParams.get('vendedorId'));
@@ -162,7 +164,10 @@ export default function Paso2Page() {
 
   const handleContinue = async () => {
     if (deliveryType === 'address' && !selectedAddressId) {
-      alert("Por favor selecciona una dirección");
+      await showAlert({
+        title: "Dirección requerida",
+        description: "Por favor selecciona una dirección",
+      });
       return;
     }
 
@@ -172,7 +177,10 @@ export default function Paso2Page() {
       const pedidoId = sessionStorage.getItem("currentPedidoId");
 
       if (!pedidoId) {
-        alert("Error: No hay pedido en sesión. Vuelve al paso anterior.");
+        await showAlert({
+          title: "Error",
+          description: "Error: No hay pedido en sesión. Vuelve al paso anterior.",
+        });
         setSaving(false);
         return;
       }
@@ -196,7 +204,10 @@ export default function Paso2Page() {
         router.push(`/cliente/proceso-pedido/paso3?vendedorId=${vendedorId}`);
       } else {
         const errorData = await res.json().catch(() => ({}));
-        alert(`Error: ${errorData.message || 'No se pudo confirmar el envío'}`);
+        await showAlert({
+          title: "Error",
+          description: `Error: ${errorData.message || 'No se pudo confirmar el envío'}`,
+        });
       }
     } catch (error) {
       console.error("Error al confirmar envío:", error);

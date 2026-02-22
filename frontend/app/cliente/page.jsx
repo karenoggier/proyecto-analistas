@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import LoadingScreen from '../../components/loading-screen';
+import { useAppDialog } from '../../components/ui/app-dialog';
 import styles from './cliente.module.css';
 
 const categories = [
@@ -21,9 +23,11 @@ const categories = [
 ];
 
 export default function ClienteHome() {
+  const { showAlert } = useAppDialog();
   const [clientProfile, setClientProfile] = useState(null);
   const [stores, setStores] = useState([]);
   const localesRef = useRef(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [loadingStores, setLoadingStores] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -130,7 +134,9 @@ export default function ClienteHome() {
   
         } catch (error) {
           console.error("Error de red:", error);
-        } 
+        } finally {
+          setIsProfileLoading(false);
+        }
   }
   
   const handleLogout = () => {
@@ -200,7 +206,10 @@ export default function ClienteHome() {
     }
 
     if (!selectedAddressId) {
-      alert("Por favor, selecciona una dirección antes de buscar por categoría.");
+      showAlert({
+        title: "Dirección requerida",
+        description: "Por favor, selecciona una dirección antes de buscar por categoría.",
+      });
       return;
     }
 
@@ -223,6 +232,14 @@ export default function ClienteHome() {
       }
     }
   }, [clientProfile]);
+
+  if (isProfileLoading) {
+    return <LoadingScreen text="Cargando..." />;
+  }
+
+  if (loadingStores && stores.length === 0) {
+    return <LoadingScreen text="Cargando locales..." />;
+  }
 
 
   return (

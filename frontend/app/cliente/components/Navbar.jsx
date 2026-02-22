@@ -8,8 +8,10 @@ import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
 import AddressModal from './AddressModal';
 import NewAddressModal from './NewAddressModal';
+import { useAppDialog } from '../../../components/ui/app-dialog';
 
 export default function Navbar({ showSearchBar = false, profile, onAddressUpdate, disableAddressModal = false }) {
+  const { showAlert } = useAppDialog();
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [addressOpen, setAddressOpen] = useState(false);
@@ -79,7 +81,10 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
     e.preventDefault();
     const selectedAddressId = sessionStorage.getItem("selectedAddressId");
     if (!selectedAddressId) {
-      alert("Por favor, selecciona una dirección antes de buscar.");
+      showAlert({
+        title: "Dirección requerida",
+        description: "Por favor, selecciona una dirección antes de buscar.",
+      });
       return;
     }
 

@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./vendedor.module.css"
 import VendedorNavbar from "./components/vendedor-navbar"
+import LoadingScreen from "../../components/loading-screen"
 
 export default function VendedorPage() {
+  const [isLoading, setIsLoading] = useState(true)
   const [isProfileComplete, setIsProfileComplete] = useState(false)
   const [vendedorProfile, setVendedorProfile] = useState(null);
   const [contadores, setContadores] = useState({ pendientes: 0, preparacion: 0, entregados: 0 });
@@ -60,7 +62,9 @@ export default function VendedorPage() {
 
       } catch (error) {
         console.error("Error de red:", error);
-      } 
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     fetchPerfil();
@@ -167,6 +171,9 @@ export default function VendedorPage() {
     return () => document.removeEventListener("click", handleClickOutside)
   }, [])
 
+  if (isLoading) {
+    return <LoadingScreen text="Cargando tu negocio..." />
+  }
 
   return (
     <div className={styles.pageWrapper}>

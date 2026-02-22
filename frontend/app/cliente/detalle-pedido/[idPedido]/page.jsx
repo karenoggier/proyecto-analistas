@@ -6,6 +6,7 @@ import Image from "next/image";
 import styles from "../detalle-pedido.module.css";
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import LoadingScreen from '../../../../components/loading-screen';
 
 
 export default function DetallePedidoPage({ params }) {
@@ -83,17 +84,7 @@ export default function DetallePedidoPage({ params }) {
   };
 
   if (loading) {
-    return (
-      <div className={styles.page}>
-        <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} />
-        <main className={styles.main}>
-          <div style={{ textAlign: "center", color: "#666", marginTop: "40px" }}>
-            Cargando detalle del pedido...
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+    return <LoadingScreen text="Cargando detalle del pedido..." />;
   }
 
   if (!order) {

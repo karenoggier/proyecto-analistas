@@ -9,6 +9,7 @@ import confetti from 'canvas-confetti';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
+import LoadingScreen from '../../../../components/loading-screen';
 import styles from '../proceso-pedido.module.css';
 
 function Paso5Content() {
@@ -58,15 +59,6 @@ function Paso5Content() {
     };
 
     const renderStatusContent = () => {
-        if (loading) {
-            return (
-                <>
-                    <div className={styles.loadingIcon}>⏳</div>
-                    <h2 className={styles.successTitle}>Verificando pago...</h2>
-                    <p className={styles.successSubtitle}>Por favor espera mientras consultamos el estado de tu pago.</p>
-                </>
-            );
-        }
 
         if (!estadoPago) {
             return (
@@ -110,6 +102,10 @@ function Paso5Content() {
         }
     };
 
+    if (loading) {
+        return <LoadingScreen text="Verificando pago..." />;
+    }
+
     return (
         <div className={styles.successPage}>
             {renderStatusContent()}
@@ -128,7 +124,6 @@ function Paso5Content() {
 
 export default function Paso5Page() {
 
-   
     return (
         <div className={styles.page}>
             <header className={styles.topNavbar}>
@@ -144,7 +139,7 @@ export default function Paso5Page() {
                     <h1 className={styles.title}>ESTADO DEL PEDIDO</h1>
                 </div>
                 <Stepper activeStep={5} />
-                <Suspense fallback={<div>Cargando estado del pago...</div>}>
+                <Suspense fallback={<LoadingScreen text="Cargando estado del pago..." />}>
                     <Paso5Content />
                 </Suspense>
             </main>

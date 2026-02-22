@@ -6,8 +6,10 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import styles from './direcciones.module.css';
 import NewAddressModal from '../components/NewAddressModal';
+import { useAppDialog } from '../../../components/ui/app-dialog';
 
 export default function MisDireccionesPage() {
+  const { showAlert, showConfirm } = useAppDialog();
   const router = useRouter()
   const [showModal, setShowModal] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
@@ -45,11 +47,21 @@ export default function MisDireccionesPage() {
 
   const handleDelete = async (id) => {
     if (!id) {
-        alert("Por favor, selecciona una dirección para eliminar.");
+        await showAlert({
+          title: "Dirección requerida",
+          description: "Por favor, selecciona una dirección para eliminar.",
+        });
         return;
     }
 
-    if (!confirm("¿Estás seguro de que querés eliminar esta dirección?")) return;
+    const shouldDelete = await showConfirm({
+      title: "Eliminar dirección",
+      description: "¿Estás seguro de que querés eliminar esta dirección?",
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+    });
+
+    if (!shouldDelete) return;
 
     const token = sessionStorage.getItem("token");
     
@@ -63,7 +75,10 @@ export default function MisDireccionesPage() {
         });
 
         if (res.ok) {
-            alert("Dirección eliminada con éxito");
+            await showAlert({
+              title: "Operación exitosa",
+              description: "Dirección eliminada con éxito",
+            });
             setSelectedId(null);
             fetchPerfil(); 
             if (id === selectedId) {
@@ -71,7 +86,10 @@ export default function MisDireccionesPage() {
             }
         } else {
             const errorData = await res.json().catch(() => ({}));
-            alert(errorData.mensaje || "No se pudo eliminar la dirección");
+            await showAlert({
+              title: "Error",
+              description: errorData.mensaje || "No se pudo eliminar la dirección",
+            });
         }
     } catch (error) {
         console.error("Error de red al eliminar:", error);

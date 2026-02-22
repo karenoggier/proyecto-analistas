@@ -6,6 +6,7 @@ import styles from "./pedidos.module.css"
 import Link from "next/link"
 import Image from "next/image"
 import VendedorNavbar from "../components/vendedor-navbar"
+import LoadingScreen from "../../../components/loading-screen"
 
 export default function VendedorPedidosPage() {
   const router = useRouter()
@@ -22,6 +23,7 @@ export default function VendedorPedidosPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(false)
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
 
   // Filtros de fecha
   const [dateRange, setDateRange] = useState("HOY") 
@@ -154,6 +156,7 @@ export default function VendedorPedidosPage() {
       console.error("Error fetching orders:", error)
     } finally {
       setLoading(false)
+      setHasLoadedOnce(true)
     }
   }
 
@@ -328,6 +331,10 @@ export default function VendedorPedidosPage() {
     window.location.href = path
   }
 
+  if (loading && !hasLoadedOnce) {
+    return <LoadingScreen text="Cargando pedidos..." />
+  }
+
   return (
     <div className={styles.pageWrapper}>
       <VendedorNavbar profile={vendedorProfile} />
@@ -419,7 +426,7 @@ export default function VendedorPedidosPage() {
 
         {/* ORDERS LIST */}
         {loading ? (
-          <div className={styles.emptyState}><p className={styles.emptyText}>Cargando pedidos...</p></div>
+          <LoadingScreen text="Cargando pedidos..." />
         ) : filteredOrders.length === 0 ? (
           <div className={styles.emptyState}>
             <p className={styles.emptyText}>No hay pedidos</p>

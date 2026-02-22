@@ -6,8 +6,11 @@ import styles from "./productos.module.css"
 import Link from "next/link"
 import Image from "next/image"
 import VendedorNavbar from "../components/vendedor-navbar"
+import LoadingScreen from "../../../components/loading-screen"
+import { useAppDialog } from "../../../components/ui/app-dialog"
 
 export default function VendedorProductosPage() {
+  const { showAlert, showConfirm } = useAppDialog()
   const router = useRouter()
   const nombreRef = useRef(null)
 
@@ -30,6 +33,7 @@ export default function VendedorProductosPage() {
   })
 
   const [products, setProducts] = useState([])
+  const [isLoadingData, setIsLoadingData] = useState(true)
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -95,9 +99,11 @@ export default function VendedorProductosPage() {
                   setCategoriasMap(mapa); 
               }
 
-          } catch (error) {
+            } catch (error) {
               console.error("Error de red:", error);
-          }
+            } finally {
+              setIsLoadingData(false)
+            }
       }
 
       fetchDatos();
@@ -108,6 +114,10 @@ export default function VendedorProductosPage() {
           nombreRef.current.focus();
       }
     }, [isNewProduct, isEditing]);
+
+  if (isLoadingData) {
+    return <LoadingScreen text="Cargando tus productos..." />
+  }
 
   // --- LÓGICA DE FILTRADO Y BÚSQUEDA ---
   const filteredProducts = products.filter(product => {
@@ -124,10 +134,15 @@ export default function VendedorProductosPage() {
     return matchesSearch && matchesCategory && matchesSubcategory && matchesAvailability;
   });
 
-  const handleBackgroundClick = () => {
+  const handleBackgroundClick = async () => {
     if (isEditing || isNewProduct) {
-        const confirm = window.confirm("Tienes cambios sin guardar. ¿Quieres cerrar y perder los cambios?");
-        if (!confirm) return; 
+        const shouldClose = await showConfirm({
+          title: "Descartar cambios",
+          description: "Tienes cambios sin guardar. ¿Quieres cerrar y perder los cambios?",
+          confirmText: "Sí, cerrar",
+          cancelText: "Cancelar",
+        })
+        if (!shouldClose) return
     }
 
     if (selectedProduct || isNewProduct || isEditing) {
@@ -193,8 +208,13 @@ export default function VendedorProductosPage() {
   const handleEliminarClick = async () => {
     if (!selectedProduct) return;
 
-    const confirm = window.confirm(`¿Estás seguro de eliminar "${selectedProduct.nombre}"?`);
-    if(!confirm) return;
+    const shouldDelete = await showConfirm({
+      title: "Eliminar producto",
+      description: `¿Estás seguro de eliminar "${selectedProduct.nombre}"?`,
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+    })
+    if(!shouldDelete) return;
 
     const token = sessionStorage.getItem("token")
 
@@ -223,7 +243,10 @@ export default function VendedorProductosPage() {
                 imagen: "",
             })
             
-            alert("Producto eliminado correctamente")
+            await showAlert({
+              title: "Operación exitosa",
+              description: "Producto eliminado correctamente",
+            })
 
         } else {
             let mensajeError = "No se pudo eliminar el producto.";
@@ -295,10 +318,16 @@ export default function VendedorProductosPage() {
 
             if (method === 'POST') {
                 setProducts((prev) => [...prev, productoGuardado])
-                alert("Producto creado con éxito")
+                await showAlert({
+                  title: "Operación exitosa",
+                  description: "Producto creado con éxito",
+                })
             } else {
                 setProducts((prev) => prev.map(p => p.id === productoGuardado.id ? productoGuardado : p))
-                alert("Producto actualizado con éxito")
+                await showAlert({
+                  title: "Operación exitosa",
+                  description: "Producto actualizado con éxito",
+                })
             }
             
             setIsEditing(false)
@@ -363,6 +392,13 @@ export default function VendedorProductosPage() {
         setPreviews(prev => ({ ...prev, imagen: base64String }));
       };
     }
+  }
+
+  const handleRemoveImage = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setPreviews((prev) => ({ ...prev, imagen: null }))
+    setFormData((prev) => ({ ...prev, imagen: "" }))
   }
 
   const todasLasSubcategorias = Object.values(categoriasMap).flat();
@@ -485,7 +521,7 @@ export default function VendedorProductosPage() {
           {/* Form */}
           <div className={styles.formPanel}>
             <div className={styles.formImageUpload}>
-              <label className={styles.imageUploadArea} htmlFor="producto-upload">
+              <label className={`${styles.imageUploadArea} ${!isEditing ? styles.imageUploadAreaDisabled : ""}`} htmlFor="producto-upload">
                 <input 
                   type="file" 
                   id="producto-upload" 
@@ -494,13 +530,27 @@ export default function VendedorProductosPage() {
                   onChange={handleImageChange}
                   disabled={!isEditing}
                 />
-                {(previews.logo || formData.imagen) ? (
-                  <img 
-                    src={previews.logo || formData.imagen} 
-                    alt="Producto" 
-                    className={styles.imagePreview} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
-                  />
+                {(previews.imagen || formData.imagen) ? (
+                  <div className={styles.previewWrapper}>
+                    <img 
+                      src={previews.imagen || formData.imagen} 
+                      alt="Producto" 
+                      className={styles.imagePreview} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
+                    />
+                    {isEditing && (
+                      <button
+                        className={styles.removeButton}
+                        onClick={handleRemoveImage}
+                        type="button"
+                        aria-label="Eliminar imagen"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <div style={{display:'flex', alignItems:'center', justifyContent:'center', width:'100%', height:'100%'}}>
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="#9da0a4">

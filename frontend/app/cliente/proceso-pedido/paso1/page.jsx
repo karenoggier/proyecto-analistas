@@ -8,9 +8,12 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Stepper from '../../components/Stepper';
 import ResumenCompra from '../../components/ResumenCompra';
+import LoadingScreen from '../../../../components/loading-screen';
+import { useAppDialog } from '../../../../components/ui/app-dialog';
 import styles from '../proceso-pedido.module.css';
 
 export default function Paso1Page() {
+  const { showAlert } = useAppDialog();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [cart, setCart] = useState(null);
@@ -172,26 +175,24 @@ export default function Paso1Page() {
         router.push(`/cliente/proceso-pedido/paso2?vendedorId=${cart.vendedorId}`);
       } else {
         const errorData = await res.json().catch(() => ({}));
-        alert(`Error: ${errorData.message || 'No se pudo iniciar el checkout'}`);
+        await showAlert({
+          title: "Error",
+          description: `Error: ${errorData.message || 'No se pudo iniciar el checkout'}`,
+        });
       }
     } catch (error) {
       console.error("Error de red:", error);
-      alert("Error de conexión. Intenta de nuevo.");
+      await showAlert({
+        title: "Error de conexión",
+        description: "Error de conexión. Intenta de nuevo.",
+      });
     } finally {
       setProcessing(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className={styles.page}>
-        <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile}/>
-        <main className={styles.main}>
-          <div style={{textAlign: 'center', padding: '2rem'}}>Cargando...</div>
-        </main>
-        <Footer />
-      </div>
-    );
+    return <LoadingScreen text="Cargando tu pedido..." />;
   }
 
   if (!cart) {

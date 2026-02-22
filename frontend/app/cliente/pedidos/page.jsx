@@ -6,6 +6,7 @@ import Image from "next/image";
 import styles from "./pedidos.module.css";
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
+import LoadingScreen from '../../../components/loading-screen';
 
 const STATUS_FILTERS = ["Entregados", "Cancelados"];
 const PERIOD_FILTERS = [
@@ -143,6 +144,10 @@ export default function MisPedidosPage() {
     fetchPerfil();
   };
 
+  if (loading) {
+    return <LoadingScreen text="Cargando pedidos..." />;
+  }
+
   return (
     <div className={styles.page}>
       <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} />
@@ -178,9 +183,7 @@ export default function MisPedidosPage() {
           </button>
         </div>
 
-        {loading ? (
-          <div style={{textAlign: 'center', padding: '2rem', color: '#666'}}>Cargando pedidos...</div>
-        ) : orders.length === 0 ? (
+        {orders.length === 0 ? (
           <div style={{textAlign: 'center', padding: '2rem', color: '#666'}}>No se encontraron pedidos.</div>
         ) : (
           <div className={styles.orderList}>

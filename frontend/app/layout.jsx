@@ -1,6 +1,7 @@
 import React from "react"
 import { Metadata } from "next"
 import { Poppins } from "next/font/google"
+import { AppDialogProvider } from "../components/ui/app-dialog"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -18,7 +19,9 @@ export const metadata = {
 export default function RootLayout({children}) {
   return (
     <html lang="es">
-      <body className={poppins.className}>{children}</body>
+      <body className={poppins.className}>
+        <AppDialogProvider>{children}</AppDialogProvider>
+      </body>
     </html>
   )
 }
