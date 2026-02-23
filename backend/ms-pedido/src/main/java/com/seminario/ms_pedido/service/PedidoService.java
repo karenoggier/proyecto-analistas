@@ -57,18 +57,14 @@ public class PedidoService {
         Double distancia = usuarioClient.calcularDistanciaEntreDirecciones(idVendedorUsuario, idDireccionCliente, authentication);
         System.out.println("Distancia calculada: " + distancia);
 
-        BigDecimal costoEnvio;
-
-        //Esto hay que redefinirlo
-        if (distancia <= 2) {
-            costoEnvio = BigDecimal.valueOf(1000);
-        } else if (distancia <= 5) {
-            costoEnvio = BigDecimal.valueOf(2000);
-        } else if (distancia <= 10) {
-            costoEnvio = BigDecimal.valueOf(2500);
-        }  else {
-            costoEnvio = BigDecimal.valueOf(3000);
-        }
+        // Cálculo basado en precio por km
+        // Costo base: $1000 + $350 por km
+        BigDecimal costoBase = BigDecimal.valueOf(500);
+        BigDecimal precioPorKm = BigDecimal.valueOf(350);
+        
+        BigDecimal costoEnvio = costoBase.add(
+            BigDecimal.valueOf(distancia).multiply(precioPorKm)
+        );
 
         return costoEnvio;
         
@@ -287,8 +283,12 @@ public class PedidoService {
             pedidos = pedidoRepository.findByVendedorIdAndEstadoAndFechaCreacionBetween(vendedorId, estado, start, end)
                     .stream().map(pedidoMapper::toVendedorResponseDTO).toList();
         } else {
+            // Cuando no hay estado especificado, traer todos los pedidos excepto PENDIENTE
             pedidos = pedidoRepository.findByVendedorIdAndFechaCreacionBetween(vendedorId, start, end)
-                    .stream().map(pedidoMapper::toVendedorResponseDTO).toList();
+                    .stream()
+                    .filter(p -> !EstadoPedido.PENDIENTE.equals(p.getEstado()))
+                    .map(pedidoMapper::toVendedorResponseDTO)
+                    .toList();
         }
         
         // Ordenar por fecha de creación descendente (más reciente primero)

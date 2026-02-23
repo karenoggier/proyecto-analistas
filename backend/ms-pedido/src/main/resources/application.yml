@@ -38,10 +38,9 @@ spring:
         order_inserts: true
         order_updates: true
   
-  # ===== MONGODB PARA CARRITO =====
-  
+  # ===== MONGODB PARA CARRITO Y NOTIFICACIONES =====
   mongodb:
-    uri: mongodb://localhost:27018/carrito_db
+    uri: mongodb://localhost:27018/pedido-mongo-db
     auto-index-creation: true
   
   # ===== CACHE CON CAFFEINE =====

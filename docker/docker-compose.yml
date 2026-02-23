@@ -40,25 +40,14 @@ services:
     networks:
       - app-network
 
-# --- BASE DE DATOS CARRITO (NoSQL) ---
-  carrito-db:
+# --- BASE DE DATOS MS-PEDIDO (NoSQL) ---
+  pedido-mongo-db:
     image: mongo:latest
-    container_name: carrito-db
+    container_name: pedido-mongo-db
     ports:
       - "27018:27017" 
     volumes:
-      - ./docker/data/carrito:/data/db 
-    networks:
-      - app-network
-
-# --- BASE DE DATOS NOTIFICACIONES (NoSQL) ---
-  notificaciones-db:
-    image: mongo:latest
-    container_name: notificaciones-db
-    ports:
-      - "27019:27017" 
-    volumes:
-      - ./docker/data/notificaciones:/data/db 
+      - ./docker/data/ms-pedido:/data/db 
     networks:
       - app-network
 

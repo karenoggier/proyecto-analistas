@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.seminario.ms_pago.service.PagoService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +21,7 @@ public class WebhookController {
     private final PagoService pagoService;
 
     @PostMapping
+    @Operation(summary = "Procesa las notificaciones webhooks de Mercado Pago")
     public ResponseEntity<Void> recibirNotificacion(
             @RequestParam(value = "data.id", required = false) String dataId,
             @RequestParam(value = "id", required = false) String id,
