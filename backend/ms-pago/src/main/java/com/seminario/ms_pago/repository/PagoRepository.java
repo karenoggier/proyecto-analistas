@@ -1,5 +1,6 @@
 package com.seminario.ms_pago.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,8 +15,18 @@ import com.seminario.ms_pago.model.EstadoTransaccion;
 @Repository
 public interface PagoRepository extends JpaRepository<Pago, String> {
     Optional<Pago> findByPedidoId(String pedidoId);
+
     Optional<Pago> findByPreferenciaId(String preferenciaId);
+
     List<Pago> findByPedidoIdAndEstadoOrderByFechaCreacionAsc(String pedidoId, EstadoTransaccion estado);
+    
     List<Pago> findAllByPedidoIdOrderByFechaCreacionDesc(String pedidoId);
-	Optional<Pago> findByIdMP(String paymentId);
+	
+    Optional<Pago> findByIdMP(String paymentId);
+    
+    List<Pago> findByEstadoAndFechaCreacionBefore(EstadoTransaccion estado, LocalDateTime fecha);
+    
+    @Query("SELECT p.pedidoId FROM Pago p GROUP BY p.pedidoId HAVING COUNT(p.pedidoId) > 1")
+    List<String> findPedidoIdsConDuplicados();
+
 }

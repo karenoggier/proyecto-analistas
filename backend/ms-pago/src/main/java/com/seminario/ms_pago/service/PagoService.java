@@ -36,13 +36,11 @@ public class PagoService {
 
     public Map<String, String> crearPreferencia(String pedidoId) {
         try {
-            // Validar que no exista una transacción PENDIENTE para este pedido
             List<Pago> pagosPendientes = pagoRepository.findByPedidoIdAndEstadoOrderByFechaCreacionAsc(pedidoId, EstadoTransaccion.PENDIENTE);
             
             if (!pagosPendientes.isEmpty()) {
                 Pago pagoPendiente = pagosPendientes.get(0);
                 log.warn("Ya existe una transacción PENDIENTE para el pedido {}. Preferencia ID: {}", pedidoId, pagoPendiente.getPreferenciaId());
-                // Retornar la preferencia existente en lugar de crear una nueva
                 return Map.of(
                     "preferenceId", pagoPendiente.getPreferenciaId(),
                     "url", "https://www.mercadopago.com.ar/checkout/v1/redirect?preference-id=" + pagoPendiente.getPreferenciaId()
@@ -74,10 +72,8 @@ public class PagoService {
                 .autoReturn("approved") 
                 .build();
 
-            // Enviar la solicitud a Mercado Pago
             Preference preference = client.create(request);
 
-            // Guardamos el intento de pago
             Pago pago = new Pago();
             pago.setPedidoId(pedidoId);
             pago.setPreferenciaId(preference.getId());
@@ -101,58 +97,6 @@ public class PagoService {
             throw new RuntimeException("Error de conexión: " + e.getMessage());
         }
     }
-
-   /*  @Transactional
-    public void procesarNotificacionPago(String paymentId) {
-        try {
-            
-            PaymentClient client = new PaymentClient();
-            Payment payment = client.get(Long.parseLong(paymentId));
-            String pedidoId = payment.getExternalReference();
-
-            // 1. Obtener el estado real de Mercado Pago (convertir approved -> APROBADO, etc.)
-            EstadoTransaccion nuevoEstado = mapearEstado(payment.getStatus());
-
-            // 2. Buscar y borrar TODOS los registros previos (pendientes) de este pedido
-            List<Pago> pagosPrevios = pagoRepository.findAllByPedidoIdOrderByFechaCreacionDesc(pedidoId);
-            String preferenciaIdOriginal = null;
-            
-            if (!pagosPrevios.isEmpty()) {
-                preferenciaIdOriginal = pagosPrevios.get(0).getPreferenciaId();
-                log.info("Borrando {} registros previos para el pedido {}", pagosPrevios.size(), pedidoId);
-                pagoRepository.deleteAll(pagosPrevios);
-                // Forzamos el borrado para evitar conflictos de ID si usas la misma clave primaria
-                pagoRepository.flush(); 
-            }
-
-            // 3. Crear el nuevo registro con el estado final
-            Pago pagoFinal = new Pago();
-            pagoFinal.setPedidoId(pedidoId);
-            pagoFinal.setIdMP(paymentId);
-            pagoFinal.setPreferenciaId(preferenciaIdOriginal);
-            pagoFinal.setMonto(payment.getTransactionAmount());
-            pagoFinal.setEstado(nuevoEstado);
-            pagoFinal.setFechaCreacion(LocalDateTime.now());
-            
-            if (payment.getDateApproved() != null) {
-                pagoFinal.setFechaAprobacion(payment.getDateApproved().toLocalDateTime());
-            }
-            
-            pagoFinal.setMetodoDePago(mapearMetodo(payment.getPaymentTypeId()));
-
-            // 4. Guardar el nuevo registro limpio
-            pagoRepository.save(pagoFinal);
-
-            // 5. Si fue aprobado, confirmar al micro de pedidos
-            if (EstadoTransaccion.APROBADO.equals(nuevoEstado)) {
-                pedidoClient.confirmarPago(pedidoId);
-                log.info("Pedido {} confirmado exitosamente tras borrar pendientes.", pedidoId);
-            }
-
-        } catch (Exception e) {
-            log.error("Error procesando Webhook de MP para el pago {}: {}", paymentId, e.getMessage(), e);
-        }
-    }*/
 
     @Transactional
     public void procesarNotificacionPago(String paymentId) {
@@ -186,7 +130,7 @@ public class PagoService {
                 pago = new Pago();
                 pago.setPedidoId(pedidoId);
                 pago.setFechaCreacion(LocalDateTime.now());
-                // 💡 REUTILIZAMOS el ID de preferencia que recuperamos arriba
+                // REUTILIZAMOS el ID de preferencia que recuperamos arriba
                 pago.setPreferenciaId(preferenciaIdGuardada); 
             }
 
