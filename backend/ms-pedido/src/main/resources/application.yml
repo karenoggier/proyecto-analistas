@@ -236,11 +236,6 @@ logging:
   # ✅ PATTERN CON TRACE IDs HABILITADO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [${spring.application.name:},%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
-  
-  file:
-    name: logs/ms-pedido.log
-    max-size: 10MB
-    max-history: 30
 
 ---
 # ===== PERFIL DE DESARROLLO =====
