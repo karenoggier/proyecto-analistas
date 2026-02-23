@@ -47,6 +47,7 @@ public class PedidoService {
     private final ClienteMapper clienteMapper;
     private final CatalogoClient catalogoClient;
     private final UsuarioClient usuarioClient;
+    private final NotificacionService notificacionService;
 
     public BigDecimal calcularCostoEnvio(String idVendedor, String idDireccionCliente, Authentication authentication) {
         //Se busca el id del vendedor que pertenece a la base de datos de usuarios
@@ -210,16 +211,33 @@ public class PedidoService {
     public void marcarComoPagado(String id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new RequestException("PED", 404, HttpStatus.NOT_FOUND, "Pedido no encontrado"));
+
+        if (EstadoPedido.REALIZADO.equals(pedido.getEstado())) {
+            log.info("Pedido {} ya estaba REALIZADO. Se omite reprocesar.", id);
+            return;
+        }
         
         pedido.setEstado(EstadoPedido.REALIZADO);
         pedidoRepository.save(pedido);
 
-        String emailCliente = pedido.getCliente().getEmail(); 
-        String vendedorId = pedido.getVendedorId();
-        
-        carritoService.eliminarCarritoPorVendedorYCliente(emailCliente, vendedorId);
+        try {
+            String emailVendedor = catalogoClient.obtenerEmailPorVendedorId(pedido.getVendedorId());
 
-        log.info("Pedido {} pagado. Estado: REALIZADO y Carrito vaciado para cliente: {}", id, pedido.getClienteId());
+            notificacionService.crearYEnviarNotificacion(
+                emailVendedor,
+                "¡Nuevo pedido recibido! #" + id,
+                id
+            );
+
+            String emailCliente = pedido.getCliente().getEmail();
+            String vendedorId = pedido.getVendedorId();
+
+            carritoService.eliminarCarritoPorVendedorYCliente(emailCliente, vendedorId);
+        } catch (Exception ex) {
+            log.warn("Pedido {} pagado, pero fallo el post-procesamiento: {}", id, ex.getMessage());
+        }
+
+        log.info("Pedido {} pagado. Estado: REALIZADO", id);
         }
 
     public PedidoDetalleDTO obtenerDetallePedidoPorId(String pedidoId, String emailCliente) {
@@ -287,6 +305,12 @@ public class PedidoService {
 
         pedido.setEstado(nuevoEstado);
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        notificacionService.crearYEnviarNotificacion(
+            pedidoGuardado.getCliente().getEmail(), 
+            "Tu pedido #" + pedidoId + " ahora está " + nuevoEstado, 
+            pedidoId
+        );
         
         return pedidoMapper.toResponseDTO(pedidoGuardado);
     }

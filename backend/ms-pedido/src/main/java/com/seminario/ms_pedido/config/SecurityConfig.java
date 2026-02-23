@@ -32,6 +32,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/clientes/registrar").permitAll()
                 .requestMatchers("/pedidos/*/confirmar-pago").permitAll()
+                .requestMatchers("/ws-notifications", "/ws-notifications/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/index.html", "/api-docs/**", "/api-docs/swagger-config").permitAll()
                 .anyRequest().authenticated() 
             )

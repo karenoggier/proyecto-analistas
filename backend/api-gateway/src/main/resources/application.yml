@@ -11,7 +11,13 @@ spring:
             allowedOrigins: "http://localhost:3000"
             allowedMethods: "*"
             allowedHeaders: "*"
+            allowCredentials: true
       routes:
+        - id: ms-pedido-ws
+          uri: ws://localhost:8082
+          predicates:
+            - Path=/pedidoMs/ws-notifications/**
+            - Header=Upgrade, websocket
         - id: ms-usuarios
           uri: http://localhost:8080
           predicates:

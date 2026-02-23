@@ -456,6 +456,13 @@ public class VendedorService {
         return vendedor.getUsuarioId();
     }
 
+    public String obtenerEmailPorVendedorId(String id) {
+        Vendedor vendedor = vendedorRepository.findById(id)
+                .orElseThrow(() -> new RequestException("CA", 2, HttpStatus.BAD_REQUEST, "Vendedor no encontrado con ID: " + id));
+
+        return vendedor.getEmail();
+    }
+
 
     public VendedorResumidoDTO obtenerDatosVendedor(String id) {
         Vendedor vendedor = vendedorRepository.findById(id)

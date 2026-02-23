@@ -177,6 +177,10 @@ public class PagoService {
 
             if (pagoExistentePorMP.isPresent()) {
                 pago = pagoExistentePorMP.get();
+                if (EstadoTransaccion.APROBADO.equals(pago.getEstado()) && "approved".equals(mpStatus)) {
+                    log.info("Pago {} ya estaba APROBADO. Se ignora webhook duplicado.", paymentId);
+                    return;
+                }
             } else {
                 // Si es un reintento o el primer aviso, creamos un registro
                 pago = new Pago();

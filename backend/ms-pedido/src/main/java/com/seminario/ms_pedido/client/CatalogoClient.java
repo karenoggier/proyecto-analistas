@@ -39,6 +39,9 @@ public interface CatalogoClient {
     @GetExchange("/vendedores/id-usuario/{vendedorId}")
     @NonNull String obtenerIdUsuarioPorVendedorId(@PathVariable("vendedorId") @NonNull String vendedorId);
 
+    @GetExchange("/vendedores/email/{vendedorId}")
+    @NonNull String obtenerEmailPorVendedorId(@PathVariable("vendedorId") @NonNull String vendedorId);
+
     @GetExchange("/vendedores/resumen/{vendedorId}")
     @NonNull VendedorResumidoDTO obtenerDatosVendedor(@PathVariable("vendedorId") @NonNull String vendedorId);
 

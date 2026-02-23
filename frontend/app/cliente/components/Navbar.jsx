@@ -9,6 +9,9 @@ import styles from './Navbar.module.css';
 import AddressModal from './AddressModal';
 import NewAddressModal from './NewAddressModal';
 import { useAppDialog } from '../../../components/ui/app-dialog';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function Navbar({ showSearchBar = false, profile, onAddressUpdate, disableAddressModal = false }) {
   const { showAlert } = useAppDialog();
@@ -21,9 +24,13 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
   const [showDisabledNotice, setShowDisabledNotice] = useState(false);
   const pathname = usePathname();
 
+  const [notificaciones, setNotificaciones] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   const notifRef = useRef(null);
   const userRef = useRef(null);
   const addressRef = useRef(null);
+  const notifOpenRef = useRef(false);
 
   const handleLogout = () => {
     sessionStorage.clear()
@@ -39,6 +46,79 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
 
     setAddressOpen(true);    
   };
+
+  useEffect(() => {
+    const fetchNotif = async () => {
+      const token = sessionStorage.getItem("token");
+      const res = await fetch('/pedidoMs/notificaciones', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const normalized = data.map((n) => ({
+          ...n,
+          leida: Boolean(n.leida),
+          destacada: Boolean(n.destacada),
+        }));
+        setNotificaciones(normalized.slice(0, 10));
+      }
+    };
+    fetchNotif();
+  }, []);
+
+  useEffect(() => {
+    setUnreadCount(notificaciones.filter(n => !n.leida).length);
+  }, [notificaciones]);
+
+  useEffect(() => {
+    notifOpenRef.current = notifOpen;
+  }, [notifOpen]);
+
+  useEffect(() => {
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8082/pedidoMs/ws-notifications';
+    const socket = new SockJS(wsUrl);
+    const token = sessionStorage.getItem("token");
+    const client = new Client({
+      webSocketFactory: () => socket,
+      connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
+      debug: (str) => console.log(str), 
+      onConnect: () => {
+        console.log("¡CONECTADO AL WS!");
+        client.subscribe('/user/queue/updates', (msg) => {
+          const nuevaNotif = JSON.parse(msg.body);
+          const isOpen = notifOpenRef.current;
+          const normalizada = {
+            ...nuevaNotif,
+            leida: isOpen ? true : Boolean(nuevaNotif.leida),
+            destacada: isOpen ? true : Boolean(nuevaNotif.destacada),
+          };
+          
+          toast.custom((t) => (
+            <div className={`${styles.toast} ${t.visible ? styles.toastEnter : styles.toastLeave}`}>
+              <div className={styles.toastIcon}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
+                  <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 01-3.46 0" />
+                </svg>
+              </div>
+              <div className={styles.toastText}>{formatMessage(normalizada.mensaje)}</div>
+            </div>
+          ), {
+            duration: 4000,
+            position: 'bottom-right',
+          });
+
+          setNotificaciones(prev => {
+            if (prev.some(n => n.id === normalizada.id)) return prev;
+            return [normalizada, ...prev].slice(0, 10);
+          });
+        });
+      },
+    });
+
+    client.activate();
+    return () => client.deactivate();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -89,6 +169,57 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
     }
 
     window.location.href = `/cliente/buscar?q=${encodeURIComponent(searchQuery)}`;
+  };
+
+  const handleMarcarLeidas = async () => {
+    setNotificaciones(prev => prev.map(n => ({
+      ...n,
+      leida: true,
+      destacada: false,
+    })));
+
+    const token = sessionStorage.getItem("token");
+    try {
+      await fetch('/pedidoMs/notificaciones/leer-todas', {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch {
+      // Ignore network errors; UI will stay in sync locally.
+    }
+  };
+
+  const formatMessage = (text) => {
+    if (!text) return text;
+    // Lista de estados para resaltar
+    const baseStatuses = [
+      "RECHAZADO",
+      "ACEPTADO",
+      "EN_PREPARACION",
+      "EN_ENVIO",
+      "ENTREGADO",
+      "EN_ESPERA",
+      "REALIZADO",
+      "PENDIENTE",
+      "PAGADO",
+      "APROBADO",
+      "EN_CAMINO",
+      "CANCELADO",
+    ];
+
+    const statuses = baseStatuses.flatMap((s) => {
+      if (!s.includes("_")) return [s];
+      const spaced = s.replaceAll("_", " ");
+      const dashed = s.replaceAll("_", "-");
+      return [s, spaced, dashed];
+    });
+
+    const regex = new RegExp(`(${statuses.join('|')})`, 'gi');
+    return text.split(regex).map((part, i) => 
+      statuses.some(s => s.toLowerCase() === part.toLowerCase()) 
+        ? <span key={i} className={styles.statusHighlight}>{part}</span> 
+        : part
+    );
   };
 
   return (
@@ -162,39 +293,6 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
             onClose={handleSuccessSave}
             onSuccess={handleSuccessSave}
           />
-
-          {/*{addressOpen && (
-            <div className={styles.modalOverlay} onClick={() => setAddressOpen(false)}>
-              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                <div className={styles.popoverHeader}>
-                  <h3>Direcciones</h3>
-                  <button className={styles.popoverClose} onClick={() => setAddressOpen(false)}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-                <p className={styles.popoverSubtext}>Elija una direccion...</p>
-
-                <div className={styles.addressContainer}>
-                  <div className={styles.addressList}>
-                    <label className={styles.addressItem}>
-                      <input type="radio" name="address" defaultChecked className={styles.addressRadio} />
-                      <div className={styles.addressText}>
-                        <strong>Santos Vianni 1032</strong>
-                        <span>CP: 3081 - Humboldt, Santa Fe</span>
-                      </div>
-                    </label>
-                    {/* Aquí podrías mapear más direcciones 
-                  </div>
-
-                  <Link href="/cliente/direcciones" className={styles.addAddressLink} onClick={() => setAddressOpen(false)}>
-                    <span className={styles.plusIcon}>+</span> Agregar dirección
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}*/}
         </div>
 
         {showSearchBar && (
@@ -218,11 +316,14 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
 
       <div className={styles.navRight}>
         <div className={styles.iconWrapper} ref={notifRef}>
-          <button className={styles.iconBtn} onClick={() => { setNotifOpen(!notifOpen); setUserOpen(false); }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 01-3.46 0" />
-            </svg>
+          <button className={styles.iconBtn} onClick={() => { setNotifOpen((prev) => !prev); setUserOpen(false); }}>
+            <div className={styles.notifBadgeWrapper}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 01-3.46 0" />
+              </svg>
+              {unreadCount > 0 && <span className={styles.badge}>{unreadCount}</span>}
+            </div>
           </button>
           {notifOpen && (
             <div className={styles.popover}>
@@ -234,10 +335,22 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
                   </svg>
                   <span>Notificaciones</span>
                 </div>
+                <button onClick={handleMarcarLeidas} className={styles.clearBtn}>Marcar como leidas</button>
               </div>
-              <div className={styles.emptyNotif}>
-                <strong>No tenes notificaciones</strong>
-                <p>¡Aprovecha para descubrir productos increibles!</p>
+              <div className={styles.notifList}>
+                {notificaciones.length > 0 ? (
+                  notificaciones.map(n => (
+                    <div key={n.id} className={`${styles.notifItem} ${(!n.leida || n.destacada) ? styles.unreadLine : ''}`}>
+                      <p>{formatMessage(n.mensaje)}</p>
+                      <small>{new Date(n.fechaHora).toLocaleString()}</small>
+                    </div>
+                  ))
+                ) : (
+                  <div className={styles.emptyNotif}>
+                    <strong>No tenes notificaciones</strong>
+                    <p>¡Aprovecha para descubrir productos increibles!</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -254,10 +367,6 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
         <div className={styles.iconWrapper} ref={userRef}>
           <button className={styles.userBtn} onClick={() => { setUserOpen(!userOpen); setNotifOpen(false); }}>
             <div className={styles.avatar}>
-              {/*<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4b7e" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>*/}
               <Image src="/perfil.png" alt="Foto de perfil" width={35} height={45} />
             </div>
             <span className={styles.userName}>{profile?.nombre}</span>
@@ -313,6 +422,10 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
       </div>
       </div>
     </nav>
+    <Toaster 
+      position="bottom-right"
+      containerStyle={{ zIndex: 99999 }}
+    />
     </>
   );
 }
