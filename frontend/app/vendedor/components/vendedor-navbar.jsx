@@ -40,7 +40,7 @@ export default function VendedorNavbar({ profile }) {
             leida: Boolean(n.leida),
             destacada: Boolean(n.destacada),
           }));
-          setNotificaciones(normalized.slice(0, 10));
+          setNotificaciones(normalized);
         }
       } catch (error) {
         console.error("Error cargando notificaciones", error);
@@ -94,7 +94,7 @@ export default function VendedorNavbar({ profile }) {
 
           setNotificaciones(prev => {
             if (prev.some(n => n.id === normalizada.id)) return prev;
-            return [normalizada, ...prev].slice(0, 10);
+            return [normalizada, ...prev];
           });
         });
       },

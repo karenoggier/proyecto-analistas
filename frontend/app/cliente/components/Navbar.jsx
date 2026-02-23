@@ -60,7 +60,7 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
           leida: Boolean(n.leida),
           destacada: Boolean(n.destacada),
         }));
-        setNotificaciones(normalized.slice(0, 10));
+        setNotificaciones(normalized);
       }
     };
     fetchNotif();
@@ -110,7 +110,7 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
 
           setNotificaciones(prev => {
             if (prev.some(n => n.id === normalizada.id)) return prev;
-            return [normalizada, ...prev].slice(0, 10);
+            return [normalizada, ...prev];
           });
         });
       },

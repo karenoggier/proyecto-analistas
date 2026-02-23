@@ -11,6 +11,8 @@ public interface NotificacionRepository extends MongoRepository<Notificacion, St
 
     List<Notificacion> findByEmailAndLeidaFalse(String email);
 
+    List<Notificacion> findByEmailAndLeidaFalseOrderByFechaHoraDesc(String email);
+
     boolean existsByEmailAndPedidoIdAndMensajeAndFechaHoraAfter(
         String email,
         String pedidoId,

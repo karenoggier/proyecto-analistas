@@ -22,8 +22,20 @@ public class NotificacionService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public List<NotificacionDTO> listarNotificaciones(String email) {
+        // Obtener todas las notificaciones no leídas
+        List<Notificacion> noLeidas = notificacionRepository.findByEmailAndLeidaFalseOrderByFechaHoraDesc(email);
+        
+        // Si hay más de 10 no leídas, retornar todas las no leídas
+        if (noLeidas.size() > 10) {
+            return noLeidas.stream()
+                    .map(notificacionMapper::toDTO)
+                    .toList();
+        }
+        
+        // Si hay 10 o menos no leídas, retornar las 10 más recientes (leídas y no leídas combinadas)
         return notificacionRepository.findByEmailOrderByFechaHoraDesc(email)
                 .stream()
+                .limit(10)
                 .map(notificacionMapper::toDTO)
                 .toList();
     }

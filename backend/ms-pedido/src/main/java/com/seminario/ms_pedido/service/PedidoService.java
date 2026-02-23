@@ -282,13 +282,19 @@ public class PedidoService {
         LocalDateTime start = (inicio != null) ? inicio.atStartOfDay() : LocalDate.now().atStartOfDay();
         LocalDateTime end = (fin != null) ? fin.atTime(LocalTime.MAX) : LocalDate.now().atTime(LocalTime.MAX);
 
+        List<PedidoVendedorResponseDTO> pedidos;
         if (estado != null) {
-            return pedidoRepository.findByVendedorIdAndEstadoAndFechaCreacionBetween(vendedorId, estado, start, end)
+            pedidos = pedidoRepository.findByVendedorIdAndEstadoAndFechaCreacionBetween(vendedorId, estado, start, end)
+                    .stream().map(pedidoMapper::toVendedorResponseDTO).toList();
+        } else {
+            pedidos = pedidoRepository.findByVendedorIdAndFechaCreacionBetween(vendedorId, start, end)
                     .stream().map(pedidoMapper::toVendedorResponseDTO).toList();
         }
         
-        return pedidoRepository.findByVendedorIdAndFechaCreacionBetween(vendedorId, start, end)
-                .stream().map(pedidoMapper::toVendedorResponseDTO).toList();
+        // Ordenar por fecha de creación descendente (más reciente primero)
+        return pedidos.stream()
+                .sorted((p1, p2) -> p2.getFechaCreacion().compareTo(p1.getFechaCreacion()))
+                .toList();
     }
 
     @Transactional
