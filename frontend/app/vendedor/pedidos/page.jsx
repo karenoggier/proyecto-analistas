@@ -135,9 +135,10 @@ export default function VendedorPedidosPage() {
             nombre: d.nombreProducto,
             precio: d.montoUnitario,
             subtotal: d.cantidad * d.montoUnitario,
-            imagen: d.imagen
+            imagen: d.imagen,
+            observaciones: d.observaciones || ''
           })) : [],
-          observaciones: o.detalles ? o.detalles.map(d => d.observaciones).filter(Boolean).join(', ') : '',
+          observaciones: o.observaciones || '',
           total: o.montoTotal,
           subtotalProductos: o.montoTotalProductos,
           costoEnvio: o.costoEnvio,
@@ -449,14 +450,22 @@ export default function VendedorPedidosPage() {
 
                 <div className={styles.orderItems}>
                   {order.items.map((item, idx) => (
-                    <p key={idx} className={styles.orderItem}>
-                      <strong>{item.cantidad}</strong> {item.nombre}
-                    </p>
+                    <div key={idx} className={styles.itemBox}>
+                      <p className={styles.orderItem}>
+                        <strong>{item.cantidad}</strong> {item.nombre}
+                      </p>
+                      {item.observaciones && (
+                        <p className={styles.itemObservations}>
+                          <strong>Obs:</strong> {item.observaciones}
+                        </p>
+                      )}
+                    </div>
                   ))}
                   {order.observaciones && (
-                    <p className={styles.orderObservations}>
-                      <strong>Obs:</strong> {order.observaciones}
-                    </p>
+                    <div className={styles.pedidoObservationsBox}>
+                      <p className={styles.pedidoObservationsTitle}><strong>Observaciones del pedido:</strong></p>
+                      <p className={styles.pedidoObservations}>{order.observaciones}</p>
+                    </div>
                   )}
                 </div>
 
@@ -523,19 +532,29 @@ export default function VendedorPedidosPage() {
               <div className={styles.detailSection}>
                 <h3 className={styles.detailSectionTitle}>Detalle de ítems</h3>
                 {selectedOrder.items.map((item, idx) => (
-                  <div key={idx} className={styles.detailItem}>
-                    <p>
-                      {item.cantidad} {item.nombre}
-                    </p>
-                    <p>${item.subtotal}</p>
+                  <div key={idx} className={styles.detailItemBox}>
+                    <div className={styles.detailItem}>
+                      <p>
+                        <strong>{item.cantidad}</strong> {item.nombre}
+                      </p>
+                      <p className={styles.detailItemPrice}>${item.subtotal}</p>
+                    </div>
+                    {item.observaciones && (
+                      <div className={styles.detailItemObservations}>
+                        <strong className={styles.obsLabel}>Observaciones del item:</strong>
+                        <p>{item.observaciones}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
 
-              <div className={styles.detailSection}>
-                <h3 className={styles.detailSectionTitle}>Observaciones</h3>
-                <p className={styles.detailObservations}>{selectedOrder.observaciones || "Sin observaciones"}</p>
-              </div>
+              {selectedOrder.observaciones && (
+                <div className={styles.detailSection}>
+                  <h3 className={styles.detailSectionTitle}>Observaciones del pedido</h3>
+                  <p className={styles.detailObservations}>{selectedOrder.observaciones}</p>
+                </div>
+              )}
 
               <div className={styles.detailTotals}>
                 <div className={styles.detailTotalRow}>

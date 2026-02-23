@@ -128,7 +128,7 @@ export default function Paso5Page() {
         <div className={styles.page}>
             <header className={styles.topNavbar}>
                 <div className={`${styles.container} ${styles.headerInner}`}>
-                <Link href="http://localhost:3000/" className={styles.logo}>
+                <Link href="http://localhost:3000/cliente" className={styles.logo}>
                     <Image src="/logo.png" alt="PediloYa Logo" width={50} height={60} className={styles.logo} priority />
                     <span className={styles.logoText}>PediloYa</span>
                 </Link>

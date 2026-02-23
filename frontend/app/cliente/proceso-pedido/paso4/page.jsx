@@ -155,6 +155,9 @@ export default function Paso4Page() {
                     automaticamente a nuestra aplicacion.
                   </p>
                   <div className={styles.btnContainer}>
+                    {loading && !preferenceId && (
+                      <p className={styles.paymentDesc}>Generando link de pago...</p>
+                    )}
                     {preferenceId && <BtnMercadoPago preferenceId={preferenceId} />}
                   </div>
                 </div>
