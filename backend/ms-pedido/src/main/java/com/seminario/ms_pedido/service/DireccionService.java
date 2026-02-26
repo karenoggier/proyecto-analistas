@@ -36,7 +36,7 @@ public class DireccionService {
        
         String clienteId = cliente.getId();
 
-        DireccionResponseDTO direccionValidada = usuarioClient.buscarDatosDireccion(dto, clienteId);
+        DireccionResponseDTO direccionValidada = usuarioClient.buscarDatosDireccion(clienteId, dto);
 
         Direccion nuevaDireccion = direccionMapper.toEntity(direccionValidada);
        

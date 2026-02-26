@@ -1,40 +1,31 @@
 package com.seminario.ms_pedido.client;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
+import org.jspecify.annotations.NonNull;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.service.annotation.DeleteExchange;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seminario.ms_pedido.dto.DireccionRequestDTO;
 import com.seminario.ms_pedido.dto.DireccionResponseDTO;
-import com.seminario.ms_pedido.exception.RequestException;
-
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 
-@Component
-@RequiredArgsConstructor
-@Slf4j
-public class UsuarioClient {
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+@HttpExchange(url = "/usuariosMs")
+public interface UsuarioClient {
+    
+    @GetExchange("/direcciones/{usuarioId}")
+    DireccionResponseDTO buscarDatosDireccion(@PathVariable @NonNull String usuarioId, DireccionRequestDTO dto);
 
-    @Value("${usuarios.ms.url:http://localhost:8080}")
-    private String usuariosBaseUrl;
+    @GetExchange("/direcciones/calcular-distancia/{idVendedor}/{idDireccionCliente}")
+    @NonNull Double calcularDistanciaEntreDirecciones(
+        @PathVariable @NonNull String idVendedorUsuario, 
+        @PathVariable @NonNull String idDireccionCliente
+    );
 
-    @CircuitBreaker(name = "usuarioClient", fallbackMethod = "buscarDatosDireccionFallback")
+    @DeleteExchange("/direcciones/{idDireccion}")
+    void eliminarDireccion(@PathVariable @NonNull String idDireccion);
+
+    /*@CircuitBreaker(name = "usuarioClient", fallbackMethod = "buscarDatosDireccionFallback")
     @Retry(name = "usuarioClient")
     public DireccionResponseDTO buscarDatosDireccion(DireccionRequestDTO event, String clienteId) {
 
@@ -72,7 +63,9 @@ public class UsuarioClient {
             throw new RuntimeException("Error de conexión pura: " + e.getMessage(), e);
         }
     }
+*/
 
+/*
 // El método Fallback
     public DireccionResponseDTO buscarDatosDireccionFallback(DireccionRequestDTO event, String clienteId, Throwable t) {
         log.error("Circuit Breaker activado o reintentos agotados. Razón: {}", t.getMessage());
@@ -80,9 +73,9 @@ public class UsuarioClient {
             throw (RequestException) t; 
         }
         throw new RequestException("US", 503, HttpStatus.SERVICE_UNAVAILABLE, "Servicio de validación de direcciones temporalmente inactivo.");
-    }
+    }*/
 
-    @CircuitBreaker(name = "usuarioClient", fallbackMethod = "eliminarDireccionFallback")
+    /*@CircuitBreaker(name = "usuarioClient", fallbackMethod = "eliminarDireccionFallback")
     @Retry(name = "usuarioClient")
     public void eliminarDireccion(String idDireccion) {
         String url = usuariosBaseUrl + "/usuariosMs/direcciones/{idDireccion}";
@@ -117,29 +110,35 @@ public class UsuarioClient {
         } catch (Exception e) {
             throw new RuntimeException("Error de conexión pura: " + e.getMessage(), e);
         }
-    }
+    }*/
 
+    
+
+    /*
     public void eliminarDireccionFallback(String idDireccion, Throwable t) {
         log.error("Circuit Breaker activado o reintentos agotados. Razón: {}", t.getMessage());
         if (t instanceof RequestException) {
             throw (RequestException) t; 
         }
         throw new RequestException("US", 503, HttpStatus.SERVICE_UNAVAILABLE, "Servicio de eliminación de direcciones temporalmente inactivo.");
-    }
-@CircuitBreaker(name = "usuarioClient", fallbackMethod = "calcularDistanciaFallback")
-@Retry(name = "usuarioClient")
-public Double calcularDistanciaEntreDirecciones(String idVendedorUsuario, String idDireccionCliente, Authentication authentication) {
+    } */
+
     
-    // 1. Extraer el token JWT del objeto authentication
-    String tokenValue;
-    try {
-        // En Spring Security con OAuth2, el principal suele ser el objeto Jwt
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        tokenValue = jwt.getTokenValue();
-    } catch (Exception e) {
-        log.error("Error al extraer el token JWT: {}", e.getMessage());
-        throw new RequestException("PED", 401, HttpStatus.UNAUTHORIZED, "No se pudo recuperar la sesión del usuario");
-    }
+
+    /*@CircuitBreaker(name = "usuarioClient", fallbackMethod = "calcularDistanciaFallback")
+    @Retry(name = "usuarioClient")
+    public Double calcularDistanciaEntreDirecciones(String idVendedorUsuario, String idDireccionCliente, Authentication authentication) {
+        
+        // 1. Extraer el token JWT del objeto authentication
+        String tokenValue;
+        try {
+            // En Spring Security con OAuth2, el principal suele ser el objeto Jwt
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            tokenValue = jwt.getTokenValue();
+        } catch (Exception e) {
+            log.error("Error al extraer el token JWT: {}", e.getMessage());
+            throw new RequestException("PED", 401, HttpStatus.UNAUTHORIZED, "No se pudo recuperar la sesión del usuario");
+        }
 
     // 2. Configurar cabeceras con el token
     HttpHeaders headers = new HttpHeaders();
@@ -182,8 +181,9 @@ public Double calcularDistanciaEntreDirecciones(String idVendedorUsuario, String
         log.error("Error inesperado de comunicación: {}", e.getMessage());
         throw new RequestException("USU", 503, HttpStatus.SERVICE_UNAVAILABLE, "El servicio de usuarios no responde.");
     }
-}
+}*/
 
+/* 
 // IMPORTANTE: El método Fallback debe tener la MISMA firma que el original + la excepción
 public Double calcularDistanciaFallback(String idVendedorUsuario, String idDireccionCliente, Authentication authentication, Throwable t) {
     log.error("Fallback activado para calcularDistancia. Usuario: {}. Motivo: {}", authentication.getName(), t.getMessage());
@@ -195,4 +195,5 @@ public Double calcularDistanciaFallback(String idVendedorUsuario, String idDirec
     throw new RequestException("US", 503, HttpStatus.SERVICE_UNAVAILABLE, 
         "El servicio de usuarios no está disponible para calcular la distancia.");
 }
+*/
 }

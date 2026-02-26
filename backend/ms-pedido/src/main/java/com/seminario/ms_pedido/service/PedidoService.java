@@ -54,7 +54,7 @@ public class PedidoService {
         String idVendedorUsuario = catalogoClient.obtenerIdUsuarioPorVendedorId(idVendedor);
         System.out.println("ID Vendedor Usuario: " + idVendedorUsuario);
 
-        Double distancia = usuarioClient.calcularDistanciaEntreDirecciones(idVendedorUsuario, idDireccionCliente, authentication);
+        Double distancia = usuarioClient.calcularDistanciaEntreDirecciones(idVendedorUsuario, idDireccionCliente);
         System.out.println("Distancia calculada: " + distancia);
 
         // Cálculo basado en precio por km
