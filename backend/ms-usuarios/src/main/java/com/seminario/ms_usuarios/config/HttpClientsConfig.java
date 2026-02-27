@@ -1,4 +1,4 @@
-package com.seminario.ms_pago.config;
+package com.seminario.ms_usuarios.config;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
@@ -19,7 +19,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
-import com.seminario.ms_pago.client.PedidoClient;
+import com.seminario.ms_usuarios.client.CatalogoClient;
+import com.seminario.ms_usuarios.client.PedidoClient;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +31,11 @@ public class HttpClientsConfig {
     @Value("${pedido.ms.url:http://localhost:8082}")
     private String pedidoBaseUrl;
 
-     @Bean
+
+    @Value("${catalogo.ms.url:http://localhost:8081}")
+    private String catalogoBaseUrl;
+
+    @Bean
     public HttpClient httpClient() {
         return HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)  // Usa HTTP/2 cuando esté disponible
@@ -95,6 +100,29 @@ public class HttpClientsConfig {
             .build();
         
         return factory.createClient(PedidoClient.class);
+    }
+
+    @Bean
+    public RestClient catalogoRestClient(
+            JdkClientHttpRequestFactory requestFactory,
+            ClientHttpRequestInterceptor jwtTokenInterceptor) {
+        
+        log.info("Configurando RestClient para MS-Catalogo: {}", catalogoBaseUrl);
+        
+        return RestClient.builder()
+            .baseUrl(catalogoBaseUrl)
+            .requestFactory(requestFactory)
+            .requestInterceptor(jwtTokenInterceptor) // Propaga el JWT automáticamente
+            .build();
+    }
+
+    @Bean
+    public CatalogoClient catalogoClient(RestClient catalogoRestClient) {
+        HttpServiceProxyFactory factory = HttpServiceProxyFactory
+            .builderFor(RestClientAdapter.create(catalogoRestClient))
+            .build();
+        
+        return factory.createClient(CatalogoClient.class);
     }
 
     private String maskToken(@Nullable String token) {

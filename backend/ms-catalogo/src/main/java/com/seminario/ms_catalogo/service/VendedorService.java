@@ -139,8 +139,8 @@ public class VendedorService {
         // Llamada HTTP al MS-Usuarios (Para Lat/Long)
         VendedorRegistradoEvent respuestaUsuario;
         try {
-            // Asumiendo que usuarioClient devuelve ResponseEntity<VendedorRegistradoEvent>
-            respuestaUsuario = usuarioClient.actualizarVendedor(guardado).getBody();
+            // Asumiendo que usuarioClient devuelve VendedorRegistradoEvent
+            respuestaUsuario = usuarioClient.actualizarVendedor(guardado);
         } catch (Exception e) {
             String error = e.getMessage();
             throw new RequestException("US", 2, HttpStatus.BAD_REQUEST, error);
