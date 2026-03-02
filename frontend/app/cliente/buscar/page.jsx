@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef} from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import styles from './buscar.module.css';
 
 export default function BuscarPage() {
+  const searchParams = useSearchParams();
   const [clientProfile, setClientProfile] = useState(null);
   const [activeTab, setActiveTab] = useState('locales');
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,15 +23,14 @@ export default function BuscarPage() {
 
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const q = urlParams.get('q');
+    const q = searchParams.get('q');
 
     if (q && clientProfile && !busquedaInicialRealizada.current) {
       setSearchQuery(q);
       ejecutarBusqueda(q, activeTab);
       busquedaInicialRealizada.current = true;
     }
-  }, [clientProfile]); 
+  }, [clientProfile, searchParams]); 
 
   useEffect(() => {
     if (busquedaInicialRealizada.current && searchQuery) {
@@ -197,10 +198,10 @@ export default function BuscarPage() {
                 {/* VISTA DE LOCALES */}
                 {activeTab === 'locales' && (
                   <div className={styles.localesGrid}>
-                    {results.map((local) => (
+                    {results.map((local, index) => (
                       <Link 
-                        key={local.idVendedor} 
-                        href={`/cliente/local/${local.idVendedor}?q=${encodeURIComponent(searchQuery)}`} 
+                        key={local.id || local.idVendedor || local.vendedorId || index} 
+                        href={`/cliente/local/${local.id || local.idVendedor || local.vendedorId}?original=${encodeURIComponent(searchQuery)}`} 
                         className={styles.localCard}
                       >
                         <div className={styles.logoInner}>
@@ -248,7 +249,7 @@ export default function BuscarPage() {
                     {results.map((prod, index) => (
                       <Link 
                         key={prod.id || `prod-idx-${index}`} 
-                        href={`/cliente/local/${prod.idVendedor}?q=${encodeURIComponent(prod.nombre)}&original=${encodeURIComponent(searchQuery)}`}
+                        href={`/cliente/local/${prod.idVendedor || prod.vendedorId}?q=${encodeURIComponent(prod.nombre)}&original=${encodeURIComponent(searchQuery)}`}
                         className={styles.productCard}
                       >
                         <div className={styles.logoInner}>
@@ -256,6 +257,7 @@ export default function BuscarPage() {
                           <img 
                             src={prod.imagen} 
                             className={styles.logoImg} 
+                            alt={prod.nombre}
                           />
                         ) : (
                           <div className={styles.initialLetter}>

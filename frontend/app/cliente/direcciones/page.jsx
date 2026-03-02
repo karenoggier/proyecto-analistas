@@ -198,30 +198,36 @@ useEffect(() => {
         </div>
 
         <div className={styles.addressList}>
-          {addresses.map((addr) => (
-            <div key={addr.id} className={`${styles.addressCard} ${selectedId === addr.id ? styles.addressCardSelected : ''}`}>
-              <div className={styles.addressRadioWrapper}>
-                
-                  <input
-                    type="radio"
-                    name="selectedAddress"
-                    className={styles.addressRadio}
-                    checked={selectedId === addr.id}
-                    onChange={() => handleSelectChange(addr.id)}
-                  />
-              </div>
+          {clientProfile && addresses.length === 0 ? (
+            <p style={{ textAlign: "center", width: "100%", marginTop: "20px", color: "#555" }}>
+              No tienes direcciones registradas.
+            </p>
+          ) : (
+            addresses.map((addr) => (
+              <div key={addr.id} className={`${styles.addressCard} ${selectedId === addr.id ? styles.addressCardSelected : ''}`}>
+                <div className={styles.addressRadioWrapper}>
+                  
+                    <input
+                      type="radio"
+                      name="selectedAddress"
+                      className={styles.addressRadio}
+                      checked={selectedId === addr.id}
+                      onChange={() => handleSelectChange(addr.id)}
+                    />
+                </div>
 
-              <div className={styles.addressDetails}>
-                <strong>{addr.calle} {addr.numero}</strong>
-                <span>CP: {addr.codigoPostal} - {addr.localidad}, {addr.provincia}</span>
-                <span>
-                  Observaciones: {addr.observaciones && addr.observaciones.trim() !== "" 
-                  ? addr.observaciones 
-                  : "—"}
-                </span>
+                <div className={styles.addressDetails}>
+                  <strong>{addr.calle} {addr.numero}</strong>
+                  <span>CP: {addr.codigoPostal} - {addr.localidad}, {addr.provincia}</span>
+                  <span>
+                    Observaciones: {addr.observaciones && addr.observaciones.trim() !== "" 
+                    ? addr.observaciones 
+                    : "—"}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </main>
 
