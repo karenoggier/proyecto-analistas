@@ -2,9 +2,11 @@ package com.seminario.ms_pedido.client;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.service.annotation.DeleteExchange;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 import com.seminario.ms_pedido.dto.DireccionRequestDTO;
 import com.seminario.ms_pedido.dto.DireccionResponseDTO;
@@ -13,8 +15,8 @@ import com.seminario.ms_pedido.dto.DireccionResponseDTO;
 @HttpExchange(url = "/usuariosMs")
 public interface UsuarioClient {
     
-    @GetExchange("/direcciones/{usuarioId}")
-    DireccionResponseDTO buscarDatosDireccion(@PathVariable @NonNull String usuarioId, DireccionRequestDTO dto);
+    @PostExchange("/direcciones/{usuarioId}")
+    DireccionResponseDTO buscarDatosDireccion(@PathVariable @NonNull String usuarioId, @RequestBody @NonNull DireccionRequestDTO dto);
 
     @GetExchange("/direcciones/calcular-distancia/{idVendedor}/{idDireccionCliente}")
     @NonNull Double calcularDistanciaEntreDirecciones(

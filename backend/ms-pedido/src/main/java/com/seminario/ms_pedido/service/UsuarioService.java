@@ -22,8 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 public class UsuarioService {
 
     private final UsuarioClient usuarioClient;
-    private final ObjectMapper objectMapper;
-    
+    private final ObjectMapper objectMapper = new ObjectMapper();  
+      
     @CircuitBreaker(name = "usuarioClient", fallbackMethod = "buscarDatosDireccionFallback")
     @Retry(name = "usuarioClient")
     public DireccionResponseDTO buscarDatosDireccion(DireccionRequestDTO event, String clienteId) {
