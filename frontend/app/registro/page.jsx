@@ -101,6 +101,23 @@ export default function RegistroPage() {
     fetchLocalidades();
   }, [vendedorData.direccion.provincia]);
 
+  // 3. Scroll al primer error detectado
+  useEffect(() => {
+    const errorKeys = Object.keys(errors);
+    
+    if (errorKeys.length > 0) {
+      const firstFieldWithError = errorKeys.find(key => key !== 'global');
+
+      if (firstFieldWithError) {
+        const element = document.querySelector(`[name="${firstFieldWithError}"]`);
+
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.focus();
+        }
+      }
+    }
+  }, [errors]);
 
   // ========= VALIDATIONS =========
   const validate = () => {
@@ -458,8 +475,8 @@ export default function RegistroPage() {
                 </div>
             )}
 
-            <button type="submit" className={styles.submitButton}>
-              Crear Cuenta
+            <button type="submit" className={styles.submitButton} disabled={isLoading}>
+              {isLoading ? "Registrando..." : "Crear Cuenta"}
             </button>
           </form>
         )}
@@ -732,8 +749,8 @@ export default function RegistroPage() {
                 </div>
             )}
 
-            <button type="submit" className={styles.submitButton}>
-              Crear Cuenta
+            <button type="submit" className={styles.submitButton} disabled={isLoading}>
+              {isLoading ? "Registrando..." : "Crear Cuenta"}
             </button>
           </form>
         )}

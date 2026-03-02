@@ -79,7 +79,16 @@ export default function VendedorPedidosPage() {
 
       let inicio, fin
       const hoy = new Date()
-      const hoyStr = hoy.toISOString().split('T')[0]
+      
+      // Función auxiliar para obtener fecha local en formato YYYY-MM-DD
+      const getLocalDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const hoyStr = getLocalDate(hoy)
 
       if (dateRange === 'HOY') {
         inicio = hoyStr
@@ -87,12 +96,12 @@ export default function VendedorPedidosPage() {
       } else if (dateRange === 'AYER') {
         const ayer = new Date(hoy)
         ayer.setDate(ayer.getDate() - 1)
-        inicio = ayer.toISOString().split('T')[0]
+        inicio = getLocalDate(ayer)
         fin = inicio
       } else if (dateRange === 'ULTIMOS_7') {
         const hace7 = new Date(hoy)
         hace7.setDate(hace7.getDate() - 7)
-        inicio = hace7.toISOString().split('T')[0]
+        inicio = getLocalDate(hace7)
         fin = hoyStr
       } else if (dateRange === 'PERSONALIZADO') {
         inicio = customStart

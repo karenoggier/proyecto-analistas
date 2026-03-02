@@ -15,6 +15,7 @@ export default function LocalPage() {
   const searchParams = useSearchParams();
   const filterQuery = searchParams.get('q');
   const originalQuery = searchParams.get('original');
+  const hasOriginal = searchParams.has('original');
   const { idVendedor } = params;
   const [vendorProfile, setVendorProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -280,7 +281,13 @@ export default function LocalPage() {
       <main className={styles.main}>
         {/* Store Header */}
         <div className={styles.storeHeader}>
-          <Link href={originalQuery ? `/cliente/buscar?q=${encodeURIComponent(originalQuery)}` : (filterQuery ? `/cliente/buscar?q=${encodeURIComponent(filterQuery)}` : "/cliente")} className={styles.backBtn}>
+          <Link 
+            href={hasOriginal 
+              ? `/cliente/buscar${originalQuery ? `?q=${encodeURIComponent(originalQuery)}` : ''}` 
+              : (filterQuery ? `/cliente/buscar?q=${encodeURIComponent(filterQuery)}` : "/cliente")
+            } 
+            className={styles.backBtn}
+          >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
             </svg>

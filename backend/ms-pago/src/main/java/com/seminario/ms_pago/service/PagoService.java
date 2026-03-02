@@ -1,5 +1,13 @@
 package com.seminario.ms_pago.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
 import com.mercadopago.client.preference.PreferenceClient;
@@ -19,13 +27,6 @@ import com.seminario.ms_pago.repository.PagoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;import java.util.List;import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -63,11 +64,11 @@ public class PagoService {
             PreferenceRequest request = PreferenceRequest.builder()
                 .items(items)
                 .externalReference(pedidoId)
-                .notificationUrl("https://aspen-vicious-neda.ngrok-free.dev/pagoMs/api/pagos/webhook")
+                .notificationUrl("https://irreproachably-microtonal-evie.ngrok-free.dev/pagoMs/api/pagos/webhook")
                 .backUrls(PreferenceBackUrlsRequest.builder()
-                        .success("https://aspen-vicious-neda.ngrok-free.dev/cliente/proceso-pedido/paso5") 
-                        .pending("https://aspen-vicious-neda.ngrok-free.dev/cliente/proceso-pedido/paso5")
-                        .failure("https://aspen-vicious-neda.ngrok-free.dev/cliente/proceso-pedido/paso5")
+                        .success("https://irreproachably-microtonal-evie.ngrok-free.dev/cliente/proceso-pedido/paso5") 
+                        .pending("https://irreproachably-microtonal-evie.ngrok-free.dev/cliente/proceso-pedido/paso5")
+                        .failure("https://irreproachably-microtonal-evie.ngrok-free.dev/cliente/proceso-pedido/paso5")
                         .build())
                 .autoReturn("approved") 
                 .build();
