@@ -6,19 +6,19 @@
   background: white;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
 }
 
 /* ===================== HERO SECTION ===================== */
 .hero {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
-  padding: 1.5rem 10rem;
+  padding: 1.5rem 6.5rem;
   position: relative;
   overflow: hidden;
   min-height: 300px;
   display: flex;
   align-items: center;
+  justify-content: center;
   background: linear-gradient(135deg, #ff4b7e 0%, #ff8e4f 100%); 
 }
 
@@ -29,7 +29,8 @@
 .heroContent {
   position: relative;
   z-index: 2;
-  max-width: 650px;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .heroTitle {
@@ -40,6 +41,7 @@
   font-style: italic;
   margin: 0 0 0.5rem 0;
   line-height: 1.1;
+  max-width: 650px;
 }
 
 .heroIncomplete .heroTitle {
@@ -55,6 +57,7 @@
   font-weight: 700;
   color: #ffffff;
   margin: 0 0 0.75rem 0;
+  max-width: 650px;
 }
 
 .heroDescription {
@@ -62,6 +65,7 @@
   color: #ffffff;
   line-height: 1.6;
   margin: 0 0 1.5rem 0;
+  max-width: 650px;
 }
 
 .heroButton {
@@ -104,7 +108,10 @@
 /* Main content - sections flow directly on background */
 .mainContent {
   flex: 1;
-  padding: 2rem 10rem;
+  padding: 2rem 6.5rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 /* ===================== SECTIONS ===================== */

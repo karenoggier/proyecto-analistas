@@ -347,7 +347,7 @@ export default function VendedorPedidosPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <VendedorNavbar profile={vendedorProfile} />
+      <VendedorNavbar profile={vendedorProfile} onNotificationReceived={fetchPedidos} />
 
       {/* CONTENT */}
       <div className={styles.content}>

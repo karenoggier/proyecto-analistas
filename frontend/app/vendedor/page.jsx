@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import styles from "./vendedor.module.css"
 import VendedorNavbar from "./components/vendedor-navbar"
 import LoadingScreen from "../../components/loading-screen"
@@ -71,10 +71,9 @@ export default function VendedorPage() {
 
   }, [])
 
-  useEffect(() => {
-    if (!isProfileComplete) return;
-
-    const fetchContadores = async () => {
+  const fetchContadores = useCallback(async () => {
+      if (!isProfileComplete) return;
+      
       try {
         const token = sessionStorage.getItem("token");
         if (!token) return;
@@ -98,14 +97,15 @@ export default function VendedorPage() {
       } catch (error) {
         console.error("Error fetching counters:", error);
       }
-    };
+    }, [isProfileComplete]);
 
+  useEffect(() => {
     fetchContadores();
     // Actualizar cada 30 segundos
     const interval = setInterval(fetchContadores, 30000);
 
     return () => clearInterval(interval);
-  }, [isProfileComplete])
+  }, [fetchContadores])
 
   const handleLogout = () => {
     sessionStorage.clear()
@@ -177,7 +177,7 @@ export default function VendedorPage() {
 
   return (
     <div className={styles.pageWrapper}>
-      <VendedorNavbar profile={vendedorProfile} />
+      <VendedorNavbar profile={vendedorProfile} onNotificationReceived={fetchContadores} />
 
       {/* ========== HERO SECTION ========== */}
       <section className={`${styles.hero} ${!isProfileComplete ? styles.heroIncomplete : ""}`}

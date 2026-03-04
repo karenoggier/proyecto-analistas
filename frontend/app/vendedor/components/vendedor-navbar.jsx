@@ -9,7 +9,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import toast, { Toaster } from 'react-hot-toast';
 
-export default function VendedorNavbar({ profile }) {
+export default function VendedorNavbar({ profile, onNotificationReceived }) {
   const router = useRouter()
   const [showNotifications, setShowNotifications] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -19,11 +19,16 @@ export default function VendedorNavbar({ profile }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const notifRef = useRef(null);
   const notifOpenRef = useRef(false);
+  const onNotificationReceivedRef = useRef(onNotificationReceived);
 
   // Sincronizar ref con estado para el callback del socket
   useEffect(() => {
     notifOpenRef.current = showNotifications;
   }, [showNotifications]);
+
+  useEffect(() => {
+    onNotificationReceivedRef.current = onNotificationReceived;
+  }, [onNotificationReceived]);
 
   // 1. Cargar notificaciones iniciales
   useEffect(() => {
@@ -75,6 +80,11 @@ export default function VendedorNavbar({ profile }) {
             leida: isOpen ? true : Boolean(nuevaNotif.leida),
             destacada: isOpen ? true : Boolean(nuevaNotif.destacada),
           };
+
+          // Si nos pasaron una función de actualización, la ejecutamos
+          if (onNotificationReceivedRef.current) {
+            onNotificationReceivedRef.current();
+          }
 
           // Toast flotante
           toast.custom((t) => (

@@ -13,7 +13,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import toast, { Toaster } from 'react-hot-toast';
 
-export default function Navbar({ showSearchBar = false, profile, onAddressUpdate, disableAddressModal = false }) {
+export default function Navbar({ showSearchBar = false, profile, onAddressUpdate, disableAddressModal = false, onNotificationReceived }) {
   const { showAlert } = useAppDialog();
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
@@ -31,6 +31,7 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
   const userRef = useRef(null);
   const addressRef = useRef(null);
   const notifOpenRef = useRef(false);
+  const onNotificationReceivedRef = useRef(onNotificationReceived);
 
   const handleLogout = () => {
     sessionStorage.clear()
@@ -75,6 +76,10 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
   }, [notifOpen]);
 
   useEffect(() => {
+    onNotificationReceivedRef.current = onNotificationReceived;
+  }, [onNotificationReceived]);
+
+  useEffect(() => {
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8082/pedidoMs/ws-notifications';
     const socket = new SockJS(wsUrl);
     const token = sessionStorage.getItem("token");
@@ -92,6 +97,10 @@ export default function Navbar({ showSearchBar = false, profile, onAddressUpdate
             leida: isOpen ? true : Boolean(nuevaNotif.leida),
             destacada: isOpen ? true : Boolean(nuevaNotif.destacada),
           };
+
+          if (onNotificationReceivedRef.current) {
+            onNotificationReceivedRef.current(normalizada);
+          }
           
           toast.custom((t) => (
             <div className={`${styles.toast} ${t.visible ? styles.toastEnter : styles.toastLeave}`}>

@@ -5,11 +5,9 @@
   flex-direction: column;
 }
 
-
 /* ===================== CONTENT ===================== */
 .content {
   flex: 1;
-  max-width: 900px;
   margin: 0 auto;
   width: 100%;
   gap: 1.5rem;
@@ -678,6 +676,7 @@
   display: flex;
   flex-direction: column;
   max-height: 90vh;
+  overflow-y: auto;
 }
 
 .filtersHeader {

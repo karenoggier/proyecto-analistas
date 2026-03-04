@@ -17,6 +17,11 @@ export default function DetallePedidoPage({ params }) {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const extractEstadoFromMensaje = (mensaje = "") => {
+    const match = mensaje.match(/\b(REALIZADO|ACEPTADO|RECHAZADO|EN_PREPARACION|EN_ESPERA|EN_ENVIO|ENTREGADO|CANCELADO|PENDIENTE)\b/i);
+    return match ? match[1].toUpperCase() : null;
+  };
+
   useEffect(() => {
     fetchPerfil();
     if (id) {
@@ -58,8 +63,10 @@ export default function DetallePedidoPage({ params }) {
     }
   };
 
-  const fetchDetallePedido = async () => {
-    setLoading(true);
+  const fetchDetallePedido = async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       const token = sessionStorage.getItem("token");
       if (!token) return;
@@ -75,12 +82,29 @@ export default function DetallePedidoPage({ params }) {
     } catch (error) {
       console.error("Error fetching order:", error);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
   const handleRefreshProfile = () => {
     fetchPerfil();
+  };
+
+  const handleNotificationReceived = (notificacion) => {
+    const pedidoId = notificacion?.pedidoId;
+    const nuevoEstado = extractEstadoFromMensaje(notificacion?.mensaje || "");
+
+    if (pedidoId && nuevoEstado && order?.id === pedidoId) {
+      setOrder((prev) => (prev ? { ...prev, estado: nuevoEstado } : prev));
+    }
+
+    if (id) {
+      setTimeout(() => {
+        fetchDetallePedido(true);
+      }, 450);
+    }
   };
 
   if (loading) {
@@ -90,7 +114,11 @@ export default function DetallePedidoPage({ params }) {
   if (!order) {
     return (
       <div className={styles.page}>
-        <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} />
+        <Navbar
+          profile={clientProfile}
+          onAddressUpdate={handleRefreshProfile}
+          onNotificationReceived={handleNotificationReceived}
+        />
         <main className={styles.main}>
           <div style={{ textAlign: "center", color: "#666", marginTop: "40px" }}>
             Pedido no encontrado.
@@ -140,7 +168,11 @@ export default function DetallePedidoPage({ params }) {
 
   return (
     <div className={styles.page}>
-      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} />
+      <Navbar
+        profile={clientProfile}
+        onAddressUpdate={handleRefreshProfile}
+        onNotificationReceived={handleNotificationReceived}
+      />
       
       <main className={styles.main}>
         <div className={styles.header}>

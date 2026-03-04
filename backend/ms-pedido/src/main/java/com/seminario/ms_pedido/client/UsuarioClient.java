@@ -20,8 +20,8 @@ public interface UsuarioClient {
 
     @GetExchange("/direcciones/calcular-distancia/{idVendedor}/{idDireccionCliente}")
     @NonNull Double calcularDistanciaEntreDirecciones(
-        @PathVariable @NonNull String idVendedorUsuario, 
-        @PathVariable @NonNull String idDireccionCliente
+        @PathVariable("idVendedor") @NonNull String idVendedorUsuario, 
+        @PathVariable("idDireccionCliente") @NonNull String idDireccionCliente
     );
 
     @DeleteExchange("/direcciones/{idDireccion}")

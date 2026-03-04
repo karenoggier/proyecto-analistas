@@ -157,10 +157,10 @@ export default function ClienteHome() {
     const el = localesRef.current;
     if (!el) return;
 
-    const hasOverflow = el.scrollWidth > el.clientWidth;
+    const hasOverflow = el.scrollWidth > el.clientWidth + 1; 
 
-    setCanScrollLeft(hasOverflow && el.scrollLeft > 0);
-    setCanScrollRight(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth);
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(hasOverflow && el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
   };
 
   useEffect(() => {
@@ -179,14 +179,16 @@ export default function ClienteHome() {
 
     el.addEventListener("scroll", handleCheck);
     window.addEventListener("resize", handleCheck);
-    requestAnimationFrame(handleCheck);
+    
+    const timeoutId = setTimeout(handleCheck, 100);
 
     return () => {
       resizeObserver.disconnect();
       el.removeEventListener("scroll", handleCheck);
       window.removeEventListener("resize", handleCheck);
+      clearTimeout(timeoutId);
     };
-  }, [clientProfile]);
+  }, [stores]); 
 
   const scrollLeft = () => {
     localesRef.current.scrollBy({ left: -300, behavior: "smooth" });
@@ -217,14 +219,13 @@ export default function ClienteHome() {
   };
 
   useEffect(() => {
-    // Si el perfil cargó y no hay una dirección marcada en la sesión
+
     if (clientProfile?.direcciones?.length > 0) {
       const currentId = sessionStorage.getItem("selectedAddressId");
       if (!currentId) {
         const idPrincipal = clientProfile.direcciones[0].id;
         sessionStorage.setItem("selectedAddressId", idPrincipal);
         
-        // Actualizamos el estado visual para que coincida
         setUbicacionData({
           localidad: clientProfile.direcciones[0].localidad,
           provincia: clientProfile.direcciones[0].provincia

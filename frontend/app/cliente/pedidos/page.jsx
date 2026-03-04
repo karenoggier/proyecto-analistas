@@ -25,6 +25,11 @@ export default function MisPedidosPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const extractEstadoFromMensaje = (mensaje = "") => {
+    const match = mensaje.match(/\b(REALIZADO|ACEPTADO|RECHAZADO|EN_PREPARACION|EN_ESPERA|EN_ENVIO|ENTREGADO|CANCELADO|PENDIENTE)\b/i);
+    return match ? match[1].toUpperCase() : null;
+  };
+
   useEffect(() => {
     fetchPerfil();
     fetchPedidos();
@@ -66,8 +71,10 @@ export default function MisPedidosPage() {
         } 
   }
 
-  const fetchPedidos = async () => {
-    setLoading(true);
+  const fetchPedidos = async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       const token = sessionStorage.getItem("token");
       if (!token) return;
@@ -102,7 +109,9 @@ export default function MisPedidosPage() {
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
@@ -144,13 +153,34 @@ export default function MisPedidosPage() {
     fetchPerfil();
   };
 
+  const handleNotificationReceived = (notificacion) => {
+    const pedidoId = notificacion?.pedidoId;
+    const nuevoEstado = extractEstadoFromMensaje(notificacion?.mensaje || "");
+
+    if (pedidoId && nuevoEstado) {
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === pedidoId ? { ...order, estado: nuevoEstado } : order
+        )
+      );
+    }
+
+    setTimeout(() => {
+      fetchPedidos(true);
+    }, 450);
+  };
+
   if (loading) {
     return <LoadingScreen text="Cargando pedidos..." />;
   }
 
   return (
     <div className={styles.page}>
-      <Navbar profile={clientProfile} onAddressUpdate={handleRefreshProfile} />
+      <Navbar
+        profile={clientProfile}
+        onAddressUpdate={handleRefreshProfile}
+        onNotificationReceived={handleNotificationReceived}
+      />
       
       <main className={styles.main}>
         <div className={styles.header}>

@@ -39,7 +39,10 @@ public class PedidoController {
 
     @GetMapping("/costo-envio/{idVendedor}/{idDireccionCliente}")
     @Operation(summary = "Obtiene el costo de envio desde el local de un vendedor a la direccion del cliente")
-    public ResponseEntity<BigDecimal> calcularDistanciaEntreDirecciones(@PathVariable String idVendedor, @PathVariable String idDireccionCliente, Authentication authentication){
+    public ResponseEntity<BigDecimal> calcularDistanciaEntreDirecciones(
+        @PathVariable("idVendedor") String idVendedor, 
+        @PathVariable("idDireccionCliente") String idDireccionCliente, 
+        Authentication authentication){
         return ResponseEntity.ok(pedidoService.calcularCostoEnvio(idVendedor, idDireccionCliente, authentication));
     }
 
